@@ -4,22 +4,28 @@ import { ChevronLeft, ChevronRight, ArrowUpRight, ShieldCheck } from 'lucide-rea
 const carouselImages = [
   { 
     type: 'video', 
-    // একটি রানিং এবং স্টেবল রিয়েল এস্টেট ভিডিওর ডিরেক্ট লিংক ব্যবহার করা হলো
-    url: '/public/hero.mp4', 
+    url: '/public/hero2.mp4', 
     title: 'Discover Luxury Beyond Compare', 
     desc: 'Step into a world of architectural masterpieces and bespoke living spaces tailored just for you.' 
   },
   { 
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1920&q=80', 
+    type: 'video',
+    url: '/public/hero3.mp4', 
     title: 'Luxury Villa in Malibu', 
     desc: 'Experience breathtaking beachfront living at its finest with endless ocean views.' 
   },
   { 
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80', 
+    type: 'video',
+    url: '/public/hero4.mp4', 
     title: 'Modern Sky Penthouse', 
     desc: 'Panoramic cityscapes meets top-tier amenities in the heart of the metropolis.' 
+  },
+  // নতুন যোগ করা ৪র্থ ভিডিও স্লাইডার
+  { 
+    type: 'video',
+    url: '/public/hero5.mp4', 
+    title: 'Elegant Urban Living', 
+    desc: 'Exquisite attention to detail meets contemporary interior craftmanship.' 
   }
 ];
 
@@ -32,7 +38,7 @@ export default function HeroCarousel() {
   const currentSlide = carouselImages[currentIndex];
   const slideDuration = currentSlide.type === 'video' ? 8000 : 5000;
 
-  // ১. জিপিইউ-বান্ধব অপ্টিমাইজড টাইমলাইন প্রোগ্রেস বার
+  // ১. জিপিইউ-বান্ধব অপ্টিমাইজড টাইমライン প্রোগ্রেস বার
   useEffect(() => {
     setProgress(0);
     const startTime = Date.now();
