@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 // 1. Importing components from the src/components/ folder
 // (Go up one level to src, then down into components)
-import Navbar from '../components/Navbar';
+
 import HeroCarousel from '../components/HeroCarousel';
 import OurVision from '../components/OurVision';
 
@@ -13,13 +13,13 @@ import Projects from '../Projects';
 import DualSliders from '../DualSliders';
 import ClientReviews from '../ClientReviews';
 import Newsletter from '../Newsletter';
-import Footer from '../Footer';
+
 import SpatialAudioTour from '../components/SpatialAudioTour';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500">
-      <Navbar />
+      
       <HeroCarousel />
       <OurVision />
       <DualSliders />
@@ -38,7 +38,7 @@ export default function LandingPage() {
         </Link>
       </div>
       
-      <Footer />
+      
     </div>
   );
 }
