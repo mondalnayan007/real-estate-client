@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Home, Menu, X, LogOut, LayoutGrid } from 'lucide-react';
+import { NavLink } from 'react-router';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,20 +50,11 @@ export default function Navbar() {
         
         {/* Navigation Links */}
         <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase ${isScrolled ? 'text-gray-700' : 'text-white/90'}`}>
-          {['Home', 'Vision', 'Projects', 'Reviews'].map((item) => (
-            <a 
-              key={item}
-              href="#" 
-              className={`relative py-1 transition-colors duration-300 group ${
-                isScrolled ? 'hover:text-blue-600' : 'hover:text-blue-400'
-              }`}
-            >
-              {item}
-              <span className={`absolute bottom-0 left-1/2 w-0 h-[2px] transition-all duration-300 -translate-x-1/2 group-hover:w-full ${
-                isScrolled ? 'bg-blue-600' : 'bg-blue-400'
-              }`} />
-            </a>
-          ))}
+          <NavLink to={'/'}>Home</NavLink>
+          <NavLink to={'/projects'}>Projects</NavLink>
+          <NavLink to={'/team'}>Team</NavLink>
+          <NavLink to={'/about'}>About</NavLink>
+          <NavLink to={'/blog'}>Blog</NavLink>
         </div>
 
         {/* Desktop Buttons Wrapper */}
