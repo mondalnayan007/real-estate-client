@@ -9,12 +9,13 @@ import OurVision from '../components/OurVision';
 
 // 2. Importing components sitting directly in the src/ folder
 // (Go up one level to src, then target the files directly)
-import Projects from '../Projects';
+
 import DualSliders from '../DualSliders';
 import ClientReviews from '../ClientReviews';
 import Newsletter from '../Newsletter';
 
 import SpatialAudioTour from '../components/SpatialAudioTour';
+import HomePageProjects from '../components/HomePageProjects';
 
 export default function LandingPage() {
   return (
@@ -23,7 +24,7 @@ export default function LandingPage() {
       <HeroCarousel />
       <OurVision />
       <DualSliders />
-      <Projects />
+      <HomePageProjects></HomePageProjects>
       <SpatialAudioTour></SpatialAudioTour>
       <ClientReviews />
       <Newsletter />

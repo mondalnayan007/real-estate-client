@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, BedDouble, Bath, Maximize2, ArrowUpRight, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const categories = ['All Properties', 'Luxury Villas', 'Penthouses', 'Modern Mansions'];
 
@@ -28,12 +29,9 @@ const cardVariants = {
   }
 };
 
-export default function Projects() {
+export default function HomePageProjects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('All Properties');
-  
-  // প্রথম অবস্থায় শুধুমাত্র ৬টি কার্ড দেখানোর জন্য স্টেট
-  const [visibleLimit, setVisibleLimit] = useState(6);
 
   useEffect(() => {
     fetch('/public/data.json')
@@ -42,24 +40,13 @@ export default function Projects() {
       .catch(err => console.error("Error fetching data:", err));
   }, []);
 
-  // ট্যাব পরিবর্তন হলে দৃশ্যমান কার্ডের সংখ্যা আবার রিসেট হয়ে ৬ হয়ে যাবে
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    setVisibleLimit(6); 
-  };
-
-  // ১. ক্যাটাগরি অনুযায়ী ডাটা ফিল্টার
+  // ১. প্রথমে ক্যাটাগরি অনুযায়ী ডাটা ফিল্টার করা হচ্ছে
   const filteredProjects = activeTab === 'All Properties'
     ? premiumProjects
     : premiumProjects.filter(project => project.category === activeTab);
 
-  // ২. কারেন্ট লিমিট অনুযায়ী ডাটা স্লাইস করা (শুরুতে ৬টি, পরে ক্লিক করলে আরও বাড়বে)
-  const displayedProjects = filteredProjects.slice(0, visibleLimit);
-
-  // "Explore More" বাটনে ক্লিক করলে প্রতিবারে আরও ৩ বা ৬টি করে কার্ড লোড করার ফাংশন
-  const handleLoadMore = () => {
-    setVisibleLimit(prevLimit => prevLimit + 6); // প্রতি ক্লিকে আরও ৬টি করে কার্ড যোগ হবে
-  };
+  // ২. ফিল্টার করা ডাটা থেকে শুধুমাত্র প্রথম ৬টি কার্ড কেটে নেওয়া হচ্ছে (Home Page Limit)
+  const displayedProjects = filteredProjects.slice(0, 6);
 
   return (
     <section className="py-24 bg-slate-950 text-white px-6 overflow-hidden">
@@ -98,7 +85,7 @@ export default function Projects() {
           {categories.map((tab) => (
             <button
               key={tab}
-              onClick={() => handleTabChange(tab)}
+              onClick={() => setActiveTab(tab)}
               className={`relative px-6 py-2.5 rounded-full text-xs font-mono tracking-wider transition-all duration-300 border overflow-hidden z-10 ${
                 activeTab === tab 
                   ? 'border-transparent text-white' 
@@ -127,6 +114,7 @@ export default function Projects() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
         >
           <AnimatePresence mode="popLayout">
+            {/* এখানে আমরা filteredProjects এর বদলে স্লাইস করা displayedProjects ম্যাপ করছি */}
             {displayedProjects.map((item) => (
               <motion.div
                 key={item.id}
@@ -194,26 +182,21 @@ export default function Projects() {
         </motion.div>
 
         {/* Explore More Properties CTA Section */}
-        {/* লজিক: ফিল্টার করা টোটাল ডাটা যদি স্ক্রিনে দেখানো ডাটার চেয়ে বেশি হয়, কেবল তখনই বাটনটি রেন্ডার হবে */}
-        <AnimatePresence>
-          {filteredProjects.length > displayedProjects.length && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className="flex justify-center mt-20"
-            >
-              <button
-                onClick={handleLoadMore}
-                className="group relative inline-flex items-center gap-3 bg-slate-900 hover:bg-blue-600 text-white font-mono text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-2xl border border-slate-800 hover:border-blue-500 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_10px_35px_rgba(37,99,235,0.25)] hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <span>Explore More Properties</span>
-                <Plus size={14} className="text-slate-400 group-hover:text-white group-hover:rotate-90 transition-transform duration-300" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="flex justify-center mt-20"
+        >
+          <Link 
+            to={'/projects'}
+            className="group relative inline-flex items-center gap-3 bg-slate-900 hover:bg-blue-600 text-white font-mono text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-2xl border border-slate-800 hover:border-blue-500 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_10px_35px_rgba(37,99,235,0.25)] hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <span>Explore More Properties</span>
+            <Plus size={14} className="text-slate-400 group-hover:text-white group-hover:rotate-90 transition-transform duration-300" />
+          </Link>
+        </motion.div>
 
       </div>
     </section>
