@@ -6,6 +6,8 @@ import Team from "../views/Team";
 import About from "../views/About";
 import Blog from "../views/Blog";
 import ProjectDetails from "../views/ProjectDetails";
+import UserSignup from "../views/UserSignup";
+import UserLogin from "../views/UserLogin"
 
 const router = createBrowserRouter([
   {
@@ -23,9 +25,11 @@ const router = createBrowserRouter([
         },
         {
           path:'/project-details/:id',
-          loader: ()=>fetch(`data.json`),
-          Component: ProjectDetails
-
+          loader: async () => {
+            const res = await fetch('/data.json');
+            return res.ok ? res.json() : [];
+          },
+          Component: ProjectDetails,
         },
         {
           path:'/team',
@@ -38,6 +42,14 @@ const router = createBrowserRouter([
         {
           path:'/blog',
           Component: Blog
+        },
+        {
+          path:'/signup',
+          Component: UserSignup
+        },
+        {
+          path:'/login',
+          Component: UserLogin
         }
     ]
   },
