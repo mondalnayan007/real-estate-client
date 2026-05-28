@@ -8,6 +8,8 @@ import Blog from "../views/Blog";
 import ProjectDetails from "../views/ProjectDetails";
 import UserSignup from "../views/UserSignup";
 import UserLogin from "../views/UserLogin"
+import AdminLogin from "../views/AdminLogin"
+import Dashboard from "../views/Dashboard"
 
 const router = createBrowserRouter([
   {
@@ -53,6 +55,14 @@ const router = createBrowserRouter([
         }
     ]
   },
+  {
+    path: '/admin/login',
+    Component: AdminLogin
+  },
+  {
+    path: '/admin/dashboard',
+    Component: Dashboard
+  }
 ]);
 
 export default router;

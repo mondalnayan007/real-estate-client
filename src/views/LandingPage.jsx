@@ -25,7 +25,6 @@ export default function LandingPage() {
       <OurVision />
       <DualSliders />
       <HomePageProjects></HomePageProjects>
-      <SpatialAudioTour></SpatialAudioTour>
       <ClientReviews />
       <Newsletter />
       
