@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
-import Marquee from 'react-fast-marquee';
+import MarqueeComponent from 'react-fast-marquee';
+const Marquee = MarqueeComponent.default || MarqueeComponent;
 import DualSliderCard from './components/DualSliderCard';
 
 export default function DualSliders() {
@@ -15,10 +16,10 @@ export default function DualSliders() {
   }, []);
 
   // অ্যানিমেশন লুপ অবিচ্ছিন্ন রাখার জন্য ডেটাকে ডুপ্লিকেট করা হয়েছে
-  const doubledAssets = [...sliderAssets, ...sliderAssets];
+  // const doubledAssets = [...sliderAssets, ...sliderAssets];
   // দ্বিতীয় স্লাইডারটিকে একটু ভিন্ন লুক বা রিভার্স অর্ডারে দেখানোর জন্য
   const reversedAssets = [...sliderAssets].reverse();
-  const doubledReversedAssets = [...reversedAssets, ...reversedAssets];
+  // const doubledReversedAssets = [...reversedAssets, ...reversedAssets];
 
 
   return (
@@ -46,22 +47,33 @@ export default function DualSliders() {
       <div className="flex flex-col  w-full relative z-10">
 
         {/* FIRST SLIDER: LEFT TO RIGHT */}
-        <div className="flex w-full  ">
-          {
-            reversedAssets.map(assets => <DualSliderCard assets={assets}></DualSliderCard>)
-          }
 
+        <Marquee  pauseOnHover='true'
+          gradient='true'
+          gradientColor='black'
+          direction='right'>
+            <div className="flex w-full  ">
+              {
+                reversedAssets.map(assets => <DualSliderCard assets={assets}></DualSliderCard>)
+              }
 
-        </div>
+            </div>
+        </Marquee>
 
         {/* SECOND SLIDER: RIGHT TO LEFT (REVERSE) */}
-     
-         <div className="flex w-full ">
-          {
-            reversedAssets.map(assets => <DualSliderCard assets={assets}></DualSliderCard>)
-          }
-        </div>
-      
+        <Marquee pauseOnHover='true'
+          gradient='true'
+          gradientColor='black'>
+          <div className="flex w-full ">
+
+
+            {
+              reversedAssets.map(assets => <DualSliderCard assets={assets}></DualSliderCard>)
+            }
+
+
+          </div>
+        </Marquee>
 
       </div>
 
