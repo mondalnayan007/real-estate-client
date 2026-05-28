@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, BedDouble, Bath, Maximize2, ArrowUpRight, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+// useParams ইম্পোর্ট করার প্রয়োজন নেই এখানে
 
 const categories = ['All Properties', 'Luxury Villas', 'Penthouses', 'Modern Mansions'];
 
@@ -40,16 +41,15 @@ export default function HomePageProjects() {
       .catch(err => console.error("Error fetching data:", err));
   }, []);
 
-  // ১. প্রথমে ক্যাটাগরি অনুযায়ী ডাটা ফিল্টার করা হচ্ছে
   const filteredProjects = activeTab === 'All Properties'
     ? premiumProjects
     : premiumProjects.filter(project => project.category === activeTab);
 
-  // ২. ফিল্টার করা ডাটা থেকে শুধুমাত্র প্রথম ৬টি কার্ড কেটে নেওয়া হচ্ছে (Home Page Limit)
   const displayedProjects = filteredProjects.slice(0, 6);
 
   return (
     <section className="py-24 bg-slate-950 text-white px-6 overflow-hidden">
+      {/* বড় লিংকটি এখান থেকে সরিয়ে সাধারণ div করা হলো */}
       <div className="max-w-7xl mx-auto">
         
         {/* Header Section */}
@@ -114,8 +114,8 @@ export default function HomePageProjects() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
         >
           <AnimatePresence mode="popLayout">
-            {/* এখানে আমরা filteredProjects এর বদলে স্লাইস করা displayedProjects ম্যাপ করছি */}
             {displayedProjects.map((item) => (
+              /* ম্যাজিক এখানে: প্রতিটি কার্ড এখন আলাদাভাবে তার নিজস্ব item.id-তে লিংকড */
               <motion.div
                 key={item.id}
                 layout
@@ -127,55 +127,59 @@ export default function HomePageProjects() {
                 transition={{ type: 'spring', stiffness: 100, damping: 18 }}
                 className="group bg-slate-900/60 border border-slate-900 hover:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-2xl relative backdrop-blur-3xl"
               >
-                {/* Image Container */}
-                <div className="relative overflow-hidden h-72">
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-90" />
+                {/* কার্ডে ক্লিক করলে ডাইনামিক আইডিতে নিয়ে যাবে */}
+                <Link to={`/project-details/${item.id}`}>
                   
-                  <span className="absolute top-4 left-4 z-20 bg-slate-950/80 backdrop-blur-md text-blue-400 border border-slate-900 text-[10px] font-mono tracking-widest px-3 py-1.5 rounded-xl uppercase">
-                    {item.tag}
-                  </span>
+                  {/* Image Container */}
+                  <div className="relative overflow-hidden h-72">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-90" />
+                    
+                    <span className="absolute top-4 left-4 z-20 bg-slate-950/80 backdrop-blur-md text-blue-400 border border-slate-900 text-[10px] font-mono tracking-widest px-3 py-1.5 rounded-xl uppercase">
+                      {item.tag}
+                    </span>
 
-                  <img 
-                    src={item.img} 
-                    alt={item.title} 
-                    className="w-full h-full object-cover transition-transform duration-[1.2s] cubic-bezier(0.16, 1, 0.3, 1) group-hover:scale-105"
-                  />
+                    <img 
+                      src={item.img} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover transition-transform duration-[1.2s] cubic-bezier(0.16, 1, 0.3, 1) group-hover:scale-105"
+                    />
 
-                  {/* Dark Glass Accent Button */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                    <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-                      <ArrowUpRight className="text-blue-400 h-5 w-5" />
+                    {/* Dark Glass Accent Button */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                      <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
+                        <ArrowUpRight className="text-blue-400 h-5 w-5" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Info Text Area */}
-                <div className="p-7 relative">
-                  <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold block mb-2">{item.category}</span>
-                  <h3 className="text-xl font-bold text-slate-100 tracking-tight mb-2 group-hover:text-blue-400 transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <p className="text-slate-400 flex items-center gap-1.5 text-xs font-light mb-5">
-                    <MapPin size={13} className="text-slate-500"/> {item.location}
-                  </p>
-                  
-                  <div className="w-full h-[1px] bg-slate-950 mb-5" />
+                  {/* Info Text Area */}
+                  <div className="p-7 relative">
+                    <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold block mb-2">{item.category}</span>
+                    <h3 className="text-xl font-bold text-slate-100 tracking-tight mb-2 group-hover:text-blue-400 transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-400 flex items-center gap-1.5 text-xs font-light mb-5">
+                      <MapPin size={13} className="text-slate-500"/> {item.location}
+                    </p>
+                    
+                    <div className="w-full h-[1px] bg-slate-950 mb-5" />
 
-                  {/* Specifications */}
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-4 text-[11px] font-mono text-slate-400">
-                      <span className="flex items-center gap-1.5"><BedDouble size={14} className="text-slate-600"/> {item.beds} Bed</span>
-                      <span className="flex items-center gap-1.5"><Bath size={14} className="text-slate-600"/> {item.baths} Bath</span>
-                      <span className="flex items-center gap-1.5"><Maximize2 size={12} className="text-slate-600"/> {item.sqft}</span>
+                    {/* Specifications */}
+                    <div className="flex justify-between items-center">
+                      <div className="flex gap-4 text-[11px] font-mono text-slate-400">
+                        <span className="flex items-center gap-1.5"><BedDouble size={14} className="text-slate-600"/> {item.beds} Bed</span>
+                        <span className="flex items-center gap-1.5"><Bath size={14} className="text-slate-600"/> {item.baths} Bath</span>
+                        <span className="flex items-center gap-1.5"><Maximize2 size={12} className="text-slate-600"/> {item.sqft}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Pricing Tag */}
+                    <div className="mt-5 pt-4 border-t border-slate-950 flex justify-between items-center">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Investment Value</span>
+                      <span className="text-lg font-black text-white tracking-tight">{item.price}</span>
                     </div>
                   </div>
-                  
-                  {/* Pricing Tag */}
-                  <div className="mt-5 pt-4 border-t border-slate-950 flex justify-between items-center">
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Investment Value</span>
-                    <span className="text-lg font-black text-white tracking-tight">{item.price}</span>
-                  </div>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </AnimatePresence>

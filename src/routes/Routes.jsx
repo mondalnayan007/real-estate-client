@@ -3,6 +3,9 @@ import Root from "../Root/Root";
 import LandingPage from "../views/LandingPage";
 import Projects from "../Projects";
 import Team from "../views/Team";
+import About from "../views/About";
+import Blog from "../views/Blog";
+import ProjectDetails from "../views/ProjectDetails";
 
 const router = createBrowserRouter([
   {
@@ -19,8 +22,22 @@ const router = createBrowserRouter([
           Component: Projects
         },
         {
+          path:'/project-details/:id',
+          loader: ()=>fetch(`data.json`),
+          Component: ProjectDetails
+
+        },
+        {
           path:'/team',
           Component: Team
+        },
+        {
+          path:'/about',
+          Component: About
+        },
+        {
+          path:'/blog',
+          Component: Blog
         }
     ]
   },

@@ -137,21 +137,16 @@ export default function Navbar() {
       {/* Mobile Side-Drawer Overlay Screen */}
       {isOpen && (
         <div className="md:hidden bg-white/95 backdrop-blur-xl w-full absolute top-full left-0 shadow-2xl border-b border-gray-100 py-6 flex flex-col items-center gap-4 text-gray-800 font-semibold text-sm uppercase tracking-wider animate-in fade-in slide-in-from-top-4 duration-300">
-          {['Home', 'Vision', 'Projects', 'Reviews'].map((item) => (
-            <a 
-              key={item} 
-              href="#" 
-              onClick={() => setIsOpen(false)} 
-              className="hover:text-blue-600 transition py-1"
-            >
-              {item}
-            </a>
-          ))}
+          <Link to={'/'}>Home</Link>
+          <Link to={'/projects'}>Projects</Link>
+          <Link to={'/team'}>Team</Link>
+          <Link to={'/about'}>About</Link>
+          <Link to={'/blog'}>Blog</Link>
           
           <div className="w-4/5 h-[1px] bg-gray-100 my-2"></div>
           
           <button className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all">
-            Contact Us
+            Property Price Predictor
           </button>
 
           {/* Mobile Profile Display Interface States */}
