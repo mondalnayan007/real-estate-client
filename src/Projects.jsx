@@ -37,7 +37,7 @@ export default function Projects() {
   const [visibleLimit, setVisibleLimit] = useState(6);
 
   useEffect(() => {
-    fetch('/public/data.json')
+    fetch('data.json')
       .then(res => res.json())
       .then(data => setPremiumProjects(data))
       .catch(err => console.error("Error fetching data:", err));

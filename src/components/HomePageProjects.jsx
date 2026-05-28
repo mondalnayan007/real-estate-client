@@ -35,7 +35,7 @@ export default function HomePageProjects() {
   const [activeTab, setActiveTab] = useState('All Properties');
 
   useEffect(() => {
-    fetch('/public/data.json')
+    fetch('data.json')
       .then(res => res.json())
       .then(data => setPremiumProjects(data))
       .catch(err => console.error("Error fetching data:", err));

@@ -4,26 +4,26 @@ import { ChevronLeft, ChevronRight, ArrowUpRight, ShieldCheck } from 'lucide-rea
 const carouselImages = [
   { 
     type: 'video', 
-    url: '/public/hero2.mp4', 
+    url: 'hero2.mp4', 
     title: 'Discover Luxury Beyond Compare', 
     desc: 'Step into a world of architectural masterpieces and bespoke living spaces tailored just for you.' 
   },
   { 
     type: 'video',
-    url: '/public/hero3.mp4', 
+    url: 'hero3.mp4', 
     title: 'Luxury Villa in Malibu', 
     desc: 'Experience breathtaking beachfront living at its finest with endless ocean views.' 
   },
   { 
     type: 'video',
-    url: '/public/hero4.mp4', 
+    url: 'hero4.mp4', 
     title: 'Modern Sky Penthouse', 
     desc: 'Panoramic cityscapes meets top-tier amenities in the heart of the metropolis.' 
   },
   // নতুন যোগ করা ৪র্থ ভিডিও স্লাইডার
   { 
     type: 'video',
-    url: '/public/hero5.mp4', 
+    url: 'hero5.mp4', 
     title: 'Elegant Urban Living', 
     desc: 'Exquisite attention to detail meets contemporary interior craftmanship.' 
   }
