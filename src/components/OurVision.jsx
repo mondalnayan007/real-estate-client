@@ -12,7 +12,7 @@ export default function OurVision() {
           setIsVisible(true);
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.1 });
     
     const currentRef = domRef.current;
     if (currentRef) observer.observe(currentRef);
@@ -24,17 +24,20 @@ export default function OurVision() {
 
   const corePillars = [
     {
-      icon: <Eye className="text-blue-500 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />,
+      num: "/01",
+      icon: <Eye className="text-blue-500 h-5 w-5 group-hover:scale-110 transition-transform" />,
       title: "Architectural Foresight",
       desc: "Curating generational ultra-luxury penthouses and estates defined by timeless structural design."
     },
     {
-      icon: <ShieldCheck className="text-blue-500 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />,
+      num: "/02",
+      icon: <ShieldCheck className="text-blue-500 h-5 w-5 group-hover:scale-110 transition-transform" />,
       title: "Discreet Sovereignty",
       desc: "Uncompromising contractual confidentiality and institutional asset protection protocols."
     },
     {
-      icon: <Compass className="text-blue-500 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />,
+      num: "/03",
+      icon: <Compass className="text-blue-500 h-5 w-5 group-hover:rotate-45 transition-transform duration-500" />,
       title: "Global Coordinates",
       desc: "Strategic elite placements across high-barrier metropolitan districts and coastal strips."
     }
@@ -44,104 +47,102 @@ export default function OurVision() {
     <section 
       id="vision" 
       ref={domRef}
-      className="w-full min-h-screen bg-slate-950 text-white py-32 px-6 md:px-12 overflow-hidden relative flex items-center select-none"
+      className="w-full min-h-screen bg-slate-950 text-white py-36 px-6 md:px-12 overflow-hidden relative select-none"
     >
-      {/* Immersive Deep-Atmosphere Flares (Preserving your exact Blue Theme) */}
-      <div className="absolute top-1/4 -right-20 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none animate-pulse duration-[6000ms]" />
-      <div className="absolute bottom-1/4 -left-20 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[160px] pointer-events-none" />
+      {/* Cinematic Ambient Glow Background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/5 rounded-full blur-[200px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto w-full relative">
+      <div className="max-w-7xl mx-auto w-full relative z-10 space-y-24">
         
-        {/* Background Floating Typography Watermark for High-End Aesthetic */}
-        <div className="absolute -top-16 right-0 text-[12vw] font-black font-sans text-slate-900/30 tracking-tighter select-none pointer-events-none hidden lg:block">
-          VISION
+        {/* ================= 🌟 TOP MINIMAL HEADING DECK ================= */}
+        <div className={`w-full max-w-4xl space-y-4 transition-all duration-1000 transform ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+            <span className="text-blue-400 font-mono text-[10px] font-bold tracking-[0.3em] uppercase">
+              Corporate Directives
+            </span>
+          </div>
+          <h2 className="text-4xl font-black tracking-tight uppercase leading-none">
+            OUR VISION <span className="font-serif font-light text-slate-700 italic lowercase block sm:inline">manifesto</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        {/* ================= 🔥 BRAND NEW STACKED SPLIT LAYOUT ================= */}
+        <div className="relative w-full flex flex-col md:flex-row gap-16 items-start">
           
-          {/* LEFT CONTENT: Premium Overlapping Editorial Text Block */}
-          <div className={`lg:col-span-5 space-y-8 z-20 transition-all duration-[1000ms] cubic-bezier(0.16, 1, 0.3, 1) transform ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-16'
+          {/* LEFT AREA: Sticky Hero Asset Wrapper */}
+          <div className={`w-full md:w-5/12 md:sticky md:top-36 space-y-8 transition-all duration-[1200ms] delay-300 transform ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}>
-            
-            {/* Elegant Sharp Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[10px] font-bold tracking-[0.2em] uppercase rounded-md">
-              <Sparkles size={11} className="animate-pulse" /> Corporate Creed
-            </div>
-            
-            {/* Bold High-Contrast Typographic Hierarchy */}
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light font-serif tracking-tight leading-[1.1] text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-100 to-slate-400">
-              Redefining the <br />
-              <span className="font-sans font-black text-white tracking-tighter drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
-                Topography of Luxury.
-              </span>
-            </h2>
-            
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed font-light max-w-lg">
-              At PrimeEstates, our blueprint extends beyond mere framework engineering. We synthesize ultra-premium spaces that function as private generational micro-kingdoms for the selective elite.
-            </p>
-
-            {/* Clean, Non-bulky Premium Interactive Button */}
-            <div className="pt-4">
-              <button className="group relative px-6 py-3.5 bg-slate-900 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-white rounded-xl transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-black/40">
-                <span>Explore Corporate Directives</span>
-                <ArrowUpRight size={14} className="group-hover:rotate-45 transition-transform duration-300 text-blue-400 group-hover:text-white" />
-              </button>
-            </div>
-          </div>
-
-          {/* RIGHT CONTENT: Overlapping Multi-Layered Structural Canvas */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-12 gap-8 relative items-center">
-            
-            {/* 1. LAYER ONE: Asymmetric Hero Architecture Panel */}
-            <div className={`sm:col-span-6 relative group rounded-2xl overflow-hidden aspect-[3/4] border border-slate-800 bg-slate-900 shadow-2xl z-10 transition-all duration-[1200ms] delay-200 transform ${
-              isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-16 scale-95'
-            }`}>
-              {/* Premium Dark Image Gradient Veil */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent z-10 opacity-90 group-hover:opacity-60 transition-opacity duration-500" />
-              
-              {/* Image Interaction */}
+            <div className="relative rounded-[2.5rem] overflow-hidden border border-slate-900 aspect-[4/5] bg-slate-900 shadow-[0_30px_100px_rgba(0,0,0,0.8)] group">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-transparent z-10" />
               <img 
-                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=700&q=80" 
-                alt="Luxury Architecture Showcase" 
-                className="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-[1000ms] ease-out"
+                src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" 
+                alt="Luxury Estate Monolith" 
+                className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-[1500ms]"
               />
-              
-              {/* Floating Bottom Label */}
-              <div className="absolute bottom-6 left-6 right-6 z-20">
-                <span className="text-[9px] font-mono font-bold text-blue-400 tracking-widest uppercase">Estates 2026</span>
-                <h4 className="text-lg font-bold text-white tracking-tight mt-0.5">Monolithic Layouts</h4>
+              <div className="absolute bottom-8 left-8 z-20">
+                <span className="font-mono text-[9px] tracking-[0.25em] text-blue-400 uppercase font-black">Estates // 2026</span>
+                <p className="text-xl font-bold tracking-tight text-white mt-1">Generational Masterpieces</p>
               </div>
             </div>
 
-            {/* 2. LAYER TWO: Frosted Glassmorphic Interaction Cards */}
-            <div className={`sm:col-span-6 flex flex-col gap-4 z-10 lg:-ml-8 transition-all duration-[1200ms] delay-400 transform ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
-            }`}>
-              {corePillars.map((pillar, idx) => (
-                <div 
-                  key={idx} 
-                  className="group p-5 bg-slate-900/40 backdrop-blur-md border border-slate-900 hover:border-blue-500/30 rounded-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.6)] flex gap-4 relative overflow-hidden"
-                >
-                  {/* Subtle inner hover glow background anchor */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-blue-600/0 to-blue-600/0 group-hover:from-blue-600/[0.02] group-hover:to-transparent transition-all duration-500" />
-                  
-                  {/* Icon Frame */}
-                  <div className="h-10 w-10 shrink-0 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-all duration-300">
+            <p className="text-slate-400 text-sm leading-relaxed font-light pl-4 border-l border-blue-500/20">
+              At PrimeEstates, our blueprint synthesizes ultra-premium spaces that function as private micro-kingdoms for the selective elite.
+            </p>
+          </div>
+
+          {/* RIGHT AREA: Overlapping Timeline & Immersive Cards */}
+          <div className="w-full md:w-7/12 space-y-8 relative">
+            
+            {/* Visual Timeline Connector Line */}
+            <div className={`absolute left-8 top-4 bottom-4 w-[1px] bg-gradient-to-b from-blue-500/50 via-slate-900 to-transparent hidden md:block transition-all duration-[2000ms] delay-500 origin-top transform ${
+              isVisible ? 'scale-y-100' : 'scale-y-0'
+            }`} />
+
+            {corePillars.map((pillar, idx) => (
+              <div 
+                key={idx} 
+                style={{ transitionDelay: `${600 + (idx * 200)}ms` }}
+                className={`group relative p-8 bg-slate-900/10 hover:bg-slate-900/40 backdrop-blur-xl border border-slate-950 hover:border-blue-500/20 rounded-3xl transition-all duration-500 flex flex-col sm:flex-row gap-6 items-start md:ml-16 transform ${
+                  isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-16'
+                }`}
+              >
+                {/* Glow Bullet Point on Timeline */}
+                <div className="absolute -left-[53px] top-10 w-2.5 h-2.5 rounded-full bg-slate-950 border border-blue-500 z-20 group-hover:bg-blue-400 group-hover:scale-120 transition-all hidden md:block" />
+
+                {/* Left Mini Column: Number & Icon */}
+                <div className="flex sm:flex-col justify-between items-center gap-4 shrink-0 w-full sm:w-auto border-b sm:border-b-0 sm:border-r border-slate-900 pb-4 sm:pb-0 sm:pr-6">
+                  <span className="font-mono text-xs font-black text-slate-600 group-hover:text-blue-500 transition-colors">
+                    {pillar.num}
+                  </span>
+                  <div className="h-12 w-12 rounded-xl bg-slate-950 border border-slate-900 flex items-center justify-center group-hover:bg-blue-600/10 group-hover:border-blue-500/20 transition-all">
                     {pillar.icon}
                   </div>
-                  
-                  {/* Card Content Text */}
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition-colors duration-300">
-                      {pillar.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 leading-relaxed font-light">
-                      {pillar.desc}
-                    </p>
-                  </div>
                 </div>
-              ))}
+
+                {/* Right Mini Column: Title & Description */}
+                <div className="space-y-2 flex-1">
+                  <h3 className="text-base font-bold text-slate-200 group-hover:text-blue-400 transition-colors tracking-wide">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed font-light">
+                    {pillar.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+            {/* Bottom Call to Action Integrated into the Flow */}
+            <div style={{ transitionDelay: '1200ms' }} className={`md:ml-16 pt-6 transition-all duration-1000 transform ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}>
+              <button className="group px-7 py-4 bg-slate-900 hover:bg-blue-600 border border-slate-800 hover:border-blue-500 text-white rounded-xl transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center gap-4 active:scale-97 shadow-2xl">
+                <span>Explore Corporate Directives</span>
+                <ArrowUpRight size={14} className="group-hover:rotate-45 transition-transform duration-300 text-blue-400 group-hover:text-white" />
+              </button>
             </div>
 
           </div>

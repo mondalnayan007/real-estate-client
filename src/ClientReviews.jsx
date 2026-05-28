@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import MarqueeComponent from 'react-fast-marquee';
+const Marquee = MarqueeComponent.default || MarqueeComponent;
 import { Star, Quote } from 'lucide-react';
 
 const premiumReviews = [
@@ -38,11 +39,8 @@ const premiumReviews = [
 ];
 
 export default function ClientReviews() {
-  // Duplicating the array ensures a seamless, gapless infinite scroll loop transition
-  const duplicatedReviews = [...premiumReviews, ...premiumReviews];
-
   return (
-    <section className="py-24 bg-slate-950 text-white overflow-hidden relative border-t border-slate-900">
+    <section className="py-24 bg-slate-950 text-white overflow-hidden relative border-t border-slate-900 select-none">
       {/* Visual Ambient Glow Accents */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -60,71 +58,68 @@ export default function ClientReviews() {
       </div>
 
       {/* Endless Marquee Container */}
-      <div className="relative w-full flex items-center Mask-Edges">
-        {/* Subtle CSS fade masking on edges for premium look */}
-        <div className="absolute inset-y-0 left-0 w-20 md:w-40 bg-gradient-to-r from-slate-950 to-transparent z-20 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-20 md:w-40 bg-gradient-to-l from-slate-950 to-transparent z-20 pointer-events-none" />
+      <div className="relative w-full flex overflow-hidden">
+        
+        {/* Soft Premium Edge Blurs */}
+        <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent z-20 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-slate-950 via-slate-950/70 to-transparent z-20 pointer-events-none" />
 
-        <motion.div 
-          className="flex gap-8 px-4 w-max cursor-grab active:cursor-grabbing"
-          // Infinite left-to-right calculation mapping based on content length
-          animate={{ x: [0, -1600] }} 
-          transition={{
-            ease: "linear",
-            duration: 35, // Adjust speed here (higher = slower)
-            repeat: Infinity,
-          }}
-          // Pauses the motion timeline on mouse interactions
-          whileHover={{ animationPlayState: 'paused' }}
+        {/* 🌟 react-fast-marquee integration */}
+        <Marquee
+          speed={60} // স্পিড কন্ট্রোল করার জন্য (পিক্সেল প্রতি সেকেন্ড)
+          pauseOnHover={true} // হোভার করলে পজ হবে
+          gradient={false} // আমরা কাস্টম গ্রাডিয়েন্ট মাস্ক উপরেই তৈরি করেছি, তাই এটি ফলস থাকবে
+          className="flex gap-8 py-4"
         >
-          {duplicatedReviews.map((review, index) => (
+          {premiumReviews.map((review) => (
             <div 
-              key={index} 
-              className="w-[450px] max-w-[90vw] bg-gradient-to-b from-slate-900 to-slate-950/40 border border-slate-800/80 rounded-3xl p-8 flex flex-col justify-between relative group hover:border-blue-500/40 transition-all duration-500 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+              key={review.id} 
+              // এখানে mx-4 দেওয়া হয়েছে যাতে কার্ডগুলোর মাঝখানের গ্যাপ ঠিক থাকে
+              className="w-[420px] max-w-[85vw] mx-4 bg-gradient-to-b from-slate-900 via-slate-900/60 to-slate-950/40 border border-slate-900 hover:border-blue-500/30 rounded-[2rem] p-8 flex flex-col justify-between relative group transition-all duration-500 shadow-2xl shrink-0"
             >
-              {/* Premium Card Glow Effect on Hover */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              {/* Premium Hover Glow Grid */}
+              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-blue-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
               <div>
-                {/* Header inside Card */}
+                {/* Header Inside Card */}
                 <div className="flex justify-between items-start mb-6">
-                  <div className="flex gap-1 text-amber-400">
+                  <div className="flex gap-1 text-amber-500/90">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} fill="currentColor" size={15} strokeWidth={0} />
+                      <Star key={i} fill="currentColor" size={14} strokeWidth={0} />
                     ))}
                   </div>
-                  <Quote size={32} className="text-slate-800 group-hover:text-blue-500/20 transition-colors duration-500" />
+                  <Quote size={28} className="text-slate-800/60 group-hover:text-blue-500/10 transition-colors duration-500 transform group-hover:rotate-6" />
                 </div>
 
-                {/* Review Text */}
-                <p className="text-slate-300 font-light leading-relaxed tracking-wide text-sm md:text-base mb-8">
+                {/* Review Content */}
+                <p className="text-slate-400 group-hover:text-slate-300 transition-colors duration-300 font-light leading-relaxed tracking-wide text-sm md:text-base mb-8">
                   "{review.text}"
                 </p>
               </div>
 
-              {/* Client Profile Footer info */}
-              <div className="flex items-center gap-4 mt-auto border-t border-slate-900 pt-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-blue-500 to-indigo-400 rounded-full p-[1px] -z-10 group-hover:rotate-180 transition-transform duration-700" />
+              {/* Client Profile Footer */}
+              <div className="flex items-center gap-4 mt-auto border-t border-slate-900/60 pt-5">
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/50 to-indigo-500/30 rounded-full p-[1px] -z-10 group-hover:rotate-180 transition-transform duration-1000" />
                   <img 
                     src={review.img} 
                     alt={review.name} 
-                    className="w-12 h-12 object-cover rounded-full filter grayscale group-hover:grayscale-0 transition-all duration-500"
+                    className="w-11 h-11 object-cover rounded-full filter grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
                 </div>
-                <div>
-                  <h4 className="font-semibold text-slate-100 text-sm tracking-wide group-hover:text-blue-400 transition-colors duration-300">
+                <div className="truncate">
+                  <h4 className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-blue-400 transition-colors duration-300">
                     {review.name}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {review.role} • <span className="text-slate-400 italic">{review.company}</span>
+                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    {review.role} • <span className="text-slate-400 italic font-light">{review.company}</span>
                   </p>
                 </div>
               </div>
 
             </div>
           ))}
-        </motion.div>
+        </Marquee>
       </div>
     </section>
   );
