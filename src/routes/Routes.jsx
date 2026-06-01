@@ -9,7 +9,9 @@ import ProjectDetails from "../views/ProjectDetails";
 import UserSignup from "../views/UserSignup";
 import UserLogin from "../views/UserLogin"
 import AdminLogin from "../views/AdminLogin"
-import Dashboard from "../views/Dashboard"
+import Dashboard from "../views/Dashboard";
+import SellerDashboard from "../views/SellerDashboard";
+
 
 const router = createBrowserRouter([
   {
@@ -62,6 +64,10 @@ const router = createBrowserRouter([
   {
     path: '/admin/dashboard',
     Component: Dashboard
+  },
+  {
+    path: '/admin/seller-dashboard',
+    Component: SellerDashboard
   }
 ]);
 
