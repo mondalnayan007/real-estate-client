@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext'; // 👈 Connected to your global security context
+import { useAuth } from '../context/AuthContext'; 
 import { 
   LayoutDashboard, Building2, Users, FileText, Bell, 
   Search, TrendingUp, DollarSign, ArrowUpRight, ArrowDownRight,
-  Plus, Filter, MoreVertical, Layers, MessageSquare, ShieldAlert, LogOut 
+  Plus, Filter, MoreVertical, Layers, MessageSquare, ShieldAlert, LogOut,
+  CheckCircle, Trash2, Send, Star, AlertCircle
 } from 'lucide-react';
 
 // Mock Data for Luxury Listings
@@ -16,25 +17,74 @@ const initialProperties = [
 ];
 
 // Mock Data for Recent Leads/Newsletter Signups
-const recentLeads = [
-  { name: 'Marcus Brody', email: 'm.brody@vanguard.com', property: 'The Obsidian Penthouse', date: 'Just now', type: 'Viewing Request' },
-  { name: 'Sophia Loren', email: 'sophia@lorenphilo.org', property: 'General Registry', date: '25 mins ago', type: 'Newsletter' },
-  { name: 'Julian Alvarez', email: 'j.alvarez@techcorp.io', property: 'The Luminary Mansion', date: '2 hours ago', type: 'Offer Submitted' },
+const initialLeads = [
+  { id: 'L-101', name: 'Marcus Brody', email: 'm.brody@vanguard.com', property: 'The Obsidian Penthouse', date: 'Just now', type: 'Viewing Request', status: 'New' },
+  { id: 'L-102', name: 'Sophia Loren', email: 'sophia@lorenphilo.org', property: 'General Registry', date: '25 mins ago', type: 'Newsletter', status: 'Processed' },
+  { id: 'L-103', name: 'Julian Alvarez', email: 'j.alvarez@techcorp.io', property: 'The Luminary Mansion', date: '2 hours ago', type: 'Offer Submitted', status: 'New' },
+];
+
+// Mock Data for Reviews
+const initialReviews = [
+  { id: 'R-01', user: 'Elena Rostova', rating: 5, comment: 'Absolute masterpiece of architecture. The Obsidian Penthouse view is unreal.', property: 'The Obsidian Penthouse', status: 'Approved' },
+  { id: 'R-02', user: 'David Vance', rating: 4, comment: 'Beautiful estate, support staff was highly professional during site visit.', property: 'Serene Woods Estate', status: 'Pending' },
 ];
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [properties, setProperties] = useState(initialProperties);
+  const [leads, setLeads] = useState(initialLeads);
+  const [reviews, setReviews] = useState(initialReviews);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const { logout } = useAuth(); // 👈 Call out global session killer handler
-  const navigate = useNavigate(); // 👈 Programmatic router anchor link hook
+  const { logout } = useAuth(); 
+  const navigate = useNavigate(); 
 
   const handleLogout = () => {
-    logout(); // Destroy administrative state verification tokens
-    navigate('/', { replace: true }); // Wipe view stack and redirect cleanly to landing page
+    logout(); 
+    navigate('/', { replace: true }); 
   };
 
+  // Add Listing Module Handler
+  const handleAddProperty = () => {
+    const randomId = `#PRP-0${properties.length + 1}`;
+    const newProperty = {
+      id: randomId,
+      title: 'Emerald Horizon Villa',
+      location: 'Malibu, CA',
+      price: '$8,900,000',
+      status: 'Active',
+      category: 'Luxury Villa',
+      views: '0'
+    };
+    setProperties([newProperty, ...properties]);
+  };
+
+  // Cycle Property Status
+  const togglePropertyStatus = (id) => {
+    setProperties(properties.map(p => {
+      if (p.id === id) {
+        const nextStatus = p.status === 'Active' ? 'Pending' : p.status === 'Pending' ? 'Sold' : 'Active';
+        return { ...p, status: nextStatus };
+      }
+      return p;
+    }));
+  };
+
+  // Lead Actions
+  const handleProcessLead = (id) => {
+    setLeads(leads.map(l => l.id === id ? { ...l, status: 'Processed' } : l));
+  };
+
+  // Review Actions
+  const handleApproveReview = (id) => {
+    setReviews(reviews.map(r => r.id === id ? { ...r, status: 'Approved' } : r));
+  };
+
+  const handleRejectReview = (id) => {
+    setReviews(reviews.filter(r => r.id !== id));
+  };
+
+  // Filter Target Source
   const filteredProperties = properties.filter(p => 
     p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     p.location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -81,9 +131,8 @@ export default function Dashboard() {
           })}
         </nav>
 
-        {/* --- SIDEBAR FOOTER (WITH RE-INTEGRATED AUTH TERMINALS) --- */}
+        {/* --- SIDEBAR FOOTER --- */}
         <div className="pt-4 border-t border-slate-900 mt-auto space-y-3">
-          {/* Elegant Clear Logout Component Engine UI */}
           <button 
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors"
@@ -114,7 +163,7 @@ export default function Dashboard() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
               <input 
                 type="text" 
-                placeholder="Search listings, leads or assets..." 
+                placeholder="Search metrics or record entries..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800/80 text-sm text-white placeholder-slate-500 outline-none focus:border-blue-500/60 transition-colors"
@@ -135,15 +184,15 @@ export default function Dashboard() {
         {/* --- CONTENT CONTAINER --- */}
         <div className="p-6 md:p-10 flex-1 overflow-y-auto space-y-10">
           
-          {/* Render Active View State conditionally */}
+          {/* ================= VIEW: OVERVIEW ================= */}
           {activeTab === 'Overview' && (
             <>
               {/* METRICS ROW */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
                   { title: 'Total Portfolio Value', value: '$26.4M', change: '+12.4%', up: true, icon: DollarSign, color: 'text-emerald-400' },
-                  { title: 'Active Showings', value: '42 listings', change: '+4.2%', up: true, icon: Building2, color: 'text-blue-400' },
-                  { title: 'Conversion Leads', value: '1,842 total', change: '-1.8%', up: false, icon: Users, color: 'text-indigo-400' },
+                  { title: 'Active Showings', value: `${properties.filter(p=>p.status==='Active').length} listings`, change: '+4.2%', up: true, icon: Building2, color: 'text-blue-400' },
+                  { title: 'Conversion Leads', value: `${leads.length} total`, change: '-1.8%', up: false, icon: Users, color: 'text-indigo-400' },
                   { title: 'Newsletter Reach', value: '12.5k Subs', change: '+24.1%', up: true, icon: FileText, color: 'text-purple-400' },
                 ].map((card, i) => {
                   const CardIcon = card.icon;
@@ -234,119 +283,182 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* LISTINGS DATA MANAGEMENT TABLE CONTAINER */}
-              <div className="bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
-                <div className="p-6 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <h3 className="font-semibold text-lg text-white">Live System Portfolio</h3>
-                    <p className="text-xs text-slate-500">Edit, remove or configure existing front-facing card modules</p>
-                  </div>
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition">
-                      <Filter size={14} /> Filter Status
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-semibold text-white transition shadow-lg shadow-blue-600/10 whitespace-nowrap">
-                      <Plus size={14} /> New Listing
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto w-full">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-500 text-xs font-semibold uppercase tracking-wider bg-slate-950/40">
-                        <th className="py-4 px-6">ID</th>
-                        <th className="py-4 px-6">Property / Title</th>
-                        <th className="py-4 px-6">Category</th>
-                        <th className="py-4 px-6">Valuation</th>
-                        <th className="py-4 px-6">Views</th>
-                        <th className="py-4 px-6">Status</th>
-                        <th className="py-4 px-6 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-800/60 text-sm">
-                      {filteredProperties.map((prop) => (
-                        <tr key={prop.id} className="hover:bg-slate-950/30 transition-colors group">
-                          <td className="py-4 px-6 font-mono text-xs text-slate-500 font-bold">{prop.id}</td>
-                          <td className="py-4 px-6">
-                            <div className="font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">{prop.title}</div>
-                            <div className="text-xs text-slate-500 font-light">{prop.location}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-400">
-                              {prop.category}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 font-medium text-slate-300">{prop.price}</td>
-                          <td className="py-4 px-6 text-slate-400 font-mono text-xs">{prop.views}</td>
-                          <td className="py-4 px-6">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                              prop.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                              prop.status === 'Pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                              'bg-slate-800 text-slate-400 border border-slate-700'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${
-                                prop.status === 'Active' ? 'bg-emerald-400' :
-                                prop.status === 'Pending' ? 'bg-amber-400' :
-                                'bg-slate-400'
-                              }`} />
-                              {prop.status}
-                            </span>
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            <button className="p-1.5 hover:bg-slate-800 text-slate-500 hover:text-white rounded-lg transition">
-                              <MoreVertical size={16} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* RECENT LEADS/NEWSLETTER REGISTRY SECTION */}
-              <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6">
-                <div className="mb-6">
-                  <h3 className="font-semibold text-lg text-white">Recent Funnel Enquiries</h3>
-                  <p className="text-xs text-slate-500">Real-time interactions capturing landing-page submissions</p>
-                </div>
-
-                <div className="space-y-4">
-                  {recentLeads.map((lead, idx) => (
-                    <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-950/60 border border-slate-800/50 rounded-xl gap-4 hover:border-slate-800 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-blue-600/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 font-bold text-sm shrink-0">
-                          {lead.name.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-200">{lead.name}</h4>
-                          <p className="text-xs text-slate-500 font-light">{lead.email}</p>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs sm:text-right">
-                        <span className="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg text-slate-400 font-medium inline-block mb-1">
-                          {lead.type}
-                        </span>
-                        <div className="text-[11px] text-slate-500">Context: <span className="text-slate-400">{lead.property}</span> • {lead.date}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </>
           )}
 
-          {/* Fallback Display State */}
-          {activeTab !== 'Overview' && (
-            <div className="py-20 text-center bg-slate-900 border border-slate-800/80 rounded-2xl max-w-xl mx-auto">
-              <Layers size={40} className="text-slate-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white mb-1">{activeTab} View Module</h3>
-              <p className="text-sm text-slate-400 max-w-sm mx-auto px-4">
-                This system dynamic subset is currently running calculations. Front-end hooks are listening properly.
-              </p>
+          {/* ================= VIEW: LISTINGS MANAGEMENT ================= */}
+          {activeTab === 'Listings Management' && (
+            <div className="bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="p-6 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="font-semibold text-lg text-white">Live System Portfolio Control</h3>
+                  <p className="text-xs text-slate-500">Click Status label to dynamically cycle states</p>
+                </div>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button onClick={handleAddProperty} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-xs font-semibold text-white transition shadow-lg shadow-blue-600/10 whitespace-nowrap">
+                    <Plus size={14} /> New Architectural Module
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-500 text-xs font-semibold uppercase tracking-wider bg-slate-950/40">
+                      <th className="py-4 px-6">ID</th>
+                      <th className="py-4 px-6">Property</th>
+                      <th className="py-4 px-6">Category</th>
+                      <th className="py-4 px-6">Valuation</th>
+                      <th className="py-4 px-6">Status (Interactive)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 text-sm">
+                    {filteredProperties.map((prop) => (
+                      <tr key={prop.id} className="hover:bg-slate-950/30 transition-colors group">
+                        <td className="py-4 px-6 font-mono text-xs text-slate-500 font-bold">{prop.id}</td>
+                        <td className="py-4 px-6">
+                          <div className="font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">{prop.title}</div>
+                          <div className="text-xs text-slate-500 font-light">{prop.location}</div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-400">{prop.category}</span>
+                        </td>
+                        <td className="py-4 px-6 font-medium text-slate-300">{prop.price}</td>
+                        <td className="py-4 px-6">
+                          <button 
+                            onClick={() => togglePropertyStatus(prop.id)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold cursor-pointer transition active:scale-95 ${
+                              prop.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' :
+                              prop.status === 'Pending' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20' :
+                              'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                            }`}
+                          >
+                            <span className={`w-1.5 h-1.5 rounded-full ${prop.status === 'Active' ? 'bg-emerald-400' : prop.status === 'Pending' ? 'bg-amber-400' : 'bg-rose-400'}`} />
+                            {prop.status}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ================= VIEW: LEADS & ENQUIRIES ================= */}
+          {activeTab === 'Leads & Enquiries' && (
+            <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg text-white">Conversion Pipeline Registry</h3>
+                <p className="text-xs text-slate-500">Review incoming interaction intents from secure terminals</p>
+              </div>
+              <div className="space-y-4">
+                {leads.map((lead) => (
+                  <div key={lead.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-950/60 border border-slate-800/50 rounded-xl gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-indigo-600/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 font-bold text-sm">
+                        {lead.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-semibold text-slate-200">{lead.name}</h4>
+                        <p className="text-xs text-slate-500 font-light">{lead.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      <div>Target Asset: <span className="text-slate-200 font-medium">{lead.property}</span></div>
+                      <div className="text-[11px] text-slate-500">{lead.type} • {lead.date}</div>
+                    </div>
+                    <div>
+                      {lead.status === 'New' ? (
+                        <button onClick={() => handleProcessLead(lead.id)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition">
+                          <CheckCircle size={12} /> Mark Processed
+                        </button>
+                      ) : (
+                        <span className="text-xs px-2.5 py-1 rounded-md bg-slate-900 border border-slate-800 text-emerald-400 font-medium">✓ Verified Pipeline</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ================= VIEW: NEWSLETTER SYSTEM ================= */}
+          {activeTab === 'Newsletter System' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-lg text-white">Broadcast Campaign Dispatcher</h3>
+                  <p className="text-xs text-slate-500">Issue synchronized dispatches to segmented investor registries</p>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-2">Campaign Topic Template</label>
+                    <input type="text" defaultValue="Q2 Premium Asset Portfolio Release - Obsidian Series" className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:border-blue-500/50 outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-2">Payload Markup</label>
+                    <textarea rows={4} defaultValue="We are proud to unlock off-market asset classes across major metropolitan registries..." className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:border-blue-500/50 outline-none resize-none" />
+                  </div>
+                  <button onClick={() => alert('Global pipeline campaign synchronized.')} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-600/10">
+                    <Send size={14} /> Broadcast to 12.5k Subs
+                  </button>
+                </div>
+              </div>
+              <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-sm text-white">System Delivery Configuration</h4>
+                  <div className="p-3.5 bg-slate-950 border border-slate-800/60 rounded-xl space-y-1">
+                    <div className="text-xs font-medium text-slate-400">SMTP Relay Status</div>
+                    <div className="text-sm font-bold text-emerald-400 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> Operational</div>
+                  </div>
+                  <div className="p-3.5 bg-slate-950 border border-slate-800/60 rounded-xl space-y-1">
+                    <div className="text-xs font-medium text-slate-400">Bounce Safeguard Threshold</div>
+                    <div className="text-sm font-bold text-slate-200">0.02% (Excellent)</div>
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-500 flex items-center gap-2"><AlertCircle size={12} /> Sync engines strictly trace local antispam compliances.</div>
+              </div>
+            </div>
+          )}
+
+          {/* ================= VIEW: REVIEWS MODERATION ================= */}
+          {activeTab === 'Reviews Moderation' && (
+            <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-6">
+              <div>
+                <h3 className="font-semibold text-lg text-white">Public Testimony Moderation Matrix</h3>
+                <p className="text-xs text-slate-500">Authorize or purge real estate card reviews</p>
+              </div>
+              <div className="space-y-4">
+                {reviews.map((rev) => (
+                  <div key={rev.id} className="p-4 bg-slate-950/60 border border-slate-800/50 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-2 max-w-xl">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-white">{rev.user}</span>
+                        <div className="flex text-amber-400">
+                          {[...Array(rev.rating)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
+                        </div>
+                        <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-slate-400 font-mono">{rev.property}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 italic leading-relaxed">"{rev.comment}"</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {rev.status === 'Pending' ? (
+                        <>
+                          <button onClick={() => handleApproveReview(rev.id)} className="p-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl transition text-xs font-semibold flex items-center gap-1">
+                            <CheckCircle size={14} /> Approve
+                          </button>
+                          <button onClick={() => handleRejectReview(rev.id)} className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition text-xs font-semibold flex items-center gap-1">
+                            <Trash2 size={14} /> Purge
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-xs px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg font-medium">Live on Client View</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
