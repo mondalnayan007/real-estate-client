@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import Root from "../Root/Root";
-import LandingPage from "../views/LandingPage";
+import LandingPage from "../views/LandingPage"; // এজেন্টের ডেমো পেজ
+import CompanyLandingPage from "../views/CompanyLandingPage"; // আপনার কোম্পানির প্রাইসিং পেজ
 import Projects from "../Projects";
 import Team from "../views/Team";
 import About from "../views/About";
@@ -12,8 +13,32 @@ import AdminLogin from "../views/AdminLogin"
 import Dashboard from "../views/Dashboard";
 import SellerDashboard from "../views/SellerDashboard";
 
+// ==========================================
+// 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
+// ==========================================
+const hostname = window.location.hostname; 
+// লোকালহোস্ট এবং আপনার লাইভ মেইন ডোমেইনকে মেইন ডোমেইন ধরা হবে
+const isMainDomain = hostname === "localhost" || hostname === "primeestates.com";
 
-const router = createBrowserRouter([
+// ==========================================
+// 👑 ২. মেইন কোম্পানির জন্য রাউটার (যদি ইউজার মেইন ডোমেইনে আসে)
+// ==========================================
+const mainCompanyRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <CompanyLandingPage /> // এখানে শুধু আপনার প্রাইসিং ও ফিচারের মেইন ল্যান্ডিং পেজ দেখাবে
+  },
+  {
+    path: "/signup", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
+    Component: UserSignup
+  }
+  // এখানে আপনার সুপার অ্যাডমিন ড্যাশবোর্ডের রুটও যোগ করতে পারেন পরবর্তীতে
+]);
+
+// ==========================================
+// 🏢 ৩. এজেন্টের ডেমো সাইটের রাউটার (আপনার আগের রাউটারটি)
+// ==========================================
+const agentDemoRouter = createBrowserRouter([
   {
     path: "/",
     element: <Root></Root>,
@@ -21,7 +46,7 @@ const router = createBrowserRouter([
         {
             index: true,
             path: '/',
-            Component: LandingPage
+            Component: LandingPage // এজেন্টের ডেমো হোমপেজ
         },
         {
           path:'/projects',
@@ -70,5 +95,10 @@ const router = createBrowserRouter([
     Component: SellerDashboard
   }
 ]);
+
+// ==========================================
+// 🚀 ৪. কন্ডিশন অনুযায়ী সঠিক রাউটারটি এক্সপোর্ট করা
+// ==========================================
+const router = isMainDomain ? mainCompanyRouter : agentDemoRouter;
 
 export default router;
