@@ -12,11 +12,13 @@ import UserLogin from "../views/UserLogin"
 import AdminLogin from "../views/AdminLogin"
 import Dashboard from "../views/Dashboard";
 import SellerDashboard from "../views/SellerDashboard";
+import SelectPlanPage from "../views/SelectPlanPage";
+import Register from "../views/Register";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
 // ==========================================
-const hostname = window.location.hostname; 
+const hostname = window.location.hostname;
 // লোকালহোস্ট এবং আপনার লাইভ মেইন ডোমেইনকে মেইন ডোমেইন ধরা হবে
 const isMainDomain = hostname === "localhost" || hostname === "primeestates.com";
 
@@ -31,6 +33,14 @@ const mainCompanyRouter = createBrowserRouter([
   {
     path: "/signup", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
     Component: UserSignup
+  },
+  {
+    path: '/register',
+    Component: Register
+  },
+  {
+    path: '/select-plan',
+    Component: SelectPlanPage
   }
   // এখানে আপনার সুপার অ্যাডমিন ড্যাশবোর্ডের রুটও যোগ করতে পারেন পরবর্তীতে
 ]);
@@ -42,44 +52,44 @@ const agentDemoRouter = createBrowserRouter([
   {
     path: "/",
     element: <Root></Root>,
-    children : [
-        {
-            index: true,
-            path: '/',
-            Component: LandingPage // এজেন্টের ডেমো হোমপেজ
+    children: [
+      {
+        index: true,
+        path: '/',
+        Component: LandingPage // এজেন্টের ডেমো হোমপেজ
+      },
+      {
+        path: '/projects',
+        Component: Projects
+      },
+      {
+        path: '/project-details/:id',
+        loader: async () => {
+          const res = await fetch('/data.json');
+          return res.ok ? res.json() : [];
         },
-        {
-          path:'/projects',
-          Component: Projects
-        },
-        {
-          path:'/project-details/:id',
-          loader: async () => {
-            const res = await fetch('/data.json');
-            return res.ok ? res.json() : [];
-          },
-          Component: ProjectDetails,
-        },
-        {
-          path:'/team',
-          Component: Team
-        },
-        {
-          path:'/about',
-          Component: About
-        },
-        {
-          path:'/blog',
-          Component: Blog
-        },
-        {
-          path:'/signup',
-          Component: UserSignup
-        },
-        {
-          path:'/login',
-          Component: UserLogin
-        }
+        Component: ProjectDetails,
+      },
+      {
+        path: '/team',
+        Component: Team
+      },
+      {
+        path: '/about',
+        Component: About
+      },
+      {
+        path: '/blog',
+        Component: Blog
+      },
+      {
+        path: '/signup',
+        Component: UserSignup
+      },
+      {
+        path: '/login',
+        Component: UserLogin
+      }
     ]
   },
   {

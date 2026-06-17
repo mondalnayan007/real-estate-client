@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router';
 
 const CompanyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,9 +31,9 @@ const CompanyNavbar = () => {
             <a href="/login" className="text-sm font-bold text-slate-700 hover:text-blue-600 transition-colors">
               Sign In
             </a>
-            <a href="#pricing" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold px-5 py-3 rounded-xl shadow-lg shadow-slate-900/10 transition-all transform hover:-translate-y-0.5">
+            <Link to={'/register'} className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold px-5 py-3 rounded-xl shadow-lg shadow-slate-900/10 transition-all transform hover:-translate-y-0.5">
               Create Your Website
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -59,7 +60,7 @@ const CompanyNavbar = () => {
           <a href="#features" onClick={() => setIsOpen(false)} className="block font-semibold text-slate-600 py-2">Features</a>
           <a href="#pricing" onClick={() => setIsOpen(false)} className="block font-semibold text-slate-600 py-2">Pricing</a>
           <a href="/login" className="block font-semibold text-slate-600 py-2">Sign In</a>
-          <a href="#pricing" onClick={() => setIsOpen(false)} className="block text-center bg-blue-600 text-white font-bold py-3 rounded-xl">Create Your Website</a>
+          <Link to={'/register'} onClick={() => setIsOpen(false)} className="block text-center bg-blue-600 text-white font-bold py-3 rounded-xl">Create Your Website</Link>
         </div>
       )}
     </nav>
