@@ -70,39 +70,7 @@ const CompanyPricing = () => {
       {/* ==========================================
           🎁 🔲 DYNAMIC ONBOARDING MODAL
          ========================================== */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl border border-slate-100 relative">
-            <h3 className="text-2xl font-black text-slate-900 mb-1">Setup Your Agency Site</h3>
-            <p className="text-sm text-slate-500 mb-6">You selected the <span className="text-blue-600 font-bold">{selectedPlan}</span></p>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Company / Agency Name</label>
-                <input required type="text" name="agencyName" value={formData.agencyName} onChange={handleInputChange} placeholder="e.g. Marcus Properties" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Desired Subdomain Prefix</label>
-                <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all overflow-hidden">
-                  <input required type="text" name="subdomain" value={formData.subdomain} onChange={handleInputChange} placeholder="marcus" className="w-full bg-transparent px-4 py-3 font-medium focus:outline-none text-sm text-right pr-1" />
-                  <span className="bg-slate-200/60 text-slate-500 text-sm px-3 py-3 font-semibold border-l border-slate-200 select-none">.primeestates.com</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">Account Email Address</label>
-                <input required type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="name@agency.com" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm" />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-sm transition-colors">Cancel</button>
-                <button type="submit" className="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm transition-colors shadow-md shadow-blue-600/10">Confirm & Launch</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      
     </section>
   );
 };
