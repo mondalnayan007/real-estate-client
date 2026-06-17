@@ -10,10 +10,11 @@ import ProjectDetails from "../views/ProjectDetails";
 import UserSignup from "../views/UserSignup";
 import UserLogin from "../views/UserLogin"
 import AdminLogin from "../views/AdminLogin"
-import Dashboard from "../views/Dashboard";
+import Dashboard from "../views/AgentDashboard";
 import SellerDashboard from "../views/SellerDashboard";
 import SelectPlanPage from "../views/SelectPlanPage";
 import Register from "../views/Register";
+import AgentDashboard from "../views/AgentDashboard";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -98,7 +99,7 @@ const agentDemoRouter = createBrowserRouter([
   },
   {
     path: '/admin/dashboard',
-    Component: Dashboard
+    Component: AgentDashboard
   },
   {
     path: '/admin/seller-dashboard',
