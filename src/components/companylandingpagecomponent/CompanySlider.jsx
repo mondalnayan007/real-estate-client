@@ -12,7 +12,7 @@ export default function CompanySlider() {
       buttonText1: "Get Started Free",
       buttonUrl1: "#pricing",
       buttonText2: "Watch SaaS Demo",
-      buttonUrl2: "#demo",
+      buttonUrl2: "https://real-estate-client-kappa-lilac.vercel.app",
       position: "Left",
     },
     {
