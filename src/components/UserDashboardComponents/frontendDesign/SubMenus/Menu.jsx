@@ -1,29 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { List, PlusCircle, Edit2, Search, CornerDownRight, Save } from 'lucide-react';
 
 export default function Menu() {
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'form'
   const [isEditing, setIsEditing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // সার্চ বার ট্র্যাকিং
 
-  // 📦 রিয়েল এস্টেট প্রজেক্টের উপযোগী ডাইনামিক মেনু ও সাব-মেনু ডাটা
-  const [menuItems, setMenuItems] = useState([
-    { id: 1, type: 'System Menu', title: 'Home', position: 1, isSub: false, parentId: null, publish: true },
-    { id: 2, type: 'System Menu', title: 'Properties Available', position: 2, isSub: false, parentId: null, publish: true },
-    { id: 3, type: 'System Menu', title: 'Our Agents', position: 3, isSub: false, parentId: null, publish: true },
-    { id: 4, type: 'System Menu', title: 'Latest Projects', position: 4, isSub: false, parentId: null, publish: true },
-    { id: 5, type: 'System Menu', title: 'FAQ', position: 5, isSub: false, parentId: null, publish: true },
-    { id: 6, type: 'System Menu', title: 'Book a Viewing', position: 6, isSub: false, parentId: null, publish: true },
-    { id: 7, type: 'System Menu', title: 'Gallery / Tours', position: 7, isSub: false, parentId: null, publish: true },
-    { id: 8, type: 'System Menu', title: 'Blogs & News', position: 8, isSub: false, parentId: null, publish: true },
-    { id: 9, type: 'System Menu', title: 'Pages', position: 9, isSub: false, parentId: null, publish: true },
-    
-    // 🏠 'Pages' এর ভেতরের রিয়েল এস্টেট সাব-মেনুসমূহ
-    { id: 11, type: 'System Menu', title: 'Our Services', position: 1, isSub: true, parentId: 9, publish: true },
-    { id: 12, type: 'System Menu', title: 'Client Testimonials', position: 2, isSub: true, parentId: 9, publish: true },
-    { id: 13, type: 'System Menu', title: 'Career with Agency', position: 3, isSub: true, parentId: 9, publish: true },
-    
-    { id: 10, type: 'System Menu', title: 'Contact Us', position: 13, isSub: false, parentId: null, publish: true }
-  ]);
+  // 📦 ডাইনামিক মেনু ও সাব-মেনু ডাটা কন্টেইনার
+  const [menuItems, setMenuItems] = useState([]);
 
   // 📝 ফর্ম স্টেট (রিয়েল এস্টেট ডাটা ফিল্ডস)
   const initialFormState = {
@@ -38,9 +22,52 @@ export default function Menu() {
   };
   const [formData, setFormData] = useState(initialFormState);
 
-  // 🔄 টগল পাবলিশ স্ট্যাটাস
-  const togglePublish = (id) => {
-    setMenuItems(prev => prev.map(item => item.id === id ? { ...item, publish: !item.publish } : item));
+  // 🌐 ১. BACKEND API: ডাটাবেজ থেকে মেনু লিস্ট তুলে আনার জন্য (GET Request)
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        // const response = await fetch('YOUR_BACKEND_API_URL/menus');
+        // const data = await response.json();
+        // setMenuItems(data);
+
+        // ডামি রিয়েল এস্টেট ডাটা (আপনার ব্যাকএন্ড এপিআই ফাকা থাকলে এটি রান করবে)
+        const mockMenus = [
+          { id: 1, type: 'System Menu', title: 'Home', position: 1, isSub: false, parentId: null, publish: true },
+          { id: 2, type: 'System Menu', title: 'Properties Available', position: 2, isSub: false, parentId: null, publish: true },
+          { id: 3, type: 'System Menu', title: 'Our Agents', position: 3, isSub: false, parentId: null, publish: true },
+          { id: 4, type: 'System Menu', title: 'Latest Projects', position: 4, isSub: false, parentId: null, publish: true },
+          { id: 5, type: 'System Menu', title: 'FAQ', position: 5, isSub: false, parentId: null, publish: true },
+          { id: 6, type: 'System Menu', title: 'Book a Viewing', position: 6, isSub: false, parentId: null, publish: true },
+          { id: 7, type: 'System Menu', title: 'Gallery / Tours', position: 7, isSub: false, parentId: null, publish: true },
+          { id: 8, type: 'System Menu', title: 'Blogs & News', position: 8, isSub: false, parentId: null, publish: true },
+          { id: 9, type: 'System Menu', title: 'Pages', position: 9, isSub: false, parentId: null, publish: true },
+          { id: 11, type: 'System Menu', title: 'Our Services', position: 1, isSub: true, parentId: 9, publish: true },
+          { id: 12, type: 'System Menu', title: 'Client Testimonials', position: 2, isSub: true, parentId: 9, publish: true },
+          { id: 13, type: 'System Menu', title: 'Career with Agency', position: 3, isSub: true, parentId: 9, publish: true },
+          { id: 10, type: 'System Menu', title: 'Contact Us', position: 13, isSub: false, parentId: null, publish: true }
+        ];
+        setMenuItems(mockMenus);
+      } catch (error) {
+        console.error("Error fetching menu routes:", error);
+      }
+    };
+    fetchMenuItems();
+  }, []);
+
+  // 🔄 ২. BACKEND API: টগল পাবলিশ স্ট্যাটাস (PATCH / PUT Request)
+  const togglePublish = async (id, currentStatus) => {
+    try {
+      // await fetch(`YOUR_BACKEND_API_URL/menus/${id}/toggle-publish`, {
+      //   method: 'PATCH',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ publish: !currentStatus })
+      // });
+
+      // ফ্রন্টএন্ড স্টেট আপডেট
+      setMenuItems(prev => prev.map(item => item.id === id ? { ...item, publish: !item.publish } : item));
+    } catch (error) {
+      console.error("Error toggling publish status:", error);
+    }
   };
 
   // ✍️ এডিট বাটনে ক্লিক করার হ্যান্ডলার
@@ -48,11 +75,11 @@ export default function Menu() {
     setFormData({
       id: item.id,
       title: item.title,
-      position: item.position,
+      position: String(item.position),
       publish: item.publish,
-      targetNewWindow: false,
-      externalUrl: false,
-      externalLink: '',
+      targetNewWindow: item.targetNewWindow || false,
+      externalUrl: item.externalUrl || false,
+      externalLink: item.externalLink || '',
       parentMenu: item.parentId ? String(item.parentId) : 'Select'
     });
     setIsEditing(true);
@@ -76,29 +103,61 @@ export default function Menu() {
     setFormData(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
-  // 🚀 সাবমিট হ্যান্ডলার (অ্যাড এবং এডিট)
-  const handleFormSubmit = (e) => {
+  // 🚀 ৩. BACKEND API: সাবমিট হ্যান্ডলার (POST / PUT Request)
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (isEditing) {
-      setMenuItems(prev => prev.map(item => item.id === formData.id ? { ...item, title: formData.title, position: Number(formData.position) } : item));
-      alert('Real Estate Navigation menu updated successfully!');
-    } else {
-      const newId = Date.now();
-      setMenuItems(prev => [...prev, {
-        id: newId,
-        type: 'System Menu',
-        title: formData.title,
-        position: Number(formData.position) || prev.length + 1,
-        isSub: formData.parentMenu !== 'Select',
-        parentId: formData.parentMenu !== 'Select' ? Number(formData.parentMenu) : null,
-        publish: formData.publish
-      }]);
-      alert('New Real Estate menu node added!');
+
+    // ব্যাকএন্ড পে-লোড প্রিপারেশন
+    const payload = {
+      title: formData.title,
+      position: Number(formData.position),
+      publish: formData.publish,
+      targetNewWindow: formData.targetNewWindow,
+      externalUrl: formData.externalUrl,
+      externalLink: formData.externalUrl ? formData.externalLink : '',
+      isSub: formData.parentMenu !== 'Select',
+      parentId: formData.parentMenu !== 'Select' ? Number(formData.parentMenu) : null,
+      type: 'System Menu'
+    };
+
+    try {
+      if (isEditing) {
+        // 🔄 এক্সিস্টিং মেনু আপডেট (PUT Request)
+        // const response = await fetch(`YOUR_BACKEND_API_URL/menus/${formData.id}`, {
+        //   method: 'PUT',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(payload)
+        // });
+        
+        setMenuItems(prev => prev.map(item => item.id === formData.id ? { ...item, title: payload.title, position: payload.position, isSub: payload.isSub, parentId: payload.parentId } : item));
+        alert('Real Estate Navigation menu updated successfully!');
+      } else {
+        // ➕ নতুন মেনু তৈরি (POST Request)
+        // const response = await fetch('YOUR_BACKEND_API_URL/menus', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(payload)
+        // });
+        // const savedData = await response.json();
+
+        const newId = Date.now();
+        setMenuItems(prev => [...prev, { id: newId, ...payload }]);
+        alert('New Real Estate menu node added!');
+      }
+
+      // ফর্ম রিসেট ও রিডাইরেকশন
+      setFormData(initialFormState);
+      setIsEditing(false);
+      setActiveTab('list');
+    } catch (error) {
+      console.error("Error saving menu structure:", error);
     }
-    setFormData(initialFormState);
-    setIsEditing(false);
-    setActiveTab('list');
   };
+
+  // 🔍 সার্চ ফিল্টারিং লজিক
+  const filteredItems = menuItems.filter(item =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -112,6 +171,7 @@ export default function Menu() {
       {/* 🗂️ ট্যাব নেভিগেশন বার */}
       <div className="flex border-b border-slate-800 gap-1">
         <button 
+          type="button"
           onClick={() => setActiveTab('list')}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${
             activeTab === 'list' 
@@ -122,6 +182,7 @@ export default function Menu() {
           <List size={14} /> Menu List
         </button>
         <button 
+          type="button"
           onClick={handleAddNewTabClick}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${
             activeTab === 'form' 
@@ -133,7 +194,7 @@ export default function Menu() {
         </button>
       </div>
 
-      {/* 🎚️ কনটেন্ট এরিয়া */}
+      {/* 🎚️ কনটেন্ট এরিয়া */}
       {activeTab === 'list' ? (
         
         /* ================= 📊 ট্যাব ১: মেনু লিস্ট ভিউ ================= */
@@ -149,7 +210,13 @@ export default function Menu() {
               <span>rows per page</span>
             </div>
             <div className="relative w-full sm:w-64">
-              <input type="text" placeholder="Search menu routes..." className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-4 py-1.5 text-xs text-white focus:outline-none focus:border-rose-600" />
+              <input 
+                type="text" 
+                placeholder="Search menu routes..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-4 py-1.5 text-xs text-white focus:outline-none focus:border-rose-600" 
+              />
               <Search className="absolute left-2.5 top-2 text-slate-500" size={14} />
             </div>
           </div>
@@ -170,7 +237,7 @@ export default function Menu() {
                   </tr>
                 </thead>
                 <tbody className="text-xs text-slate-300 divide-y divide-slate-800/60">
-                  {menuItems.map((item, index) => (
+                  {filteredItems.map((item, index) => (
                     <tr key={item.id} className={`hover:bg-slate-950/20 transition-colors ${item.isSub ? 'bg-slate-950/40' : ''}`}>
                       <td className="px-6 py-3 text-slate-500 font-mono">{index + 1}</td>
                       <td className="px-6 py-3 font-medium text-slate-400">{item.isSub ? '' : item.type}</td>
@@ -190,7 +257,7 @@ export default function Menu() {
                       <td className="px-6 py-3 text-center">
                         <button 
                           type="button"
-                          onClick={() => togglePublish(item.id)}
+                          onClick={() => togglePublish(item.id, item.publish)}
                           className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 relative inline-flex items-center ${item.publish ? 'bg-rose-500' : 'bg-slate-800'}`}
                         >
                           <span className={`w-4 h-4 rounded-full bg-white shadow transform transition-transform duration-200 ${item.publish ? 'translate-x-4' : 'translate-x-0'}`} />
@@ -217,7 +284,7 @@ export default function Menu() {
 
       ) : (
 
-        /* ================= 📝签名 ট্যাব ২: অ্যাড / এডিট মেনু ফর্ম ================= */
+        /* ================= 📝 ট্যাব ২: অ্যাড / এডিট মেনু ফর্ম ================= */
         <form onSubmit={handleFormSubmit} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6 max-w-3xl shadow-xl">
           
           <div className="border-b border-slate-800 pb-3 mb-2">
