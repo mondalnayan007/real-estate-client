@@ -5,6 +5,7 @@ import CompanyFeatures from '../components/companylandingpagecomponent/CompanyFe
 import CompanyPricing from '../components/companylandingpagecomponent/CompanyPricing';
 import CompanyFooter from '../components/companylandingpagecomponent/CompanyFooter';
 import CompanySlider from '../components/companylandingpagecomponent/CompanySlider';
+import CompanyFAQ from '../components/companylandingpagecomponent/CompanyFAQ';
 
 const CompanyLandingPage = () => {
   return (
@@ -21,6 +22,9 @@ const CompanyLandingPage = () => {
       
       {/* ৪. প্রাইসিং ও সাবস্ক্রিপশন প্ল্যান */}
       <CompanyPricing />
+
+      {/* FAQ section  */}
+      <CompanyFAQ />
       
       {/* ৫. ফুটার */}
       <CompanyFooter />
