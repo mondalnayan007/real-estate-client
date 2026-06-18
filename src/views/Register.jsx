@@ -33,7 +33,7 @@ const Register = () => {
       console.log("Mock Registration Successful for:", email);
       
       // সফল রেজিস্ট্রেশন শেষে সরাসরি আপনার সেই কাঙ্ক্ষিত প্ল্যান সিলেক্ট করার পেজে নিয়ে যাবে
-      navigate('/select-plan');
+      navigate('/');
     }, 2000); // ২ সেকেন্ডের একটি ফেক লোডিং ইফেক্ট দেওয়া হয়েছে
   };
 
