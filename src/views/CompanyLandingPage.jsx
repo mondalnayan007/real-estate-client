@@ -6,6 +6,7 @@ import CompanyPricing from '../components/companylandingpagecomponent/CompanyPri
 import CompanyFooter from '../components/companylandingpagecomponent/CompanyFooter';
 import CompanySlider from '../components/companylandingpagecomponent/CompanySlider';
 import CompanyFAQ from '../components/companylandingpagecomponent/CompanyFAQ';
+import CompanyContact from '../components/companylandingpagecomponent/CompanyContact';
 
 const CompanyLandingPage = () => {
   return (
@@ -25,6 +26,9 @@ const CompanyLandingPage = () => {
 
       {/* FAQ section  */}
       <CompanyFAQ />
+
+      {/* contuct  us section  */}
+      <CompanyContact />
       
       {/* ৫. ফুটার */}
       <CompanyFooter />
