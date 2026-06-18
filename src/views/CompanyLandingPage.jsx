@@ -4,6 +4,7 @@ import CompanyHero from '../components/companylandingpagecomponent/CompanyHero';
 import CompanyFeatures from '../components/companylandingpagecomponent/CompanyFeatures';
 import CompanyPricing from '../components/companylandingpagecomponent/CompanyPricing';
 import CompanyFooter from '../components/companylandingpagecomponent/CompanyFooter';
+import CompanySlider from '../components/companylandingpagecomponent/CompanySlider';
 
 const CompanyLandingPage = () => {
   return (
@@ -12,7 +13,8 @@ const CompanyLandingPage = () => {
       <CompanyNavbar />
       
       {/* ২. হিরো সেকশন */}
-      <CompanyHero />
+      
+      <CompanySlider></CompanySlider>
       
       {/* ৩. ফিচার সেকশন */}
       <CompanyFeatures />
