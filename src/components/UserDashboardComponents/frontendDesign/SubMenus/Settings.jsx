@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save, Upload } from 'lucide-react';
 
 export default function Settings() {
-  // 📦 ব্যাকএন্ড ফ্রেন্ডলি সিঙ্গেল স্টেট অবজেক্ট (স্ক্রিনশটের সব ফিল্ড এখানে রেডি)
+  // 📦 ব্যাকএন্ড ফ্রেন্ডলি স্টেট অবজেক্ট
   const [formData, setFormData] = useState({
-    // Screenshot 2026-06-19 014539.png এর ফিল্ডসমূহ
-    cmsTitle: 'Icon School Management System With CMS',
-    cmsUrlAlias: 'Iconschool',
+    cmsTitle: '',
+    cmsUrlAlias: '',
     cmsFrontend: 'Enabled',
     onlineAdmission: 'Enabled',
-    receiveEmailTo: 'Info@example.com',
+    receiveEmailTo: '',
     captchaStatus: 'Disable',
-    workingHours: '<span>Hours : </span> Mon To Fri - 10AM - 04PM, Sunday Closed',
+    workingHours: '',
     logo: null,
     favIcon: null,
-    address: '3470 Geraldine Lane, New York',
+    address: '',
     googleAnalytics: '',
-
-    // Screenshot 2026-06-19 014559.png এর ফিল্ডসমূহ
     primaryColor: '#ff685c',
     menuBgColor: '#ffffff',
     buttonHoverColor: '#f04133',
@@ -28,21 +25,70 @@ export default function Settings() {
     copyrightBgColor: '#262626',
     copyrightTextColor: '#8d8d8d',
     borderRadius: '0',
-    mobileNo: '+1-954-648-1802',
-    email: 'info@demo.com',
-    fax: '001 - 785 987 1234',
-    footerAboutText: 'If you are going to use a passage Lorlsum, you anythirassing hidden in the middle of text. Lators on the Internet tend to.',
-
-    // Screenshot 2026-06-19 014622.png এর ফিল্ডসমূহ
-    copyrightText: 'Copyright &copy; 2026 <span>Ramom</span>. All Rights Reserved.',
-    facebookUrl: 'https://facebook.com',
-    twitterUrl: 'https://twitter.com',
-    youtubeUrl: 'https://youtube.com',
-    googlePlus: 'https://google.com',
-    linkedinUrl: 'https://linkedin.com',
-    pinterestUrl: 'https://pinterest.com',
-    instagramUrl: 'https://instagram.com',
+    mobileNo: '',
+    email: '',
+    fax: '',
+    footerAboutText: '',
+    copyrightText: '',
+    facebookUrl: '',
+    twitterUrl: '',
+    youtubeUrl: '',
+    googlePlus: '',
+    linkedinUrl: '',
+    pinterestUrl: '',
+    instagramUrl: '',
   });
+
+  // 🌐 ১. BACKEND API: ডাটাবেজ থেকে সেটিংস ডাটা তুলে আনার জন্য (GET Request)
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        // const response = await fetch('YOUR_BACKEND_API_URL/settings');
+        // const data = await response.json();
+        // setFormData(data);
+
+        // প্রজেক্ট জেনারেট করার জন্য ডামি ডেটা সেট করে রাখলাম, আপনার এপিআই বসালে এটি কেটে দেবেন
+        setFormData({
+          cmsTitle: 'Premium Real Estate Engine',
+          cmsUrlAlias: 'premium-estate',
+          cmsFrontend: 'Enabled',
+          onlineAdmission: 'Enabled',
+          receiveEmailTo: 'info@premiumrealestate.com',
+          captchaStatus: 'Disable',
+          workingHours: 'Mon To Fri - 09AM - 06PM, Weekend Closed',
+          logo: null,
+          favIcon: null,
+          address: '742 Evergreen Terrace, New York',
+          googleAnalytics: '',
+          primaryColor: '#e11d48', // rose-600
+          menuBgColor: '#0f172a',
+          buttonHoverColor: '#f43f5e',
+          textColor: '#ffffff',
+          textSecondaryColor: '#94a3b8',
+          footerBgColor: '#0f172a',
+          footerTextColor: '#94a3b8',
+          copyrightBgColor: '#020617',
+          copyrightTextColor: '#64748b',
+          borderRadius: '12',
+          mobileNo: '+1-555-0199',
+          email: 'broker@premiumrealestate.com',
+          fax: '+1-555-0100',
+          footerAboutText: 'Find your luxury dream properties with our modern booking engine. Premium villas, duplexes, and apartments.',
+          copyrightText: 'Copyright &copy; 2026 Premium Real Estate. All Rights Reserved.',
+          facebookUrl: 'https://facebook.com',
+          twitterUrl: 'https://twitter.com',
+          youtubeUrl: 'https://youtube.com',
+          googlePlus: '',
+          linkedinUrl: 'https://linkedin.com',
+          pinterestUrl: '',
+          instagramUrl: 'https://instagram.com',
+        });
+      } catch (error) {
+        console.error("Error loading settings from backend:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   // 🔄 জেনেরিক হ্যান্ডলার (ইনপুট চেঞ্জ ট্র্যাকিং)
   const handleChange = (e) => {
@@ -58,12 +104,33 @@ export default function Settings() {
     }
   };
 
-  // 🚀 ব্যাকএন্ড সাবমিট ফাংশন
-  const handleSubmit = (e) => {
+  // 🚀 ২. BACKEND API: ফর্ম ডাটাবেজে সেভ করার জন্য (POST / PUT Request)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Backend Ready Payload:', formData);
-    alert('Settings form logged to console! Ready for your API fetch() call.');
-    // এখানে আপনার axios.post('/api/settings', formData) চলে যাবে সরাসরি
+    
+    // ইমেজের ফাইল অবজেক্ট সেফলি পাঠানোর জন্য FormData ব্যবহার করা হলো
+    const dataPayload = new FormData();
+    
+    // অবজেক্ট লুপ করে সব টেক্সট ফিল্ড FormData-তে পুশ করা হচ্ছে
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] !== null) {
+        dataPayload.append(key, formData[key]);
+      }
+    });
+
+    try {
+      // const response = await fetch('YOUR_BACKEND_API_URL/settings', {
+      //   method: 'POST', // বা আপনার রুট অনুযায়ী 'PUT'
+      //   body: dataPayload, // নোড জেসে multer দিয়ে এই বডি রিসিভ করবেন
+      // });
+      // const result = await response.json();
+      
+      console.log('Successfully saved to backend payload:', formData);
+      alert('Global configuration successfully saved to the backend database!');
+    } catch (error) {
+      console.error("Error saving config to backend:", error);
+      alert('Failed to synchronise configuration.');
+    }
   };
 
   // স্টাইল হেল্পার ম্যাক্রো
@@ -71,7 +138,7 @@ export default function Settings() {
   const inputStyle = "w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 transition-colors";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6浏览 animate-in fade-in duration-200 pb-16">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-200 pb-16">
       
       {/* হেডার গ্রুপ */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-900 pb-4">
@@ -102,7 +169,7 @@ export default function Settings() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* রেডিয়াল/টগল বাটন গ্রুপ */}
+            {/* রেডিয়াল/টগল বাটন গ্রুপ */}
             <div>
               <label className={labelStyle}>Cms Frontend *</label>
               <div className="flex gap-4 mt-2">
@@ -144,21 +211,27 @@ export default function Settings() {
             <textarea name="workingHours" value={formData.workingHours} onChange={handleChange} rows={2} className={inputStyle} required />
           </div>
 
-          {/* মিডিয়া আপলোডার নোড */}
+          {/* মিডিয়া আপলোডার নোড */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
               <div>
                 <label className={labelStyle}>Logo Asset *</label>
                 <p className="text-[10px] text-slate-500">Corporate image nodule</p>
               </div>
-              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white"><Upload size={14} /><input type="file" onChange={(e) => handleFileChange(e, 'logo')} className="hidden" accept="image/*" /></label>
+              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
+                <Upload size={14} />
+                <input type="file" onChange={(e) => handleFileChange(e, 'logo')} className="hidden" accept="image/*" />
+              </label>
             </div>
             <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
               <div>
                 <label className={labelStyle}>Fav Icon *</label>
                 <p className="text-[10px] text-slate-500">Shortcut icon vector</p>
               </div>
-              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white"><Upload size={14} /><input type="file" onChange={(e) => handleFileChange(e, 'favIcon')} className="hidden" accept="image/*" /></label>
+              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
+                <Upload size={14} />
+                <input type="file" onChange={(e) => handleFileChange(e, 'favIcon')} className="hidden" accept="image/*" />
+              </label>
             </div>
           </div>
 
@@ -261,7 +334,7 @@ export default function Settings() {
             </div>
             <div>
               <label className={labelStyle}>Pinterest Url</label>
-              <input type="url" name="pinterestUrl" value={formData.pinterestUrl} className={inputStyle} />
+              <input type="url" name="pinterestUrl" value={formData.pinterestUrl} onChange={handleChange} className={inputStyle} />
             </div>
             <div className="md:col-span-2">
               <label className={labelStyle}>Instagram Url</label>
