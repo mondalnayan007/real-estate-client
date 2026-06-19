@@ -15,6 +15,7 @@ import SellerDashboard from "../views/SellerDashboard";
 import SelectPlanPage from "../views/SelectPlanPage";
 import Register from "../views/Register";
 import AgentDashboard from "../views/AgentDashboard";
+import SuperAdminDashboard from "../views/SuperAdminDashboard";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -40,8 +41,8 @@ const mainCompanyRouter = createBrowserRouter([
     Component: Register
   },
   {
-    path: '/select-plan',
-    Component: SelectPlanPage
+    path:'/admin/super-dashboard',
+    Component:SuperAdminDashboard
   }
   // এখানে আপনার সুপার অ্যাডমিন ড্যাশবোর্ডের রুটও যোগ করতে পারেন পরবর্তীতে
 ]);
