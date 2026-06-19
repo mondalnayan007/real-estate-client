@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
-import { Check, X, ShieldCheck, ArrowRight, Sparkles, Building, Globe, Mail, User, Phone } from 'lucide-react';
+import { Check, X, ShieldCheck, ArrowRight, Sparkles, Building, Globe, Mail, User, Phone, Link2, CreditCard } from 'lucide-react';
 
 const CompanyPricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [domainType, setDomainType] = useState('subdomain');
   
-  // ৪টি প্রয়োজনীয় ডেটা ফিল্ড স্টেট
+  // পেমেন্ট প্রসেসিং স্টেট (সিমুলেশন ও ব্যাকএন্ড ইন্টিগ্রেশনের জন্য)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  
   const [formData, setFormData] = useState({
     fullName: '',
     agencyName: '',
     whatsappNumber: '',
-    customUsername: '' // সাব-ডোমেইনের জন্য ইউনিক ইউজারনেম
+    customUsername: '', 
+    customDomain: ''    
   });
 
   const pricingPlans = [
@@ -47,45 +51,98 @@ const CompanyPricing = () => {
   const handleOpenModal = (plan) => {
     setSelectedPlan(plan);
     setIsModalOpen(true);
+    setDomainType('subdomain'); 
+    setIsProcessingPayment(false); // স্টেট রিসেট
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  // 🚀 পেমেন্ট এবং ফাইনাল রিডাইরেকশন হ্যান্ডলার
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsProcessingPayment(true); // UI-তে পেমেন্ট গেটওয়ে প্রসেসিং মোড অন হবে
     
-    // ১. ইউজারনেম থেকে স্পেস বা ক্যাপিটাল লেটার ক্লিন করা (URL Friendly)
-    const cleanUsername = formData.customUsername.trim().toLowerCase().replace(/\s+/g, '');
-
-    if (!cleanUsername) {
-      alert("Please enter a valid username.");
-      return;
-    }
-
-    // ২. কারেন্ট হোস্টনেম এবং পোর্ট বের করা
-    const currentHostname = window.location.hostname; 
-    const currentPort = window.location.port;         
-
     let redirectUrl = "";
+    let payload = {
+      fullName: formData.fullName,
+      agencyName: formData.agencyName,
+      whatsappNumber: formData.whatsappNumber,
+      planId: selectedPlan.id,
+      domainType: domainType
+    };
 
-    // ৩. লোকালহোস্ট এবং লাইভ ডোমেইনের জন্য ডাইনামিক রিডাইরেকশন ইউআরএল মেকিং
-    if (currentHostname === "localhost" || currentHostname === "127.0.0.1") {
-      redirectUrl = `http://${cleanUsername}.localhost${currentPort ? `:${currentPort}` : ''}`;
+    // ডোমেইন ক্যালকুলেশন লজিক
+    if (domainType === 'subdomain') {
+      const cleanUsername = formData.customUsername.trim().toLowerCase().replace(/\s+/g, '');
+      if (!cleanUsername) {
+        alert("Please enter a valid username.");
+        setIsProcessingPayment(false);
+        return;
+      }
+      const currentHostname = window.location.hostname; 
+      const currentPort = window.location.port;         
+      if (currentHostname === "localhost" || currentHostname === "127.0.0.1") {
+        redirectUrl = `http://${cleanUsername}.localhost${currentPort ? `:${currentPort}` : ''}`;
+      } else {
+        redirectUrl = `https://${cleanUsername}.${currentHostname}`;
+      }
+      payload.targetDomain = redirectUrl;
+      payload.customUsername = cleanUsername;
     } else {
-      redirectUrl = `https://${cleanUsername}.${currentHostname}`;
+      const cleanCustomDomain = formData.customDomain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
+      if (!cleanCustomDomain) {
+        alert("Please enter a valid custom domain.");
+        setIsProcessingPayment(false);
+        return;
+      }
+      redirectUrl = `https://${cleanCustomDomain}`;
+      payload.targetDomain = redirectUrl;
+      payload.customDomain = cleanCustomDomain;
     }
 
-    console.log("Saving Agent Setup Data & Redirecting to:", redirectUrl);
-    alert(`🚀 Workspace Provisioned Successfully!\nPlan: ${selectedPlan.name}\nRedirecting to: ${redirectUrl}`);
+    try {
+      /* ====================================================================
+         🌐 FUTURE BACKEND CONNECTION (আপনি যখন ব্যাকএন্ড যুক্ত করবেন তখন এটি অন করবেন)
+         ====================================================================
+         
+         // ১. প্রথমে ব্যাকএন্ডে এজেন্টের ইনফরমেশন সেভ করবেন এবং পেমেন্ট সেশন তৈরি করবেন (Stripe/SSLCommerz)
+         const response = await fetch('YOUR_BACKEND_API_URL/subscriptions/checkout', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(payload)
+         });
+         const result = await response.json();
+         
+         // ২. ব্যাকএন্ড থেকে আসা পেমেন্ট গেটওয়ে পেজের ইউআরএল-এ ইউজারকে পাঠিয়ে দিন
+         if (result.paymentUrl) {
+           window.location.href = result.paymentUrl; 
+           return; 
+           // (পেমেন্ট পেজে টাকা পে করার পর ব্যাকএন্ড তাকে সাকসেসফুলি `redirectUrl`-এ রিডাইরেক্ট করে দেবে)
+         }
+         
+         ==================================================================== */
 
-    // ৪. মোডাল ক্লোজ ও ফর্ম রিসেট
-    setIsModalOpen(false);
-    setFormData({ fullName: '', agencyName: '', whatsappNumber: '', customUsername: '' });
+      // 🔄আপাতত ব্যাকএন্ড ছাড়া কোড সচল রাখার জন্য ডামি পেমেন্ট গেটওয়ে সিমুলেশন (৩ সেকেন্ড ট্র্যাকিং)
+      console.log("SaaS Provisioning Payload prepared for API:", payload);
+      
+      setTimeout(() => {
+        alert(`💳 Payment Confirmed Successfully via Simulation!\nTotal Paid: ${selectedPlan.price}\n\nWorkspace active. Redirecting user to: ${redirectUrl}`);
+        
+        // মোডাল ক্লোজ ও ফর্ম রিসেট
+        setIsProcessingPayment(false);
+        setIsModalOpen(false);
+        setFormData({ fullName: '', agencyName: '', whatsappNumber: '', customUsername: '', customDomain: '' });
 
-    // ৫. এজেন্টের নতুন সাব-ডোমেইনে লাইভ রিডাইরেক্ট করা
-    window.location.href = redirectUrl;
+        // পেমেন্ট সফল হওয়ার পর ফাইনাল ডোমেইনে রিডাইরেক্ট করা হলো
+        window.location.href = redirectUrl;
+      }, 3000); // ৩ সেকেন্ডের ফেক পেমেন্ট গেটওয়ে ডিলে
+
+    } catch (error) {
+      console.error("API Integration Error:", error);
+      setIsProcessingPayment(false);
+    }
   };
 
   return (
@@ -172,7 +229,7 @@ const CompanyPricing = () => {
       {isModalOpen && selectedPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           {/* Backdrop Glass Blur */}
-          <div onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+          <div onClick={() => !isProcessingPayment && setIsModalOpen(false)} className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
 
           {/* Form Modal Container (SaaS Platinum UI) */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-6 md:p-8 space-y-6 relative z-10 shadow-2xl overflow-y-auto max-h-[90vh]">
@@ -188,104 +245,170 @@ const CompanyPricing = () => {
                 <p className="text-xs text-slate-400">You are subscribing to the <span className="text-blue-500 font-bold">{selectedPlan.name}</span></p>
               </div>
               <button 
+                disabled={isProcessingPayment}
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors"
+                className="p-1.5 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <X size={15} />
               </button>
             </div>
 
-            {/* Form Infrastructure */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              
-              {/* ১. ফুল নেম ফিল্ড */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                  <User size={11} /> Full Name
-                </label>
-                <input 
-                  type="text" 
-                  name="fullName"
-                  required
-                  placeholder="e.g. Marcus Aurelius"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                />
+            {/* 💳 পেমেন্ট গেটওয়েতে রিডাইরেক্ট লোডিং ইন্টারফেস */}
+            {isProcessingPayment ? (
+              <div className="py-12 flex flex-col items-center justify-center space-y-4 text-center animate-in zoom-in-95 duration-200">
+                <div className="relative flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full border-4 border-blue-500/10 border-t-blue-500 animate-spin" />
+                  <CreditCard size={22} className="absolute text-blue-400 animate-pulse" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-white uppercase tracking-wider">Connecting Secure Payment Gateway</h4>
+                  <p className="text-xs text-slate-400 max-w-xs">Please do not close or refresh this tab. Redirecting you to checkout to authorize {selectedPlan.price} payment...</p>
+                </div>
               </div>
-
-              {/* ২. এজেন্সির নাম ফিল্ড */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                  <Building size={11} /> Agency / Business Name
-                </label>
-                <input 
-                  type="text" 
-                  name="agencyName"
-                  required
-                  placeholder="e.g. Marcus Luxury Real Estate"
-                  value={formData.agencyName}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                />
-              </div>
-
-              {/* ৩. হোয়াটসঅ্যান্ড নাম্বার ফিল্ড */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                  <Phone size={11} /> WhatsApp Number (For Client Leads)
-                </label>
-                <input 
-                  type="tel" 
-                  name="whatsappNumber"
-                  required
-                  placeholder="e.g. +1234567890"
-                  value={formData.whatsappNumber}
-                  onChange={handleInputChange}
-                  className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                />
-              </div>
-
-              {/* ৪. কাস্টম ইউআরএল ইউজারনেম ফিল্ড (সাব-ডোমেইন রাউটার) */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                  <Globe size={11} /> Choose Your Custom URL Username
-                </label>
-                <div className="relative flex items-center bg-slate-950 border border-slate-800/80 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
+            ) : (
+              /* 📋 সাধারণ ইনফরমেশন ফর্ম */
+              <form onSubmit={handleSubmit} className="space-y-4">
+                
+                {/* ১. ফুল নেম ফিল্ড */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                    <User size={11} /> Full Name
+                  </label>
                   <input 
                     type="text" 
-                    name="customUsername"
+                    name="fullName"
                     required
-                    placeholder="marcus"
-                    value={formData.customUsername}
+                    placeholder="e.g. Marcus Aurelius"
+                    value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full bg-transparent px-4 py-3 text-xs text-blue-400 placeholder-slate-700 outline-none font-bold"
+                    className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
                   />
-                  <span className="absolute right-3 text-[10px] font-mono font-bold bg-slate-900 border border-slate-800/60 text-slate-400 px-3 py-1 rounded-md pointer-events-none select-none">
-                    .primeestates.com
-                  </span>
                 </div>
-                <p className="text-[10px] text-slate-500 font-medium">This will be your unique live web address for your customers.</p>
-              </div>
 
-              {/* অ্যাকশন বাটন প্যানেল */}
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)} 
-                  className="w-1/3 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors"
-                >
-                  Go Back
-                </button>
-                <button 
-                  type="submit"
-                  className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
-                >
-                  Confirm & Launch My Site <ArrowRight size={13} />
-                </button>
-              </div>
+                {/* ২. এজেন্সির নাম ফিল্ড */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                    <Building size={11} /> Agency / Business Name
+                  </label>
+                  <input 
+                    type="text" 
+                    name="agencyName"
+                    required
+                    placeholder="e.g. Marcus Luxury Real Estate"
+                    value={formData.agencyName}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
+                  />
+                </div>
 
-            </form>
+                {/* ৩. হোয়াটসঅ্যান্ড নাম্বার ফিল্ড */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                    <Phone size={11} /> WhatsApp Number (For Client Leads)
+                  </label>
+                  <input 
+                    type="tel" 
+                    name="whatsappNumber"
+                    required
+                    placeholder="e.g. +1234567890"
+                    value={formData.whatsappNumber}
+                    onChange={handleInputChange}
+                    className="w-full bg-slate-950 border border-slate-800/80 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
+                  />
+                </div>
+
+                {/* 🛠️ Domain Type Selector Tab */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                    <Globe size={11} /> Web Address Configuration
+                  </label>
+                  <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setDomainType('subdomain')}
+                      className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        domainType === 'subdomain' 
+                          ? 'bg-blue-600 text-white shadow-md' 
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Use Subdomain
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDomainType('custom')}
+                      className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        domainType === 'custom' 
+                          ? 'bg-blue-600 text-white shadow-md' 
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      Custom Domain
+                    </button>
+                  </div>
+                </div>
+
+                {/* ৪. ডাইনামিক ডোমেইন ইনপুট ফিল্ড */}
+                {domainType === 'subdomain' ? (
+                  <div className="space-y-1.5 animate-in fade-in duration-150">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                      <Globe size={11} /> Choose Your Custom URL Username
+                    </label>
+                    <div className="relative flex items-center bg-slate-950 border border-slate-800/80 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
+                      <input 
+                        type="text" 
+                        name="customUsername"
+                        required={domainType === 'subdomain'}
+                        placeholder="marcus"
+                        value={formData.customUsername}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent px-4 py-3 text-xs text-blue-400 placeholder-slate-700 outline-none font-bold"
+                      />
+                      <span className="absolute right-3 text-[10px] font-mono font-bold bg-slate-900 border border-slate-800/60 text-slate-400 px-3 py-1 rounded-md pointer-events-none select-none">
+                        .primeestates.com
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">This will be your unique live web address for your customers.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5 animate-in fade-in duration-150">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+                      <Link2 size={11} /> Enter Your Existing Custom Domain
+                    </label>
+                    <div className="relative flex items-center bg-slate-950 border border-slate-800/80 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
+                      <input 
+                        type="text" 
+                        name="customDomain"
+                        required={domainType === 'custom'}
+                        placeholder="e.g. www.youragency.com"
+                        value={formData.customDomain}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent px-4 py-3 text-xs text-indigo-400 placeholder-slate-700 outline-none font-bold"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-medium">Point your domain's DNS settings to our servers later to make it live.</p>
+                  </div>
+                )}
+
+                {/* অ্যাকশন বাটন প্যানেল */}
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsModalOpen(false)} 
+                    className="w-1/3 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors"
+                  >
+                    Go Back
+                  </button>
+                  <button 
+                    type="submit"
+                    className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    Proceed to Payment <ArrowRight size={13} />
+                  </button>
+                </div>
+
+              </form>
+            )}
           </div>
         </div>
       )}
