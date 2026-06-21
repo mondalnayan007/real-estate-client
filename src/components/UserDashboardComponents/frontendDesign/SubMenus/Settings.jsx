@@ -39,6 +39,10 @@ export default function Settings() {
     instagramUrl: '',
   });
 
+  // 🖼️ ইমেজ প্রিভিউ ইউআরএল ট্র্যাকিং স্টেট (ডিজাইন অপরিবর্তিত রাখার জন্য আলাদা রাখা হয়েছে)
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [favIconPreview, setFavIconPreview] = useState(null);
+
   // 🌐 ১. BACKEND API: ডাটাবেজ থেকে সেটিংস ডাটা তুলে আনার জন্য (GET Request)
   useEffect(() => {
     const fetchSettings = async () => {
@@ -96,11 +100,19 @@ export default function Settings() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 📁 ফাইল আপলোড হ্যান্ডলার (লোগো এবং ফেভআইকন এর জন্য)
+  // 📁 ফাইল আপলোড হ্যান্ডলার (লোগো এবং ফেভআইকন এর জন্য উইথ লাইভ প্রিভিউ)
   const handleFileChange = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
       setFormData((prev) => ({ ...prev, [fieldName]: file }));
+      
+      // অবজেক্ট ইউআরএল তৈরি করে প্রিভিউ স্টেটে সেট করা হচ্ছে
+      const previewUrl = URL.createObjectURL(file);
+      if (fieldName === 'logo') {
+        setLogoPreview(previewUrl);
+      } else if (fieldName === 'favIcon') {
+        setFavIconPreview(previewUrl);
+      }
     }
   };
 
@@ -120,8 +132,8 @@ export default function Settings() {
 
     try {
       // const response = await fetch('YOUR_BACKEND_API_URL/settings', {
-      //   method: 'POST', // বা আপনার রুট অনুযায়ী 'PUT'
-      //   body: dataPayload, // নোড জেসে multer দিয়ে এই বডি রিসিভ করবেন
+      //   method: 'POST', // বা আপনার রুট অনুযায়ী 'PUT'
+      //   body: dataPayload, // নোড জেসে multer দিয়ে এই বডি রিসিভ করবেন
       // });
       // const result = await response.json();
       
@@ -211,22 +223,35 @@ export default function Settings() {
             <textarea name="workingHours" value={formData.workingHours} onChange={handleChange} rows={2} className={inputStyle} required />
           </div>
 
-          {/* মিডিয়া আপলোডার নোড */}
+          {/* মিডিয়া আপলোডার নোড উইথ লাইভ প্রিভিউ */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
-              <div>
-                <label className={labelStyle}>Logo Asset *</label>
-                <p className="text-[10px] text-slate-500">Corporate image nodule</p>
+              <div className="flex items-center gap-3">
+                {/* যদি প্রিভিউ ইউআরএল থাকে তবে ইমেজ দেখাবে, না থাকলে আইকন */}
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo Preview" className="w-9 h-9 object-contain rounded bg-slate-950 p-1 border border-slate-800" />
+                ) : null}
+                <div>
+                  <label className={labelStyle}>Logo Asset *</label>
+                  <p className="text-[10px] text-slate-500">Corporate image nodule</p>
+                </div>
               </div>
               <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
                 <Upload size={14} />
                 <input type="file" onChange={(e) => handleFileChange(e, 'logo')} className="hidden" accept="image/*" />
               </label>
             </div>
+            
             <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
-              <div>
-                <label className={labelStyle}>Fav Icon *</label>
-                <p className="text-[10px] text-slate-500">Shortcut icon vector</p>
+              <div className="flex items-center gap-3">
+                {/* যদি প্রিভিউ ইউআরএল থাকে তবে ইমেজ দেখাবে, না থাকলে আইকন */}
+                {favIconPreview ? (
+                  <img src={favIconPreview} alt="FavIcon Preview" className="w-9 h-9 object-contain rounded bg-slate-950 p-1 border border-slate-800" />
+                ) : null}
+                <div>
+                  <label className={labelStyle}>Fav Icon *</label>
+                  <p className="text-[10px] text-slate-500">Shortcut icon vector</p>
+                </div>
               </div>
               <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
                 <Upload size={14} />
