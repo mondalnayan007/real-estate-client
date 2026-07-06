@@ -21,6 +21,8 @@ import SuperAdminDashboard from "../views/SuperAdminDashboard";
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
 // ==========================================
 const hostname = window.location.hostname;
+
+
 // লোকালহোস্ট এবং আপনার লাইভ মেইন ডোমেইনকে মেইন ডোমেইন ধরা হবে
 const isMainDomain = hostname === "localhost" || hostname === "primeestates.com";
 

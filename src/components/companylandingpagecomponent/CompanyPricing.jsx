@@ -6,6 +6,7 @@ const CompanyPricing = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [domainType, setDomainType] = useState('subdomain');
   
+  
   // পেমেন্ট প্রসেসিং স্টেট (সিমুলেশন ও ব্যাকএন্ড ইন্টিগ্রেশনের জন্য)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
@@ -57,7 +58,11 @@ const CompanyPricing = () => {
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+
   };
+  
+
 
   // 🚀 পেমেন্ট এবং ফাইনাল রিডাইরেকশন হ্যান্ডলার
   const handleSubmit = async (e) => {

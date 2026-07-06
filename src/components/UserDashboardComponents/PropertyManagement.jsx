@@ -16,6 +16,10 @@ export default function PropertyManagement({ properties, setProperties }) {
     videoLink: ''
   });
 
+  const hostname = window.location.hostname;
+const subdomain = hostname.split('.')[0];
+console.log(subdomain);
+
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const allowedAmenities = ['Lift', 'Generator', 'Parking', 'Intercom', '24/7 Security'];
@@ -42,6 +46,7 @@ export default function PropertyManagement({ properties, setProperties }) {
       Object.keys(newProp).forEach(key => {
         formData.append(key, newProp[key]);
       });
+      formData.append('domain',subdomain)
 
       formData.append('amenities', JSON.stringify(selectedAmenities));
 
