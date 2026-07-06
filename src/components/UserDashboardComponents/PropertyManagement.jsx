@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Plus, Trash2, Check, Image, Video, FileText } from 'lucide-react';
 
 export default function PropertyManagement({ properties, setProperties }) {
+  const hostname = window.location.hostname;
+  const subdomain = hostname.split('.')[0];
+  console.log(subdomain);
   const [newProp, setNewProp] = useState({
     title: '',
     price: '',
@@ -13,12 +16,12 @@ export default function PropertyManagement({ properties, setProperties }) {
     sqft: '',
     status: 'completed',
     description: '',
-    videoLink: ''
+    domain: subdomain
   });
 
-  const hostname = window.location.hostname;
-const subdomain = hostname.split('.')[0];
-console.log(subdomain);
+
+
+
 
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -41,12 +44,14 @@ console.log(subdomain);
 
     try {
       const formData = new FormData();
-      
+
       // টেক্সট ডাটা অ্যাপেন্ড
       Object.keys(newProp).forEach(key => {
         formData.append(key, newProp[key]);
       });
-      formData.append('domain',subdomain)
+
+      
+
 
       formData.append('amenities', JSON.stringify(selectedAmenities));
 
@@ -54,6 +59,8 @@ console.log(subdomain);
       selectedImages.forEach((image) => {
         formData.append('images', image);
       });
+
+
 
       // ==================================================================
       // আপনার ব্যাকএন্ড API কল (এখানে ইউআরএল বসাবেন)
@@ -64,7 +71,7 @@ console.log(subdomain);
       });
 
       if (!response.ok) throw new Error('Failed to create property');
-      
+
       // ব্যাকএন্ড (MongoDB) থেকে আসা রেসপন্স রিসিভ করা
       // যেখানে MongoDB-এর দেওয়া `_id` থাকবে
       const savedProperty = await response.json();
@@ -91,7 +98,7 @@ console.log(subdomain);
   const rotateStatus = async (id, current) => {
     const sequence = ['completed', 'under-construction', 'upcoming'];
     const next = sequence[(sequence.indexOf(current) + 1) % sequence.length];
-    
+
     try {
       // ব্যাকএন্ডে স্ট্যাটাস আপডেটের জন্য API কল (MongoDB _id ব্যবহার করে)
       /*
@@ -111,8 +118,8 @@ console.log(subdomain);
   };
 
   const deleteProperty = async (id) => {
-    if(!window.confirm("Are you sure?")) return;
-    
+    if (!window.confirm("Are you sure?")) return;
+
     try {
       // ব্যাকএন্ড থেকে ডিলিট করার API কল
       /*
@@ -138,29 +145,29 @@ console.log(subdomain);
 
       <form onSubmit={handleSubmit} className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4" encType="multipart/form-data">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input type="text" placeholder="Property Title" value={newProp.title} onChange={e => setNewProp({...newProp, title: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
-          <input type="text" placeholder="Price (e.g. $2,920,000)" value={newProp.price} onChange={e => setNewProp({...newProp, price: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
-          <input type="text" placeholder="Location" value={newProp.location} onChange={e => setNewProp({...newProp, location: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+          <input type="text" placeholder="Property Title" value={newProp.title} onChange={e => setNewProp({ ...newProp, title: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
+          <input type="text" placeholder="Price (e.g. $2,920,000)" value={newProp.price} onChange={e => setNewProp({ ...newProp, price: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
+          <input type="text" placeholder="Location" value={newProp.location} onChange={e => setNewProp({ ...newProp, location: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
 
-          <select value={newProp.category} onChange={e => setNewProp({...newProp, category: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300">
+          <select value={newProp.category} onChange={e => setNewProp({ ...newProp, category: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300">
             {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
           </select>
 
-          <input type="text" placeholder="Tag" value={newProp.tag} onChange={e => setNewProp({...newProp, tag: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+          <input type="text" placeholder="Tag" value={newProp.tag} onChange={e => setNewProp({ ...newProp, tag: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
 
-          <select value={newProp.status} onChange={e => setNewProp({...newProp, status: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300">
+          <select value={newProp.status} onChange={e => setNewProp({ ...newProp, status: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-300">
             <option value="completed">Completed</option>
             <option value="under-construction">Under Construction</option>
             <option value="upcoming">Upcoming</option>
           </select>
 
-          <input type="number" placeholder="Beds" value={newProp.beds} onChange={e => setNewProp({...newProp, beds: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
-          <input type="number" placeholder="Baths" value={newProp.baths} onChange={e => setNewProp({...newProp, baths: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
-          <input type="text" placeholder="Sqft" value={newProp.sqft} onChange={e => setNewProp({...newProp, sqft: e.target.value})} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+          <input type="number" placeholder="Beds" value={newProp.beds} onChange={e => setNewProp({ ...newProp, beds: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+          <input type="number" placeholder="Baths" value={newProp.baths} onChange={e => setNewProp({ ...newProp, baths: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+          <input type="text" placeholder="Sqft" value={newProp.sqft} onChange={e => setNewProp({ ...newProp, sqft: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
         </div>
 
         <div className="w-full">
-          <textarea placeholder="Detailed Description Structure..." value={newProp.description} onChange={e => setNewProp({...newProp, description: e.target.value})} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" rows="2" />
+          <textarea placeholder="Detailed Description Structure..." value={newProp.description} onChange={e => setNewProp({ ...newProp, description: e.target.value })} className="w-full px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" rows="2" />
         </div>
 
         <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-3">
@@ -175,7 +182,7 @@ console.log(subdomain);
             </div>
             <div>
               <label className="block text-[10px] text-slate-400 mb-1 uppercase">Video Tour Link</label>
-              <input type="text" placeholder="https://youtube.com/..." value={newProp.videoLink} onChange={e => setNewProp({...newProp, videoLink: e.target.value})} className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs" />
+              <input type="text" placeholder="https://youtube.com/..." value={newProp.videoLink} onChange={e => setNewProp({ ...newProp, videoLink: e.target.value })} className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs" />
             </div>
           </div>
         </div>

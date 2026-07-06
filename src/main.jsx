@@ -11,7 +11,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* ২. RouterProvider-কে AuthProvider দিয়ে র‍্যাপ করে দিন */}
+    
     <AuthProvider>
       <RouterProvider router={router} />
     </AuthProvider>
