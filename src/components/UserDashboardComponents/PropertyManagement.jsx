@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, Check, Image, Video, FileText } from 'lucide-react';
 
-export default function PropertyManagement({ properties, setProperties }) {
+export default function PropertyManagement() {
+
+  const [properties, setProperties] = useState([])
   const hostname = window.location.hostname;
   const subdomain = hostname.split('.')[0];
   console.log(subdomain);
@@ -19,6 +21,12 @@ export default function PropertyManagement({ properties, setProperties }) {
     domain: subdomain
   });
 
+
+  useEffect(()=>{
+       fetch(`http://localhost:4000/projects?domain=${subdomain}`)
+       .then(res =>res.json())
+       .then(data=>setProperties(data))
+  },[])
 
 
 
