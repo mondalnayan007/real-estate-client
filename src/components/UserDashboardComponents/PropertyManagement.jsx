@@ -218,7 +218,7 @@ export default function PropertyManagement() {
               <th className="p-4">Category / Tag</th>
               <th className="p-4">Location</th>
               <th className="p-4">Specs (B/B/Sqft)</th>
-              <th className="p-4 text-center">Status (Click to Switch)</th>
+              
               <th className="p-4 text-center">Action</th>
             </tr>
           </thead>
@@ -241,13 +241,12 @@ export default function PropertyManagement() {
                 <td className="p-4 text-slate-400 font-mono text-[11px]">
                   {p.beds}B / {p.baths}B / {p.sqft}
                 </td>
-                <td className="p-4 text-center">
+                <td className="p-4 text-center space-x-3">
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
-                  <button onClick={() => rotateStatus(p._id, p.status)} className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${p.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-amber-500/10 border-amber-500 text-amber-400'}`}>{p.status}</button>
-                </td>
-                <td className="p-4 text-center">
+                  <button onClick={() => rotateStatus(p._id, p.status)} className="bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 mr-1 hover:bg-green-600 hover:text-white cursor-pointer" >Update</button>
+                
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
-                  <button onClick={() => deleteProperty(p._id)} className="text-rose-400 hover:bg-rose-500/20 p-2 rounded-lg"><Trash2 size={13} /></button>
+                  <button onClick={() => deleteProperty(p._id)} className="text-rose-400 hover:bg-rose-500/20 p-2 rounded-lg cursor-pointer"><Trash2 size={13} /></button>
                 </td>
               </tr>
             ))}
