@@ -103,20 +103,19 @@ export default function PropertyManagement() {
     }
   };
 
-  const rotateStatus = async (id, current) => {
-    const sequence = ['completed', 'under-construction', 'upcoming'];
-    const next = sequence[(sequence.indexOf(current) + 1) % sequence.length];
+  const updateProperty = async (id, current) => {
+    
 
     try {
       // ব্যাকএন্ডে স্ট্যাটাস আপডেটের জন্য API কল (MongoDB _id ব্যবহার করে)
-      /*
-      const response = await fetch(`YOUR_BACKEND_SERVER_URL/api/properties/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: next })
-      });
-      if (!response.ok) throw new Error('Status update failed');
-      */
+     
+      // const response = await fetch(`http://localhost:4000/projects?domain=${subdomain}&id=${id}`, {
+      //   method: 'PATCH',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ status: next })
+      // });
+      // if (!response.ok) throw new Error('Status update failed');
+      
 
       // ফ্রন্টএন্ড স্টেট আপডেট (এখানে p._id ব্যবহার করা হয়েছে কারণ MongoDB তে আইডি _id হিসেবে থাকে)
       setProperties(properties.map(p => p._id === id ? { ...p, status: next } : p));
@@ -206,7 +205,7 @@ export default function PropertyManagement() {
           </div>
         </div>
 
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors"><Plus size={14} /> Add Property Listing</button>
+        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"><Plus size={14} /> Add Property Listing</button>
       </form>
 
       {/* Table List View */}
@@ -243,7 +242,7 @@ export default function PropertyManagement() {
                 </td>
                 <td className="p-4 text-center space-x-3">
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
-                  <button onClick={() => rotateStatus(p._id, p.status)} className="bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 mr-1 hover:bg-green-600 hover:text-white cursor-pointer" >Update</button>
+                  <button onClick={() => updateProperty(p._id, p.status)} className="bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 mr-1 hover:bg-green-600 hover:text-white cursor-pointer" >Update</button>
                 
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
                   <button onClick={() => deleteProperty(p._id)} className="text-rose-400 hover:bg-rose-500/20 p-2 rounded-lg cursor-pointer"><Trash2 size={13} /></button>
