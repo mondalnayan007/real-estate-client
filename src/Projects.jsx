@@ -33,11 +33,14 @@ export default function Projects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('All Properties');
 
+    const hostname = window.location.hostname;
+  const subdomain = hostname.split('.')[0];
+
   // প্রথম অবস্থায় শুধুমাত্র ৬টি কার্ড দেখানোর জন্য স্টেট
   const [visibleLimit, setVisibleLimit] = useState(6);
 
   useEffect(() => {
-    fetch('data.json')
+    fetch(`http://localhost:4000/projects?domain=${subdomain}`)
       .then(res => res.json())
       .then(data => setPremiumProjects(data))
       .catch(err => console.error("Error fetching data:", err));

@@ -109,12 +109,32 @@ export default function PropertyManagement() {
     setIsOpen(true);
   }
 
-  const updateProperty = async (id, current) => {
+  const updateProperty = async (e) => {
 
-
-
+e.preventDefault();
+    if (!newProp.title || !newProp.price) return;
 
     try {
+
+       const formData = new FormData();
+
+      // টেক্সট ডাটা অ্যাপেন্ড
+      Object.keys(newProp).forEach(key => {
+        formData.append(key, newProp[key]);
+      });
+
+      console.log(newProp);
+
+
+
+      formData.append('amenities', JSON.stringify(selectedAmenities));
+
+      // একাধিক ইমেজ ফাইল অ্যাপেন্ড
+      selectedImages.forEach((image) => {
+        formData.append('images', image);
+      });
+
+
       // ব্যাকএন্ডে স্ট্যাটাস আপডেটের জন্য API কল (MongoDB _id ব্যবহার করে)
 
       // const response = await fetch(`http://localhost:4000/projects?domain=${subdomain}&id=${id}`, {
