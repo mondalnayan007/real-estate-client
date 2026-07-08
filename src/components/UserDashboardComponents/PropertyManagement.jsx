@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, Check, Image, Video, FileText } from 'lucide-react';
+import { RxCross2 } from "react-icons/rx";
 
 export default function PropertyManagement() {
 
@@ -104,10 +105,14 @@ export default function PropertyManagement() {
     }
   };
 
+  const handleUpdate = () => {
+    setIsOpen(true);
+  }
+
   const updateProperty = async (id, current) => {
 
 
-    setIsOpen(true);
+
 
     try {
       // ব্যাকএন্ডে স্ট্যাটাস আপডেটের জন্য API কল (MongoDB _id ব্যবহার করে)
@@ -219,8 +224,18 @@ export default function PropertyManagement() {
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center">
-          <div className=" p-5 rounded">
-            <form onSubmit={handleSubmit} className="bg-slate-900 shadow-xl shadow-gray-300 p-6 rounded-2xl border border-slate-800 space-y-4" encType="multipart/form-data">
+          <div className=" p-8 rounded ">
+
+            <form onSubmit={updateProperty} className="bg-slate-900 shadow-md shadow-gray-300 p-6 rounded-2xl border border-slate-800 space-y-4" encType="multipart/form-data">
+
+              <div className='flex items-center justify-between'>
+                <div>
+
+                </div>
+                <button className='text-2xl border hover:border-blue-500' onClick={() => setIsOpen(false)}>
+               <RxCross2 />
+              </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input type="text" placeholder="Property Title" value={newProp.title} onChange={e => setNewProp({ ...newProp, title: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
                 <input type="text" placeholder="Price (e.g. $2,920,000)" value={newProp.price} onChange={e => setNewProp({ ...newProp, price: e.target.value })} className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" required />
@@ -275,17 +290,15 @@ export default function PropertyManagement() {
                 </div>
               </div>
 
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"><Plus size={14} /> Add Property Listing</button>
+              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer"> Update Property</button>
             </form>
 
-            <button onClick={() => setIsOpen(false)}>
-              Close
-            </button>
+
           </div>
         </div>
       )}
 
-     
+
 
 
 
@@ -327,7 +340,7 @@ export default function PropertyManagement() {
                 </td>
                 <td className="p-4 text-center space-x-3">
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
-                  <button onClick={() => updateProperty(p._id, p.status)} className="bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 mr-1 hover:bg-green-600 hover:text-white cursor-pointer" >Update</button>
+                  <button onClick={handleUpdate} className="bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 mr-1 hover:bg-green-600 hover:text-white cursor-pointer" >Update</button>
 
                   {/* MongoDB এর আইডি পাস করা হচ্ছে */}
                   <button onClick={() => deleteProperty(p._id)} className="text-rose-400 hover:bg-rose-500/20 p-2 rounded-lg cursor-pointer"><Trash2 size={13} /></button>
