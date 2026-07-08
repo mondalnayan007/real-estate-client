@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 .active {
   /* পিওর আইস-ব্লু লাক্সারি টেক্সট কালার এবং শার্পনেস */
