@@ -69,10 +69,7 @@ const agentDemoRouter = createBrowserRouter([
       },
       {
         path: '/project-details/:id',
-        loader: async ({params}) => {
-          const res = await fetch(`http://localhost:4000/projects?domain=${subdomain}&id=${params._id}`);
-          return res.ok ? res.json() : [];
-        },
+        
         Component: ProjectDetails,
       },
       {
