@@ -8,11 +8,7 @@ import About from "../views/About";
 import Blog from "../views/Blog";
 import ProjectDetails from "../views/ProjectDetails";
 import UserSignup from "../views/UserSignup";
-import UserLogin from "../views/UserLogin"
 import AdminLogin from "../views/AdminLogin"
-import Dashboard from "../views/AgentDashboard";
-import SellerDashboard from "../views/SellerDashboard";
-import SelectPlanPage from "../views/SelectPlanPage";
 import Register from "../views/Register";
 import AgentDashboard from "../views/AgentDashboard";
 import SuperAdminDashboard from "../views/SuperAdminDashboard";
@@ -83,14 +79,6 @@ const agentDemoRouter = createBrowserRouter([
       {
         path: '/blog',
         Component: Blog
-      },
-      {
-        path: '/signup',
-        Component: UserSignup
-      },
-      {
-        path: '/login',
-        Component: UserLogin
       }
     ]
   },
@@ -101,10 +89,6 @@ const agentDemoRouter = createBrowserRouter([
   {
     path: '/admin/dashboard',
     Component: AgentDashboard
-  },
-  {
-    path: '/admin/seller-dashboard',
-    Component: SellerDashboard
   }
 ]);
 
