@@ -21,6 +21,7 @@ import SuperAdminDashboard from "../views/SuperAdminDashboard";
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
 // ==========================================
 const hostname = window.location.hostname;
+const subdomain = hostname.split('.')[0];
 
 
 // লোকালহোস্ট এবং আপনার লাইভ মেইন ডোমেইনকে মেইন ডোমেইন ধরা হবে
@@ -68,8 +69,8 @@ const agentDemoRouter = createBrowserRouter([
       },
       {
         path: '/project-details/:id',
-        loader: async () => {
-          const res = await fetch('/data.json');
+        loader: async ({params}) => {
+          const res = await fetch(`http://localhost:4000/projects?domain=${subdomain}&id=${params._id}`);
           return res.ok ? res.json() : [];
         },
         Component: ProjectDetails,

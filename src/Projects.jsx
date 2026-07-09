@@ -134,7 +134,7 @@ export default function Projects() {
             
 
               {displayedProjects.map((item) => (
-                <Link to={`/project-details/${item.id}`}>
+                <Link to={`/project-details/${item._id}`}>
                 <motion.div
                   key={item.id}
                   layout
