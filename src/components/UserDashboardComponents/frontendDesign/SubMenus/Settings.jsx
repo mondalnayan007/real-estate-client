@@ -3,7 +3,14 @@ import { Save, Upload } from 'lucide-react';
 
 
 // ফর্মে রি-ইউজেবল ইনিশিয়াল স্টেট ডেফিনিশন
-const initialFormState = {
+
+
+export default function Settings() {
+  const hostname = window.location.hostname;
+const subdomain = hostname.split('.')[0];
+
+
+  const initialFormState = {
   cmsTitle: '',
   cmsUrlAlias: '',
   email: '',
@@ -19,10 +26,9 @@ const initialFormState = {
   linkedinUrl: '',
   pinterestUrl: '',
   instagramUrl: '',
+  domain:subdomain
   
 };
-
-export default function Settings() {
   // 📦 ব্যাকএন্ড ফ্রেন্ডলি স্টেট অবজেক্ট (ডিফল্ট ব্ল্যাঙ্ক রাখা হয়েছে)
   const [formData, setFormData] = useState(initialFormState);
 
