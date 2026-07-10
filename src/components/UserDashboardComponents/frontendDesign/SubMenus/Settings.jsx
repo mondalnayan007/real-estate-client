@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Upload } from 'lucide-react';
+import axios from 'axios';
+
 
 export default function Settings() {
   // 📦 ব্যাকএন্ড ফ্রেন্ডলি স্টেট অবজেক্ট
@@ -14,17 +16,6 @@ export default function Settings() {
     logo: null,
     favIcon: null,
     address: '',
-    googleAnalytics: '',
-    primaryColor: '#ff685c',
-    menuBgColor: '#ffffff',
-    buttonHoverColor: '#f04133',
-    textColor: '#232323',
-    textSecondaryColor: '#383838',
-    footerBgColor: '#383838',
-    footerTextColor: '#8d8d8d',
-    copyrightBgColor: '#262626',
-    copyrightTextColor: '#8d8d8d',
-    borderRadius: '0',
     mobileNo: '',
     email: '',
     fax: '',
@@ -33,13 +24,13 @@ export default function Settings() {
     facebookUrl: '',
     twitterUrl: '',
     youtubeUrl: '',
-    googlePlus: '',
     linkedinUrl: '',
     pinterestUrl: '',
     instagramUrl: '',
+    googleAnalytics: '', // ইনপুটে থাকা ফিল্ডটি স্টেটে যোগ করা হলো
   });
 
-  // 🖼️ ইমেজ প্রিভিউ ইউআরএল ট্র্যাকিং স্টেট (ডিজাইন অপরিবর্তিত রাখার জন্য আলাদা রাখা হয়েছে)
+  // 🖼️ ইমেজ প্রিভিউ ইউআরএল ট্র্যাকিং স্টেট (ডিজাইন অপরিবর্তিত রাখার জন্য আলাদা রাখা হয়েছে)
   const [logoPreview, setLogoPreview] = useState(null);
   const [favIconPreview, setFavIconPreview] = useState(null);
 
@@ -47,9 +38,18 @@ export default function Settings() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        // const response = await fetch('YOUR_BACKEND_API_URL/settings');
-        // const data = await response.json();
-        // setFormData(data);
+        // 🛠️ আপনার আসল API কল করার জন্য নিচের কমেন্টগুলো খুলে দিন:
+        // const response = await axios.get('YOUR_BACKEND_GET_API_URL');
+        // if (response.data) {
+        //   setFormData({
+        //     ...response.data,
+        //     logo: null,    // ফাইল ইনপুট রিসেট রাখার জন্য
+        //     favIcon: null  // ফাইল ইনপুট রিসেট রাখার জন্য
+        //   });
+        //   // ব্যাকএন্ড থেকে যদি আগে আপলোড করা ইমেজের লিংক আসে, তা প্রিভিউতে দেখানোর জন্য:
+        //   if (response.data.logo) setLogoPreview(response.data.logo);
+        //   if (response.data.favIcon) setFavIconPreview(response.data.favIcon);
+        // }
 
         // প্রজেক্ট জেনারেট করার জন্য ডামি ডেটা সেট করে রাখলাম, আপনার এপিআই বসালে এটি কেটে দেবেন
         setFormData({
@@ -63,17 +63,6 @@ export default function Settings() {
           logo: null,
           favIcon: null,
           address: '742 Evergreen Terrace, New York',
-          googleAnalytics: '',
-          primaryColor: '#e11d48', // rose-600
-          menuBgColor: '#0f172a',
-          buttonHoverColor: '#f43f5e',
-          textColor: '#ffffff',
-          textSecondaryColor: '#94a3b8',
-          footerBgColor: '#0f172a',
-          footerTextColor: '#94a3b8',
-          copyrightBgColor: '#020617',
-          copyrightTextColor: '#64748b',
-          borderRadius: '12',
           mobileNo: '+1-555-0199',
           email: 'broker@premiumrealestate.com',
           fax: '+1-555-0100',
@@ -82,10 +71,10 @@ export default function Settings() {
           facebookUrl: 'https://facebook.com',
           twitterUrl: 'https://twitter.com',
           youtubeUrl: 'https://youtube.com',
-          googlePlus: '',
           linkedinUrl: 'https://linkedin.com',
           pinterestUrl: '',
           instagramUrl: 'https://instagram.com',
+          googleAnalytics: '',
         });
       } catch (error) {
         console.error("Error loading settings from backend:", error);
@@ -123,22 +112,28 @@ export default function Settings() {
     // ইমেজের ফাইল অবজেক্ট সেফলি পাঠানোর জন্য FormData ব্যবহার করা হলো
     const dataPayload = new FormData();
     
-    // অবজেক্ট লুপ করে সব টেক্সট ফিল্ড FormData-তে পুশ করা হচ্ছে
+    // অবজেক্ট লুপ করে সব টেক্সট ফিল্ড এবং ফাইল FormData-তে পুশ করা হচ্ছে
     Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
+      if (formData[key] !== null && formData[key] !== undefined) {
         dataPayload.append(key, formData[key]);
       }
     });
 
     try {
-      // const response = await fetch('YOUR_BACKEND_API_URL/settings', {
-      //   method: 'POST', // বা আপনার রুট অনুযায়ী 'PUT'
-      //   body: dataPayload, // নোড জেসে multer দিয়ে এই বডি রিসিভ করবেন
-      // });
-      // const result = await response.json();
+      // 🛠️ আপনার ব্যাকএন্ড রাউটের URL এখানে বসাবেন
+      const response = await axios({
+        method: 'POST', // অথবা আপনার রুট অনুযায়ী 'PUT'
+        url: 'YOUR_BACKEND_POST_API_URL',
+        data: dataPayload,
+        headers: {
+          'Content-Type': 'multipart/form-data', // ফাইল পাঠানোর জন্য এটি আবশ্যক
+        },
+      });
       
-      console.log('Successfully saved to backend payload:', formData);
-      alert('Global configuration successfully saved to the backend database!');
+      if (response.status === 200 || response.status === 201) {
+        console.log('Successfully saved to backend payload:', response.data);
+        alert('Global configuration successfully saved to the backend database!');
+      }
     } catch (error) {
       console.error("Error saving config to backend:", error);
       alert('Failed to synchronise configuration.');
@@ -181,40 +176,9 @@ export default function Settings() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* রেডিয়াল/টগল বাটন গ্রুপ */}
-            <div>
-              <label className={labelStyle}>Cms Frontend *</label>
-              <div className="flex gap-4 mt-2">
-                {['Enabled', 'Disabled'].map((status) => (
-                  <label key={status} className="flex items-center gap-2 text-xs text-white cursor-pointer">
-                    <input type="radio" name="cmsFrontend" value={status} checked={formData.cmsFrontend === status} onChange={handleChange} className="accent-rose-500" /> {status}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className={labelStyle}>Online Admission *</label>
-              <div className="flex gap-4 mt-2">
-                {['Enabled', 'Disabled'].map((status) => (
-                  <label key={status} className="flex items-center gap-2 text-xs text-white cursor-pointer">
-                    <input type="radio" name="onlineAdmission" value={status} checked={formData.onlineAdmission === status} onChange={handleChange} className="accent-rose-500" /> {status}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelStyle}>Receive Email To *</label>
               <input type="email" name="receiveEmailTo" value={formData.receiveEmailTo} onChange={handleChange} className={inputStyle} required />
-            </div>
-            <div>
-              <label className={labelStyle}>Captcha Status *</label>
-              <select name="captchaStatus" value={formData.captchaStatus} onChange={handleChange} className={`${inputStyle} appearance-none`}>
-                <option value="Enable">Enable</option>
-                <option value="Disable">Disable</option>
-              </select>
             </div>
           </div>
 
@@ -267,60 +231,11 @@ export default function Settings() {
 
           <div>
             <label className={labelStyle}>Google Analytics</label>
-            <textarea name="googleAnalytics" value={formData.googleAnalytics} onChange={handleChange} placeholder="Paste your tracker script tags here..." rows={2} className={inputStyle} />
+            <textarea name="googleAnalytics" value={formData.googleAnalytics || ''} onChange={handleChange} placeholder="Paste your tracker script tags here..." rows={2} className={inputStyle} />
           </div>
         </div>
 
         {/* কলাম ২: থিম অপশন ও কন্টাক্ট নোড (Screenshot 2) */}
-        <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
-            <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">🎨 Custom Theme Options</h3>
-            
-            {/* ডাইনামিক কালার ম্যাপিং লুপ */}
-            {[
-              { label: 'Primary Color *', name: 'primaryColor' },
-              { label: 'Menu BG Color *', name: 'menuBgColor' },
-              { label: 'Button Hover Color *', name: 'buttonHoverColor' },
-              { label: 'Text Color *', name: 'textColor' },
-              { label: 'Footer BG Color *', name: 'footerBgColor' },
-            ].map((colorField) => (
-              <div key={colorField.name} className="flex items-center justify-between gap-4 bg-slate-950/40 p-2 rounded-xl border border-slate-800/40">
-                <label className="text-[11px] font-medium text-slate-300">{colorField.label}</label>
-                <div className="flex items-center gap-2">
-                  <input type="text" name={colorField.name} value={formData[colorField.name]} onChange={handleChange} className="bg-transparent text-right text-xs text-slate-400 focus:outline-none w-20 font-mono" />
-                  <input type="color" name={colorField.name} value={formData[colorField.name]} onChange={handleChange} className="w-6 h-6 rounded-md cursor-pointer border-0 bg-transparent" />
-                </div>
-              </div>
-            ))}
-
-            <div>
-              <label className={labelStyle}>Border Radius *</label>
-              <input type="number" name="borderRadius" value={formData.borderRadius} onChange={handleChange} className={inputStyle} required />
-            </div>
-          </div>
-
-          {/* কন্টাক্ট সাব-মডিউল */}
-          <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
-            <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">📞 Communication Nodes</h3>
-            <div>
-              <label className={labelStyle}>Mobile No *</label>
-              <input type="text" name="mobileNo" value={formData.mobileNo} onChange={handleChange} className={inputStyle} required />
-            </div>
-            <div>
-              <label className={labelStyle}>Email *</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputStyle} required />
-            </div>
-            <div>
-              <label className={labelStyle}>Fax *</label>
-              <input type="text" name="fax" value={formData.fax} onChange={handleChange} className={inputStyle} required />
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* রো ৩: ফুটার ডেসক্রিপশন এবং সোশ্যাল ডিরেক্টরি (Screenshot 2 & 3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
           <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">📝 Typography Typography</h3>
           <div>
@@ -333,6 +248,11 @@ export default function Settings() {
           </div>
         </div>
 
+      </div>
+
+      {/* রো ৩: ফুটার ডেসক্রিপশন এবং সোশ্যাল ডিরেক্টরি (Screenshot 2 & 3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         {/* সোশ্যাল ডিরেক্টরি ইনপুটস */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
           <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">🔗 Social Graph Endpoints</h3>
@@ -349,10 +269,7 @@ export default function Settings() {
               <label className={labelStyle}>Youtube Url</label>
               <input type="url" name="youtubeUrl" value={formData.youtubeUrl} onChange={handleChange} className={inputStyle} />
             </div>
-            <div>
-              <label className={labelStyle}>Google Plus</label>
-              <input type="url" name="googlePlus" value={formData.googlePlus} onChange={handleChange} className={inputStyle} />
-            </div>
+           
             <div>
               <label className={labelStyle}>Linkedin Url</label>
               <input type="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} className={inputStyle} />
