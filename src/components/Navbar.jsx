@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Home, Menu, X, LogOut, LayoutGrid } from 'lucide-react';
 import { NavLink } from 'react-router'; // আপনার ইমপোর্ট অনুযায়ী রাখা হয়েছে
+import { SettingsContext } from '../context/SettingsContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { settings } = useContext(SettingsContext);
+  console.log(settings);
 
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
