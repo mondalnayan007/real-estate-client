@@ -6,7 +6,7 @@ import { Save, Upload } from 'lucide-react';
 const initialFormState = {
   cmsTitle: '',
   cmsUrlAlias: '',
-  receiveEmailTo: '',
+  email: '',
   workingHours: '',
   logo: null,
   favIcon: null,
@@ -149,8 +149,8 @@ export default function Settings() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={labelStyle}>Receive Email To *</label>
-              <input type="email" name="receiveEmailTo" value={formData.receiveEmailTo} onChange={handleChange} placeholder="e.g. info@yourdomain.com" className={inputStyle} required />
+              <label className={labelStyle}> Email *</label>
+              <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="e.g. info@yourdomain.com" className={inputStyle} required />
             </div>
           </div>
 
