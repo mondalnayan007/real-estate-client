@@ -60,7 +60,14 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center">
           
           {/* Brand Logo */}
-          <div 
+          {
+            settings ? 
+            <div className='flex gap-2 text-white'>
+              <img className='h-8 w-10' src={settings.logo} alt="" /> 
+              <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
+            </div>
+            : 
+            <div 
             className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
               isScrolled ? 'text-blue-600' : 'text-white'
             }`} 
@@ -69,6 +76,7 @@ export default function Navbar() {
             <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-blue-400'}`} />
             <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
           </div>
+          }
           
           {/* Navigation Links (Desktop) */}
           <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase ${isScrolled ? 'text-gray-700' : 'text-white/90'}`}>
