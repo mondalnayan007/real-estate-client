@@ -11,8 +11,8 @@ const subdomain = hostname.split('.')[0];
 
 
   const initialFormState = {
-  cmsTitle: '',
-  cmsUrlAlias: '',
+  brandName: '',
+  title: '',
   email: '',
   workingHours: '',
   logo: null,
@@ -144,12 +144,12 @@ const subdomain = hostname.split('.')[0];
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={labelStyle}>Cms Title *</label>
-              <input type="text" name="cmsTitle" value={formData.cmsTitle} onChange={handleChange} placeholder="e.g. Premium Real Estate Engine" className={inputStyle} required />
+              <label className={labelStyle}>Brand Name</label>
+              <input type="text" name="brandName" value={formData.brandName} onChange={handleChange} placeholder="e.g. Premium Real Estate Engine" className={inputStyle} required />
             </div>
             <div>
-              <label className={labelStyle}>Cms Url Alias *</label>
-              <input type="text" name="cmsUrlAlias" value={formData.cmsUrlAlias} onChange={handleChange} placeholder="e.g. premium-estate" className={inputStyle} required />
+              <label className={labelStyle}>Title</label>
+              <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="e.g. premium-estate" className={inputStyle} required />
             </div>
           </div>
 

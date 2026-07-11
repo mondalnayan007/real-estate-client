@@ -64,7 +64,7 @@ export default function Navbar() {
             settings ? 
             <div className='flex gap-2 text-white'>
               <img className='h-8 w-10' src={settings.logo} alt="" /> 
-              <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
+              <span className="font-serif font-normal italic tracking-wide">{settings.brandName}</span>
             </div>
             : 
             <div 
