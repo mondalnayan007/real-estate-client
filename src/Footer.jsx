@@ -44,7 +44,11 @@ export default function Footer() {
             <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
           </div>
           }
-          <p className="text-sm">{settings.footerAboutText}</p>
+          {
+            settings? <p className="text-sm">{footerAboutText}</p>
+            :
+            <p className="text-sm">This is PrimeEstate . A modern and premium properties supplier real estate corporation</p>
+          }
         </div>
         <div>
           <h4 className="text-white font-semibold mb-4">Quick Links</h4>
