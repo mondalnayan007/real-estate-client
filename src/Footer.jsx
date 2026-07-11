@@ -8,8 +8,9 @@ import { useNavigate } from 'react-router';
 export default function Footer() {
 
     const { settings } = useContext(SettingsContext);
-    const {address,brandName,copyrightText,domain,email,facebookUrl,favIcon,footerAboutText,instagramUrl,linkedinUrl,logo,pinterestUrl,title,twitterUrl,workingHours,youtubeUrl}= settings
      const [isScrolled, setIsScrolled] = useState(false);
+     const {address,brandName,copyrightText,domain,email,facebookUrl,favIcon,footerAboutText,instagramUrl,linkedinUrl,logo,pinterestUrl,title,twitterUrl,workingHours,youtubeUrl
+}= settings || {}
 
     const navigate = useNavigate();
 
@@ -55,21 +56,46 @@ export default function Footer() {
         </div>
         <div>
           <h4 className="text-white font-semibold mb-4">Contact Info</h4>
-          <p className="text-sm mb-2">{address}</p>
-          <p className="text-sm">{email}</p>
+          {
+            settings? <p className="text-sm mb-2">{address}</p> 
+            :
+            <p className="text-sm mb-2">123 Luxury Way, Suite 100<br/>Beverly Hills, CA 90210</p>
+          }
+          {
+            settings?<p className="text-sm">{email}</p>
+            :
+            <p className="text-sm">support@primeestates.com</p>
+          }
         </div>
         <div>
           <h4 className="text-white font-semibold mb-4">Follow Us</h4>
           <div className="flex gap-4">
-            <a href={facebookUrl} className="hover:text-white transition"><FaFacebook size={20}/></a>
-            <a href={twitterUrl} className="hover:text-white transition"><FaTwitter size={20}/></a>
-            <a href="#" className="hover:text-white transition"><FaInstagram size={20}/></a>
-            <a href={linkedinUrl} className="hover:text-white transition"><FaLinkedin size={20}/></a>
+            {
+              settings? <a href={facebookUrl} className="hover:text-white transition"><FaFacebook size={20}/></a>
+              :
+              <a href="#" className="hover:text-white transition"><FaFacebook size={20}/></a>
+            }
+            {
+              settings? <a href={twitterUrl} className="hover:text-white transition"><FaTwitter size={20}/></a>
+              :
+              <a href="#" className="hover:text-white transition"><FaTwitter size={20}/></a>
+            }
+            {
+              settings? <a href={instagramUrl} className="hover:text-white transition"><FaInstagram size={20}/></a>
+              :
+              <a href="#" className="hover:text-white transition"><FaInstagram size={20}/></a>
+            }
+            {
+              settings? <a href={linkedinUrl} className="hover:text-white transition"><FaLinkedin size={20}/></a>
+              :
+              <a href="#" className="hover:text-white transition"><FaLinkedin size={20}/></a>
+            }
+            
           </div>
         </div>
       </div>
       <div className="max-w-7xl mx-auto border-t border-gray-800 pt-6 text-center text-xs">
-        <p>&copy; {new Date().getFullYear()} {brandName}. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} PrimeEstates. All rights reserved.</p>
       </div>
     </footer>
   );
