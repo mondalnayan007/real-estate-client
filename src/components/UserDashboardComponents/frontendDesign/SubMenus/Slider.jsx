@@ -10,11 +10,8 @@ export default function Slider() {
   // 📝 ফর্ম স্টেট (Screenshot 2026-06-19 021032.png এর সব ফিল্ড)
   const initialFormState = {
     id: null,
+    headerTitle:'',
     title: '',
-    buttonText1: '',
-    buttonUrl1: '',
-    buttonText2: '',
-    buttonUrl2: '',
     description: '',
     position: 'Left',
     photo: null,
@@ -86,11 +83,8 @@ export default function Slider() {
 
     // যেহেতু ইমেজ আপলোড হবে, তাই FormData ব্যবহার করা ব্যাকএন্ডের জন্য বেস্ট প্র্যাকটিস
     const payload = new FormData();
+    payload.append('headerTitle', formData.headerTitle);
     payload.append('title', formData.title);
-    payload.append('buttonText1', formData.buttonText1);
-    payload.append('buttonUrl1', formData.buttonUrl1);
-    payload.append('buttonText2', formData.buttonText2);
-    payload.append('buttonUrl2', formData.buttonUrl2);
     payload.append('description', formData.description);
     payload.append('position', formData.position);
     if (formData.photo) payload.append('photo', formData.photo); // ফাইল অবজেক্ট
@@ -178,10 +172,7 @@ export default function Slider() {
                       <th className="px-6 py-3.5 w-16">Sl</th>
                       <th className="px-6 py-3.5 w-32">Photo</th>
                       <th className="px-6 py-3.5">Title</th>
-                      <th className="px-6 py-3.5">Button Text 1</th>
-                      <th className="px-6 py-3.5">Button Url 1</th>
-                      <th className="px-6 py-3.5">Button Text 2</th>
-                      <th className="px-6 py-3.5">Button Url 2</th>
+                      <th className="px-6 py-3.5">HeaderTitle</th>
                       <th className="px-6 py-3.5 w-24 text-center">Position</th>
                       <th className="px-6 py-3.5 w-24 text-center">Action</th>
                     </tr>
@@ -199,9 +190,8 @@ export default function Slider() {
                         </td>
                         <td className="px-6 py-4 font-bold text-white max-w-xs truncate">{item.title}</td>
                         <td className="px-6 py-4 text-slate-400">{item.buttonText1 || '-'}</td>
-                        <td className="px-6 py-4 font-mono text-slate-500">{item.buttonUrl1 || '-'}</td>
-                        <td className="px-6 py-4 text-slate-400">{item.buttonText2 || '-'}</td>
-                        <td className="px-6 py-4 font-mono text-slate-500">{item.buttonUrl2 || '-'}</td>
+                        
+                        
                         <td className="px-6 py-4 text-center text-slate-400"><span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[10px] font-mono">{item.position}</span></td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex gap-2 justify-center">
@@ -228,41 +218,21 @@ export default function Slider() {
             </h3>
           </div>
 
+          {/* headerTitle */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            <label className="text-xs font-bold text-slate-400 md:text-right">HeaderTitle</label>
+            <div className="md:col-span-3">
+              <input type="text" name="headerTitle" required value={formData.headerTitle} onChange={handleInputChange} placeholder="e.g., Ultra Modern Smart Apartments" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
+            </div>
+          </div>
           {/* Title */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
             <label className="text-xs font-bold text-slate-400 md:text-right">Title</label>
             <div className="md:col-span-3">
-              <input type="text" name="title" value={formData.title} onChange={handleInputChange} placeholder="e.g., Ultra Modern Smart Apartments" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
+              <input type="text" name="title" required value={formData.title} onChange={handleInputChange} placeholder="e.g., Ultra Modern Smart Apartments" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
             </div>
           </div>
 
-          {/* Button Group 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Button Text 1 *</label>
-            <div className="md:col-span-3">
-              <input type="text" name="buttonText1" value={formData.buttonText1} onChange={handleInputChange} placeholder="e.g., View Catalog" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Button Url 1 *</label>
-            <div className="md:col-span-3">
-              <input type="text" name="buttonUrl1" value={formData.buttonUrl1} onChange={handleInputChange} placeholder="#" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
-            </div>
-          </div>
-
-          {/* Button Group 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Button Text 2 *</label>
-            <div className="md:col-span-3">
-              <input type="text" name="buttonText2" value={formData.buttonText2} onChange={handleInputChange} placeholder="e.g., Speak to Agent" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Button Url 2 *</label>
-            <div className="md:col-span-3">
-              <input type="text" name="buttonUrl2" value={formData.buttonUrl2} onChange={handleInputChange} placeholder="#" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
-            </div>
-          </div>
 
           {/* Description */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
