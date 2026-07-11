@@ -31,7 +31,7 @@ console.log(subdomain);
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        const response = await fetch(API_BASE_URL);
+        const response = await fetch(`http://localhost:4000/slider?domain=${subdomain}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -40,12 +40,8 @@ console.log(subdomain);
       } catch (error) {
         console.error("Error fetching sliders (Using Mock Data fallback):", error);
         
-        // ব্যাকএন্ড এপিআই কানেক্ট না থাকলে মক ডাটা ফলব্যাক হিসেবে থাকবে
-        const mockData = [
-          { id: 1, photoPreview: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=150', headerTitle: 'Exclusive Living', title: 'Find Your Dream Luxury Penthouse', position: 'Left', description: 'Premium apartments available.' },
-          { id: 2, photoPreview: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=150', headerTitle: 'Ocean Front', title: 'Modern Beachfront Villas Available', position: 'Left', description: 'Exclusive ocean view estates.' }
-        ];
-        setMenuItems(mockData);
+       
+       
       }
     };
     fetchSliders();
@@ -77,27 +73,27 @@ console.log(subdomain);
   };
 
   // ❌ ২. BACKEND API: স্লাইডার ডিলিট (DELETE Request)
-  const handleDeleteClick = async (id) => {
-    if (window.confirm("Are you sure you want to delete this slider?")) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/${id}`, {
-          method: 'DELETE',
-        });
+  // const handleDeleteClick = async (id) => {
+  //   if (window.confirm("Are you sure you want to delete this slider?")) {
+  //     try {
+  //       const response = await fetch(`${API_BASE_URL}/${id}`, {
+  //         method: 'DELETE',
+  //       });
 
-        if (response.ok) {
-          setMenuItems(prev => prev.filter(item => item.id !== id));
-          alert('Slider asset deleted successfully.');
-        } else {
-          throw new Error('Failed to delete');
-        }
-      } catch (error) {
-        console.error("Error deleting slider:", error);
-        // লোকাল স্টেট থেকে রিমুভ (যদি ব্যাকএন্ড টেস্ট করার সময় কানেক্টেড না থাকে)
-        setMenuItems(prev => prev.filter(item => item.id !== id));
-        alert('Slider deleted locally.');
-      }
-    }
-  };
+  //       if (response.ok) {
+  //         setMenuItems(prev => prev.filter(item => item.id !== id));
+  //         alert('Slider asset deleted successfully.');
+  //       } else {
+  //         throw new Error('Failed to delete');
+  //       }
+  //     } catch (error) {
+  //       console.error("Error deleting slider:", error);
+  //       // লোকাল স্টেট থেকে রিমুভ (যদি ব্যাকএন্ড টেস্ট করার সময় কানেক্টেড না থাকে)
+  //       setMenuItems(prev => prev.filter(item => item.id !== id));
+  //       alert('Slider deleted locally.');
+  //     }
+  //   }
+  // };
 
   // 🚀 ৩. BACKEND API: ফর্ম সাবমিট (POST / PUT Request)
   const handleFormSubmit = async (e) => {
@@ -232,8 +228,8 @@ console.log(subdomain);
                       <tr key={item.id} className="hover:bg-slate-950/20 transition-colors">
                         <td className="px-6 py-4 text-slate-500 font-mono">{index + 1}</td>
                         <td className="px-6 py-4">
-                          {item.photoPreview ? (
-                            <img src={item.photoPreview} alt="slider" className="w-20 h-11 object-cover rounded-lg border border-slate-800 shadow" />
+                          {item.photo ? (
+                            <img src={item.photo} alt="slider" className="w-20 h-11 object-cover rounded-lg border border-slate-800 shadow" />
                           ) : (
                             <div className="w-20 h-11 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-center text-slate-600"><ImageIcon size={14} /></div>
                           )}
