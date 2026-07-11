@@ -6,38 +6,50 @@ export default function Slider() {
   const [isEditing, setIsEditing] = useState(false);
   const [menuItems, setMenuItems] = useState([]); // স্লাইডার লিস্ট কন্টেইনার
   const [searchQuery, setSearchQuery] = useState('');
+  const hostname = window.location.hostname;
+const subdomain = hostname.split('.')[0];
+
+console.log(subdomain);
+  // 🔗 আপনার ব্যাকএন্ড এন্ডপয়েন্ট URL এখানে বসান
+  const API_BASE_URL = 'http://localhost:4000/slider';
 
   // 📝 ফর্ম স্টেট (Screenshot 2026-06-19 021032.png এর সব ফিল্ড)
   const initialFormState = {
-    id: null,
-    headerTitle:'',
+    
+    headerTitle: '',
     title: '',
     description: '',
     position: 'Left',
+    domain:subdomain,
     photo: null,
     photoPreview: '' // ফ্রন্টএন্ডে ইমেজ প্রিভিউ দেখানোর জন্য
   };
   const [formData, setFormData] = useState(initialFormState);
 
+
   // 🌐 ১. BACKEND API: স্লাইডার লিস্ট গেট করার জন্য (GET Request)
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        // const response = await axios.get('YOUR_BACKEND_API_URL/sliders');
-        // setMenuItems(response.data);
+        const response = await fetch(API_BASE_URL);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setMenuItems(data);
+      } catch (error) {
+        console.error("Error fetching sliders (Using Mock Data fallback):", error);
         
-        // ডামি রিয়েল এস্টেট ডাটা (যদি ব্যাকএন্ড এপিআই ফাকা থাকে)
+        // ব্যাকএন্ড এপিআই কানেক্ট না থাকলে মক ডাটা ফলব্যাক হিসেবে থাকবে
         const mockData = [
-          { id: 1, photoPreview: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=150', title: 'Find Your Dream Luxury Penthouse', buttonText1: 'View Properties', buttonUrl1: '#', buttonText2: 'Contact Agent', buttonUrl2: '#', position: 'Left', description: 'Premium apartments available.' },
-          { id: 2, photoPreview: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=150', title: 'Modern Beachfront Villas Available', buttonText1: 'Explore Now', buttonUrl1: '#', buttonText2: 'Book a Tour', buttonUrl2: '#', position: 'Left', description: 'Exclusive ocean view estates.' }
+          { id: 1, photoPreview: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=150', headerTitle: 'Exclusive Living', title: 'Find Your Dream Luxury Penthouse', position: 'Left', description: 'Premium apartments available.' },
+          { id: 2, photoPreview: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=150', headerTitle: 'Ocean Front', title: 'Modern Beachfront Villas Available', position: 'Left', description: 'Exclusive ocean view estates.' }
         ];
         setMenuItems(mockData);
-      } catch (error) {
-        console.error("Error fetching sliders:", error);
       }
     };
     fetchSliders();
-  }, []);
+  }, [API_BASE_URL]);
 
   // 📥 ইনপুট হ্যান্ডলার
   const handleInputChange = (e) => {
@@ -57,7 +69,7 @@ export default function Slider() {
     }
   };
 
-  // ✍️ এডিট মোড এক্টিভেশন (টেবিল থেকে ডেটা ফর্মে নেওয়া)
+  // ✍️ এডিট মোড এক্টিভেশন (টেবিল থেকে ডেটা ফর্মে নেওয়া)
   const handleEditClick = (item) => {
     setFormData({ ...item });
     setIsEditing(true);
@@ -68,11 +80,21 @@ export default function Slider() {
   const handleDeleteClick = async (id) => {
     if (window.confirm("Are you sure you want to delete this slider?")) {
       try {
-        // await axios.delete(`YOUR_BACKEND_API_URL/sliders/${id}`);
-        setMenuItems(prev => prev.filter(item => item.id !== id));
-        alert('Slider asset deleted successfully.');
+        const response = await fetch(`${API_BASE_URL}/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          setMenuItems(prev => prev.filter(item => item.id !== id));
+          alert('Slider asset deleted successfully.');
+        } else {
+          throw new Error('Failed to delete');
+        }
       } catch (error) {
         console.error("Error deleting slider:", error);
+        // লোকাল স্টেট থেকে রিমুভ (যদি ব্যাকএন্ড টেস্ট করার সময় কানেক্টেড না থাকে)
+        setMenuItems(prev => prev.filter(item => item.id !== id));
+        alert('Slider deleted locally.');
       }
     }
   };
@@ -81,24 +103,52 @@ export default function Slider() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    // যেহেতু ইমেজ আপলোড হবে, তাই FormData ব্যবহার করা ব্যাকএন্ডের জন্য বেস্ট প্র্যাকটিস
+    // ইমেজ আপলোডের জন্য FormData ব্যবহার করা ব্যাকএন্ডের স্ট্যান্ডার্ড প্র্যাকটিস
     const payload = new FormData();
     payload.append('headerTitle', formData.headerTitle);
     payload.append('title', formData.title);
     payload.append('description', formData.description);
     payload.append('position', formData.position);
-    if (formData.photo) payload.append('photo', formData.photo); // ফাইল অবজেক্ট
+    payload.append('domain', formData.domain);
+  
+    if (formData.photo) {
+      payload.append('photo', formData.photo); // ফাইল অবজেক্ট
+    }
 
     try {
       if (isEditing) {
-        // await axios.put(`YOUR_BACKEND_API_URL/sliders/${formData.id}`, payload);
-        setMenuItems(prev => prev.map(item => item.id === formData.id ? { ...formData } : item));
-        alert('Slider node updated!');
+        // PUT Request (Update)
+        const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
+          method: 'PUT',
+          body: payload,
+        });
+
+        if (response.ok) {
+          const updatedData = await response.json();
+          setMenuItems(prev => prev.map(item => item.id === formData.id ? updatedData : item));
+          alert('Slider node updated!');
+        } else {
+          // ফলব্যাক লোকাল আপডেট (যদি ব্যাকএন্ড না থাকে)
+          setMenuItems(prev => prev.map(item => item.id === formData.id ? { ...formData } : item));
+          alert('Slider updated locally!');
+        }
       } else {
-        // const response = await axios.post('YOUR_BACKEND_API_URL/sliders', payload);
-        const newSlider = { ...formData, id: Date.now() };
-        setMenuItems(prev => [...prev, newSlider]);
-        alert('New luxury slider asset added!');
+        // POST Request (Create)
+        const response = await fetch(API_BASE_URL, {
+          method: 'POST',
+          body: payload,
+        });
+
+        if (response.ok) {
+          const createdData = await response.json();
+          setMenuItems(prev => [...prev, createdData]);
+          alert('New luxury slider asset added!');
+        } else {
+          // ফলব্যাক লোকাল ক্রিয়েট (যদি ব্যাকএন্ড না থাকে)
+          const newSlider = { ...formData, id: Date.now() };
+          setMenuItems(prev => [...prev, newSlider]);
+          alert('New luxury slider asset added locally!');
+        }
       }
 
       // ফর্ম রিসেট ও ব্যাক টু লিস্ট
@@ -112,7 +162,7 @@ export default function Slider() {
 
   // ফিল্টারিং লজিক (সার্চ বার)
   const filteredItems = menuItems.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    item.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -141,7 +191,7 @@ export default function Slider() {
         </button>
       </div>
 
-      {/* কনটেন্ট এরিয়া */}
+      {/* কনটেন্ট এরিয়া */}
       {activeTab === 'list' ? (
         
         /* ================= 📊 ট্যাব ১: স্লাইডার লিস্ট টেবিল ================= */
@@ -189,8 +239,7 @@ export default function Slider() {
                           )}
                         </td>
                         <td className="px-6 py-4 font-bold text-white max-w-xs truncate">{item.title}</td>
-                        <td className="px-6 py-4 text-slate-400">{item.buttonText1 || '-'}</td>
-                        
+                        <td className="px-6 py-4 text-slate-400">{item.headerTitle || '-'}</td>
                         
                         <td className="px-6 py-4 text-center text-slate-400"><span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[10px] font-mono">{item.position}</span></td>
                         <td className="px-6 py-4 text-center">
