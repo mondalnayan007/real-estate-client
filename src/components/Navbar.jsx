@@ -94,7 +94,7 @@ export default function Navbar() {
             </button>
 
             {/* Dynamic Authentication Module Placement */}
-            <div className="relative">
+            {/* <div className="relative">
               {currentUser ? (
                 <div className="relative flex items-center">
                   <button 
@@ -145,7 +145,7 @@ export default function Navbar() {
                   Sign Up
                 </Link>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile Hamburger Menu Toggle */}
