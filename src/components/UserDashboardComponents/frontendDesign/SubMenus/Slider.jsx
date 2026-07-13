@@ -95,66 +95,73 @@ console.log(subdomain);
   //   }
   // };
 
-  // 🚀 ৩. BACKEND API: ফর্ম সাবমিট (POST / PUT Request)
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
+// 🚀 ৩. BACKEND API: ফর্ম সাবমিট (POST / PUT Request)
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
 
-    // ইমেজ আপলোডের জন্য FormData ব্যবহার করা ব্যাকএন্ডের স্ট্যান্ডার্ড প্র্যাকটিস
-    const payload = new FormData();
-    payload.append('headerTitle', formData.headerTitle);
-    payload.append('title', formData.title);
-    payload.append('description', formData.description);
-    payload.append('position', formData.position);
-    payload.append('domain', formData.domain);
-  
-    if (formData.photo) {
-      payload.append('photo', formData.photo); // ফাইল অবজেক্ট
-    }
+  // ১. ইউনিক আইডি নির্ধারণ (_id বা id)
+  const currentId = formData._id || formData.id;
+  console.log(currentId);
 
-    try {
-      if (isEditing) {
-        // PUT Request (Update)
-        const response = await fetch(`${API_BASE_URL}/${formData.id}`, {
-          method: 'PUT',
-          body: payload,
-        });
+  // ২. FormData অবজেক্ট তৈরি
+  const payload = new FormData();
+  payload.append('headerTitle', formData.headerTitle || '');
+  payload.append('title', formData.title || '');
+  payload.append('description', formData.description || '');
+  payload.append('position', formData.position || '');
+  payload.append('domain', formData.domain || '');
 
-        if (response.ok) {
-          const updatedData = await response.json();
-          setMenuItems(prev => prev.map(item => item.id === formData.id ? updatedData : item));
-          alert('Slider node updated!');
-        } else {
-          // ফলব্যাক লোকাল আপডেট (যদি ব্যাকএন্ড না থাকে)
-          setMenuItems(prev => prev.map(item => item.id === formData.id ? { ...formData } : item));
-          alert('Slider updated locally!');
-        }
+  // ফটো ফাইল হলে তবেই FormData-তে যুক্ত হবে
+  if (formData.photo && typeof formData.photo !== 'string') {
+    payload.append('photo', formData.photo);
+  }
+
+  try {
+    if (isEditing) {
+      // PUT Request (Update)
+      const response = await fetch(`${API_BASE_URL}/${currentId}`, {
+        method: 'PUT',
+        body: payload,
+      });
+
+      if (response.ok) {
+        const updatedData = await response.json();
+        // ID ম্যাচ করে স্টেট আপডেট (MongoDB _id বা সাধারণ id এর জন্য নিরাপদ)
+        setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? updatedData : item));
+        alert('Slider node updated!');
       } else {
-        // POST Request (Create)
-        const response = await fetch(API_BASE_URL, {
-          method: 'POST',
-          body: payload,
-        });
-
-        if (response.ok) {
-          const createdData = await response.json();
-          setMenuItems(prev => [...prev, createdData]);
-          alert('New luxury slider asset added!');
-        } else {
-          // ফলব্যাক লোকাল ক্রিয়েট (যদি ব্যাকএন্ড না থাকে)
-          const newSlider = { ...formData, id: Date.now() };
-          setMenuItems(prev => [...prev, newSlider]);
-          alert('New luxury slider asset added locally!');
-        }
+        // ফলব্যাক লোকাল আপডেট
+        setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? { ...formData } : item));
+        alert('Slider updated locally!');
       }
+    } else {
+      // POST Request (Create)
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
+        body: payload,
+      });
 
-      // ফর্ম রিসেট ও ব্যাক টু লিস্ট
-      setFormData(initialFormState);
-      setIsEditing(false);
-      setActiveTab('list');
-    } catch (error) {
-      console.error("Error saving slider:", error);
+      if (response.ok) {
+        const createdData = await response.json();
+        setMenuItems(prev => [...prev, createdData]);
+        alert('New luxury slider asset added!');
+      } else {
+        // ফলব্যাক লোকাল ক্রিয়েট
+        const newSlider = { ...formData, id: Date.now() };
+        setMenuItems(prev => [...prev, newSlider]);
+        alert('New luxury slider asset added locally!');
+      }
     }
-  };
+
+    // ফর্ম রিসেট ও ব্যাক টু লিস্ট
+    setFormData(initialFormState);
+    setIsEditing(false);
+    setActiveTab('list');
+  } catch (error) {
+    console.error("Error saving slider:", error);
+    alert('Something went wrong!');
+  }
+};
 
   // ফিল্টারিং লজিক (সার্চ বার)
   const filteredItems = menuItems.filter(item => 
