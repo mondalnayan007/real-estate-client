@@ -13,6 +13,7 @@ import Register from "../views/Register";
 import AgentDashboard from "../views/AgentDashboard";
 import SuperAdminDashboard from "../views/SuperAdminDashboard";
 import SetupWorkspace from "../views/SetupWorkspace";
+import FakePaymentLoader from "../views/FakePaymentLoader";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -39,6 +40,10 @@ const mainCompanyRouter = createBrowserRouter([
   {
     path: '/register',
     Component: Register
+  },
+  {
+    path: '/process-payment',
+    Component: FakePaymentLoader
   },
   {
       path:'/setup-workspace',
