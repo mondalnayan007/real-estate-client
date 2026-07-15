@@ -12,6 +12,7 @@ import ProjectDetails from "../views/ProjectDetails";
 import Register from "../views/Register";
 import AgentDashboard from "../views/AgentDashboard";
 import SuperAdminDashboard from "../views/SuperAdminDashboard";
+import SetupWorkspace from "../views/SetupWorkspace";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -38,6 +39,10 @@ const mainCompanyRouter = createBrowserRouter([
   {
     path: '/register',
     Component: Register
+  },
+  {
+      path:'/setup-workspace',
+      Component:SetupWorkspace
   },
   {
     path:'/admin/super-dashboard',
