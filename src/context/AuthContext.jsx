@@ -11,7 +11,7 @@ import { auth } from '../firebase/firebase.config';
 
 
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 
 
@@ -54,8 +54,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext value={value}>
       {!loading && children}
-    </AuthContext.Provider>
+    </AuthContext>
   );
 };

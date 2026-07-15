@@ -11,15 +11,13 @@ import SettingsProvider from './context/SettingsContext.jsx'
  // পাথটি আপনার প্রজেক্ট অনুযায়ী চেক করে নিন
 
 createRoot(document.getElementById('root')).render(
-  <AuthProvider>
-    <StrictMode>
+  <StrictMode>
+    <AuthProvider>
     <SettingsProvider>
       
       <RouterProvider router={router} />
     
     </SettingsProvider>
-    
-  </StrictMode>
-
-  </AuthProvider>
+    </AuthProvider>
+  </StrictMode>,
 )

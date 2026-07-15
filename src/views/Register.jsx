@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, use } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 import { FaEnvelope, FaLock, FaUser, FaArrowRight, FaCamera, FaSpinner } from 'react-icons/fa';
+import { AuthContext } from '../context/AuthContext';
 
 const Register = () => {
-  // const { signUpWithEmail, signUpWithGoogle } = useAuth();
+   const {signUpWithGoogle,signUpWithEmail} = use(AuthContext);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
@@ -49,76 +50,76 @@ const Register = () => {
   };
 
   // গুগল সাইন-আপ হ্যান্ডলার
-  // const handleGoogleSignUp = async () => {
-  //   setError('');
-  //   setLoading(true);
-  //   try {
-  //     const userCredential = await signUpWithGoogle();
-  //     const googleUser = userCredential.user;
+  const handleGoogleSignUp = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const userCredential = await signUpWithGoogle();
+      const googleUser = userCredential.user;
 
-  //     const nameParts = googleUser.displayName ? googleUser.displayName.split(' ') : ['Google', 'User'];
+      const nameParts = googleUser.displayName ? googleUser.displayName.split(' ') : ['Google', 'User'];
 
-  //     // গুগল অলরেডি প্রোফাইল পিকচার দেয় (photoURL)। তাই ক্লাউডিনারি আপলোডের প্রয়োজন নেই।
-  //     navigate('/setup-workspace', {
-  //       state: {
-  //         agentId: googleUser.uid,
-  //         firstName: nameParts[0],
-  //         lastName: nameParts.slice(1).join(' ') || '',
-  //         email: googleUser.email,
-  //         avatar: googleUser.photoURL || '',
-  //         authProvider: 'google'
-  //       }
-  //     });
-  //   } catch (err) {
-  //     setError(err.message || "Google Authentication failed.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      // গুগল অলরেডি প্রোফাইল পিকচার দেয় (photoURL)। তাই ক্লাউডিনারি আপলোডের প্রয়োজন নেই।
+      navigate('/setup-workspace', {
+        state: {
+          agentId: googleUser.uid,
+          firstName: nameParts[0],
+          lastName: nameParts.slice(1).join(' ') || '',
+          email: googleUser.email,
+          avatar: googleUser.photoURL || '',
+          authProvider: 'google'
+        }
+      });
+    } catch (err) {
+      setError(err.message || "Google Authentication failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ইমেইল-পাসওয়ার্ড সাবমিশন
-  // const handleRegisterNext = async (e) => {
-  //   e.preventDefault();
-  //   setError('');
+  const handleRegisterNext = async (e) => {
+    e.preventDefault();
+    setError('');
 
-  //   if (password !== confirmPassword) {
-  //     return setError("Passwords do not match!");
-  //   }
-  //   if (password.length < 6) {
-  //     return setError("Password must be at least 6 characters.");
-  //   }
+    if (password !== confirmPassword) {
+      return setError("Passwords do not match!");
+    }
+    if (password.length < 6) {
+      return setError("Password must be at least 6 characters.");
+    }
 
-  //   setLoading(true);
+    setLoading(true);
 
-  //   try {
-  //     // ১. ক্লাউডিনারিতে প্রোফাইল ইমেজ আপলোড (যদি ইউজার ইমেজ সিলেক্ট করে থাকে)
-  //     let uploadedImageUrl = '';
-  //     if (profileImage) {
-  //       uploadedImageUrl = await uploadToCloudinary(profileImage);
-  //     }
+    try {
+      // ১. ক্লাউডিনারিতে প্রোফাইল ইমেজ আপলোড (যদি ইউজার ইমেজ সিলেক্ট করে থাকে)
+      let uploadedImageUrl = '';
+      if (profileImage) {
+        uploadedImageUrl = await uploadToCloudinary(profileImage);
+      }
 
-  //     // ২. ফায়ারবেসে অ্যাকাউন্ট ক্রিয়েট
-  //     const userCredential = await signUpWithEmail(email, password);
-  //     const firebaseUid = userCredential.user.uid;
+      // ২. ফায়ারবেসে অ্যাকাউন্ট ক্রিয়েট
+      const userCredential = await signUpWithEmail(email, password);
+      const firebaseUid = userCredential.user.uid;
 
-  //     // ৩. সফলভাবে ডাটা ক্লাউডিনারি ও ফায়ারবেসে যাওয়ার পর স্টেপ ২-তে ট্রান্সফার
-  //     navigate('/setup-workspace', {
-  //       state: {
-  //         agentId: firebaseUid,
-  //         firstName: firstName.trim(),
-  //         lastName: lastName.trim(),
-  //         email: email.trim().toLowerCase(),
-  //         avatar: uploadedImageUrl, // ক্লাউডিনারি লাইভ ইমেজ লিঙ্ক ডাটাবেজে স্টোর করার জন্য
-  //         authProvider: 'email'
-  //       }
-  //     });
+      // ৩. সফলভাবে ডাটা ক্লাউডিনারি ও ফায়ারবেসে যাওয়ার পর স্টেপ ২-তে ট্রান্সফার
+      navigate('/setup-workspace', {
+        state: {
+          agentId: firebaseUid,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim().toLowerCase(),
+          avatar: uploadedImageUrl, // ক্লাউডিনারি লাইভ ইমেজ লিঙ্ক ডাটাবেজে স্টোর করার জন্য
+          authProvider: 'email'
+        }
+      });
 
-  //   } catch (err) {
-  //     setError(err.message || "Registration failed. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans antialiased">
@@ -153,7 +154,7 @@ const Register = () => {
             </div>
           )}
 
-          <form onSubmit={''} className="space-y-4">
+          <form onSubmit={handleRegisterNext} className="space-y-4">
             
             {/* সার্কুলার ইমেজ সিলেক্টর */}
             <div className="flex flex-col items-center justify-center mb-4">
@@ -298,7 +299,7 @@ const Register = () => {
           <button
             type="button"
             disabled={loading}
-            onClick={''}
+            onClick={handleGoogleSignUp}
             className="w-full flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-900 font-bold py-3 px-4 rounded-xl transition-all duration-200 text-sm active:scale-[0.99] border border-slate-200 shadow-sm disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
