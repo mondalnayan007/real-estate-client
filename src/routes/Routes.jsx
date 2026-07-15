@@ -7,8 +7,8 @@ import Team from "../views/Team";
 import About from "../views/About";
 import Blog from "../views/Blog";
 import ProjectDetails from "../views/ProjectDetails";
-import UserSignup from "../views/UserSignup";
-import AdminLogin from "../views/AdminLogin"
+// import UserSignup from "../views/UserSignup";
+// import AdminLogin from "../views/AdminLogin"
 import Register from "../views/Register";
 import AgentDashboard from "../views/AgentDashboard";
 import SuperAdminDashboard from "../views/SuperAdminDashboard";
@@ -31,10 +31,10 @@ const mainCompanyRouter = createBrowserRouter([
     path: "/",
     element: <CompanyLandingPage /> // এখানে শুধু আপনার প্রাইসিং ও ফিচারের মেইন ল্যান্ডিং পেজ দেখাবে
   },
-  {
-    path: "/signup", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
-    Component: UserSignup
-  },
+  // {
+  //   path: "/signup", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
+  //   Component: UserSignup
+  // },
   {
     path: '/register',
     Component: Register
@@ -82,10 +82,10 @@ const agentDemoRouter = createBrowserRouter([
       }
     ]
   },
-  {
-    path: '/admin/login',
-    Component: AdminLogin
-  },
+  // {
+  //   path: '/admin/login',
+  //   Component: AdminLogin
+  // },
   {
     path: '/admin/dashboard',
     Component: AgentDashboard

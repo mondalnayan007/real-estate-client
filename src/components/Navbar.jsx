@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+;
 import { Home, Menu, X, LogOut, LayoutGrid } from 'lucide-react';
 import { NavLink } from 'react-router'; // আপনার ইমপোর্ট অনুযায়ী রাখা হয়েছে
 import { SettingsContext } from '../context/SettingsContext';
@@ -12,7 +12,7 @@ export default function Navbar() {
   const { settings } = useContext(SettingsContext);
   console.log(settings);
 
-  const { currentUser, logout } = useAuth();
+
   const navigate = useNavigate();
 
   // Scroll handler for background color change
@@ -39,7 +39,7 @@ export default function Navbar() {
   const handleLogoutAction = () => {
     setProfileOpen(false);
     setIsOpen(false);
-    logout();
+    
     navigate('/');
   };
 
@@ -181,7 +181,7 @@ export default function Navbar() {
             </button>
 
             {/* Mobile Profile Interface */}
-            {currentUser ? (
+            {/* {currentUser ? (
               <div className="w-4/5 flex flex-col items-center gap-3.5 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 shadow-sm mt-2">
                 <div className="flex items-center gap-3 w-full px-1">
                   <img src={currentUser.avatar} alt="Profile" className="h-11 w-11 rounded-full border-2 border-blue-600 object-cover p-0.5" />
@@ -213,7 +213,7 @@ export default function Navbar() {
               >
                 Sign Up
               </Link>
-            )}
+            )} */}
           </div>
         )}
       </nav>
