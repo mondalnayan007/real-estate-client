@@ -1,92 +1,59 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged,
+  signOut
+} from 'firebase/auth';
+import { app } from '../firebase/firebase.config'; // আপনার ফায়ারবেস কনফিগারেশন ফাইল পাথ
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
 
+  // ১. ইমেইল-পাসওয়ার্ড দিয়ে ফায়ারবেস অ্যাকাউন্ট ক্রিয়েশন
+  const signUpWithEmail = (email, password) => {
+    return createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  // ২. গুগল পপআপ সাইন-আপ/সাইন-ইন
+  const signUpWithGoogle = () => {
+    return signInWithPopup(auth, googleProvider);
+  };
+
+  // ৩. সাইন আউট
+  const logOut = () => {
+    return signOut(auth);
+  };
+
+  // কারেন্ট ইউজার স্টেট মনিটর করা
   useEffect(() => {
-    const storedUser = localStorage.getItem('pe_user');
-    const storedAdminToken = localStorage.getItem('pe_admin_auth');
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [auth]);
 
-    if (storedAdminToken === 'true') {
-      setIsAdmin(true);
-      setCurrentUser({ email: 'admin@primeestates.com', role: 'admin', name: 'Admin Desk', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' });
-    } else if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
-  }, []);
-
-  const loginUser = (email, password, role) => {
-    // Special master control override check
-    if (role === 'admin') {
-      if (email === 'admin@primeestates.com' && password === 'luxury2026') {
-        setIsAdmin(true);
-        const adminData = { email, role: 'admin', name: 'Admin Desk', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' };
-        setCurrentUser(adminData);
-        localStorage.setItem('pe_admin_auth', 'true');
-        return { success: true, isAdmin: true };
-      }
-      return { success: false, error: 'Access denied. Security token mismatch.' };
-    }
-
-    const database = JSON.parse(localStorage.getItem('pe_users_db') || '[]');
-    const match = database.find(u => u.email === email && u.password === password && u.role === role);
-    
-    if (match) {
-      const userData = { 
-        name: match.name, 
-        email: match.email, 
-        role: match.role,
-        avatar: match.role === 'seller' 
-          ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80'
-      };
-      setCurrentUser(userData);
-      localStorage.setItem('pe_user', JSON.stringify(userData));
-      return { success: true, isAdmin: false };
-    }
-    return { success: false, error: `Invalid credentials for the selected ${role} registry panel.` };
-  };
-
-  const registerUser = (userData) => {
-    const database = JSON.parse(localStorage.getItem('pe_users_db') || '[]');
-    if (database.some(user => user.email === userData.email) || userData.email === 'admin@primeestates.com') {
-      return { success: false, error: 'This email is already registered.' };
-    }
-    
-    database.push(userData);
-    localStorage.setItem('pe_users_db', JSON.stringify(database));
-    
-    const sessionData = {
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-      avatar: userData.role === 'seller' 
-        ? 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80'
-    };
-    
-    setCurrentUser(sessionData);
-    localStorage.setItem('pe_user', JSON.stringify(sessionData));
-    return { success: true };
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
-    setIsAdmin(false);
-    localStorage.removeItem('pe_user');
-    localStorage.removeItem('pe_admin_auth');
+  const value = {
+    currentUser,
+    loading,
+    signUpWithEmail,
+    signUpWithGoogle,
+    logOut
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, isAdmin, loading, loginUser, registerUser, logout }}>
+    <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
-}
-
-export const useAuth = () => useContext(AuthContext);
+};

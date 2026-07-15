@@ -77,7 +77,7 @@ const CompanyPricing = () => {
       planId: selectedPlan.id,
       domainType: domainType
     };
-
+console.log(payload);
     // ডোমেইন ক্যালকুলেশন লজিক
     if (domainType === 'subdomain') {
       const cleanUsername = formData.customUsername.trim().toLowerCase().replace(/\s+/g, '');
