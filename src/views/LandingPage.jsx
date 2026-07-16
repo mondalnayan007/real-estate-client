@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { use } from 'react';
 import { Link } from 'react-router-dom';
 
 // 1. Importing components from the src/components/ folder
@@ -16,8 +16,14 @@ import Newsletter from '../Newsletter';
 
 import SpatialAudioTour from '../components/SpatialAudioTour';
 import HomePageProjects from '../components/HomePageProjects';
+import AgentContext from '../context/AgentContext';
+
 
 export default function LandingPage() {
+  const {user} = use(AgentContext);
+  console.log(user.agentId);
+  
+
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500">
       

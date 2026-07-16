@@ -6,12 +6,14 @@ import { RouterProvider } from 'react-router-dom' // বা আপনার ব�
 import router from './routes/Routes.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import SettingsProvider from './context/SettingsContext.jsx'
+import { AgentProvider } from './context/AgentContext.jsx'
 
 // ১. আপনার তৈরি করা AuthProvider টি সঠিক পাথ থেকে ইম্পোর্ট করুন
  // পাথটি আপনার প্রজেক্ট অনুযায়ী চেক করে নিন
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  
+    <AgentProvider>
     <AuthProvider>
     <SettingsProvider>
       
@@ -19,5 +21,6 @@ createRoot(document.getElementById('root')).render(
     
     </SettingsProvider>
     </AuthProvider>
-  </StrictMode>,
+    </AgentProvider>
+  ,
 )
