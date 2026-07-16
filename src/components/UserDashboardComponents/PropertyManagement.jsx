@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Plus, Trash2, Check, Image, Video, FileText } from 'lucide-react';
 import { RxCross2 } from "react-icons/rx";
+import AgentContext from '../../context/AgentContext';
 
 export default function PropertyManagement() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [properties, setProperties] = useState([])
+  const {user} = use(AgentContext);
+    console.log(user?.agentId);
+    const agentId = user?.agentId;
   const hostname = window.location.hostname;
   const subdomain = hostname.split('.')[0];
   console.log(subdomain);
@@ -20,7 +24,9 @@ export default function PropertyManagement() {
     sqft: '',
     status: 'completed',
     description: '',
-    domain: subdomain
+    domain: subdomain,
+    agentId:agentId
+
   });
 
 
