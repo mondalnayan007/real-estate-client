@@ -35,7 +35,7 @@ console.log(subdomain);
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/slider?agentId=${user.agentId}`);
+        const response = await fetch(`http://localhost:4000/slider?agentId=${user?.agentId}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

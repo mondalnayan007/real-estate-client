@@ -16,7 +16,7 @@ export default function SettingsProvider({ children }) {
 
     useEffect(() => {
 
-        fetch(`http://localhost:4000/settings?agentId=${user.agentId}`)
+        fetch(`http://localhost:4000/settings?agentId=${user?.agentId}`)
             .then(res => res.json())
             .then(data => setSettings(data));
 
