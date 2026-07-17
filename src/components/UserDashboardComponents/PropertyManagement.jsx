@@ -31,7 +31,7 @@ export default function PropertyManagement() {
 
 
   useEffect(() => {
-    fetch(`http://localhost:4000/projects?domain=${subdomain}`)
+    fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
       .then(res => res.json())
       .then(data => setProperties(data))
   }, [])

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, BedDouble, Bath, Maximize2, ArrowUpRight, Plus } from 'lucide-react';
 import { Link } from 'react-router';
+import AgentContext from './context/AgentContext';
 
 const categories = ['All Properties', 'Luxury Villas', 'Penthouses', 'Modern Mansions'];
 
@@ -32,6 +33,8 @@ const cardVariants = {
 export default function Projects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('All Properties');
+  const {user} = use(AgentContext);
+    console.log(user.agentId);
 
     const hostname = window.location.hostname;
   const subdomain = hostname.split('.')[0];
@@ -40,7 +43,7 @@ export default function Projects() {
   const [visibleLimit, setVisibleLimit] = useState(6);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/projects?domain=${subdomain}`)
+    fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
       .then(res => res.json())
       .then(data => setPremiumProjects(data))
       .catch(err => console.error("Error fetching data:", err));
