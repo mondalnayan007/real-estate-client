@@ -9,7 +9,7 @@ export default function SettingsProvider({ children }) {
 
     const [settings, setSettings] = useState(null);
       const {user} = use(AgentContext);
-    console.log(user.agentId);
+   
     const hostname = window.location.hostname;
     const subdomain = hostname.split('.')[0];
 
