@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import { ChevronLeft, ChevronRight, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import AgentContext from '../context/AgentContext';
 
 // ব্যাকআপ / ডিফল্ট ভিডিও স্লাইডার ডাটা
 const defaultSlides = [
@@ -39,6 +40,9 @@ export default function HeroCarousel() {
   const videoRef = useRef(null);
   const playPromiseRef = useRef(null);
 
+    const {user} = use(AgentContext);
+    
+
   const hostname = window.location.hostname;
   const subdomain = hostname.split('.')[0];
 
@@ -46,7 +50,7 @@ export default function HeroCarousel() {
   const [carouselData, setCarouselData] = useState(defaultSlides);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/slider?domain=${subdomain}`)
+    fetch(`http://localhost:4000/slider?agentId=${user.agentId}`)
       .then((res) => res.json())
       .then((data) => {
         // ডাটাবেস থেকে যদি ডাটা আসে এবং অ্যারিতে অন্তত ১টি ডাটা থাকে
@@ -62,7 +66,7 @@ export default function HeroCarousel() {
         // ব্যাকএন্ডে কোনো সমস্যা হলে ডিফল্ট ডাটাই থাকবে
         setCarouselData(defaultSlides);
       });
-  }, [subdomain]);
+  }, [user.agentId]);
 
   const currentSlide = carouselData[currentIndex] || {};
   const slideDuration = currentSlide?.type === 'video' ? 8000 : 5000;

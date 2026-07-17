@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, use } from 'react';
 import { useLoaderData, useParams, useNavigate } from 'react-router'; 
 import { 
   MapPin, BedDouble, Bath, Maximize2, ArrowLeft, 
@@ -9,6 +9,7 @@ import {
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
+import AgentContext from '../context/AgentContext';
 
 // --- HIGH-FIDELITY AUDIO GENERATOR ENGINE ---
 function createWaterNoiseNode(ctx) {
@@ -150,13 +151,13 @@ function DrawingRoomScene({ imageUrl }) {
 
 
 const ProjectDetails = () => {
-const hostname = window.location.hostname;
-const subdomain = hostname.split('.')[0];
+  const {user} = use(AgentContext);
+   
 const [singleData,setSingleData]= useState([])
 
 const {id} = useParams();
   useEffect(()=>{
-    fetch(`http://localhost:4000/projects?domain=${subdomain}&id=${id}`)
+    fetch(`http://localhost:4000/projects?agentId=${user.agentId}&id=${id}`)
     .then(res =>res.json())
     .then(data => {
       console.log(data);

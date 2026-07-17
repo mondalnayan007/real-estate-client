@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Plus, List, Edit2, Trash2, Search, Upload, Save, Image as ImageIcon } from 'lucide-react';
+import AgentContext from '../../../../context/AgentContext';
 
 export default function Slider() {
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'form'
@@ -8,6 +9,8 @@ export default function Slider() {
   const [searchQuery, setSearchQuery] = useState('');
   const hostname = window.location.hostname;
 const subdomain = hostname.split('.')[0];
+  const {user} = use(AgentContext);
+    console.log(user.agentId);
 
 console.log(subdomain);
   // 🔗 আপনার ব্যাকএন্ড এন্ডপয়েন্ট URL এখানে বসান
@@ -22,6 +25,7 @@ console.log(subdomain);
     position: 'Left',
     domain:subdomain,
     photo: null,
+    agentId:user.agentId,
     photoPreview: '' // ফ্রন্টএন্ডে ইমেজ প্রিভিউ দেখানোর জন্য
   };
   const [formData, setFormData] = useState(initialFormState);
@@ -31,7 +35,7 @@ console.log(subdomain);
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/slider?domain=${subdomain}`);
+        const response = await fetch(`http://localhost:4000/slider?agentId=${user.agentId}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -110,6 +114,7 @@ const handleFormSubmit = async (e) => {
   payload.append('description', formData.description || '');
   payload.append('position', formData.position || '');
   payload.append('domain', formData.domain || '');
+  payload.append('agentId', formData.agentId || '');
 
   // ফটো ফাইল হলে তবেই FormData-তে যুক্ত হবে
   if (formData.photo && typeof formData.photo !== 'string') {
