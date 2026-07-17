@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Save, Upload } from 'lucide-react';
+import AgentContext from '../../../../context/AgentContext';
 
 
 // ফর্মে রি-ইউজেবল ইনিশিয়াল স্টেট ডেফিনিশন
 
 
 export default function Settings() {
+    const {user} = use(AgentContext);
+    console.log(user.agentId);
+
   const hostname = window.location.hostname;
 const subdomain = hostname.split('.')[0];
 
@@ -26,7 +30,8 @@ const subdomain = hostname.split('.')[0];
   linkedinUrl: '',
   pinterestUrl: '',
   instagramUrl: '',
-  domain:subdomain
+  domain:subdomain,
+  agentId:user.agentId
   
 };
   // 📦 ব্যাকএন্ড ফ্রেন্ডলি স্টেট অবজেক্ট (ডিফল্ট ব্ল্যাঙ্ক রাখা হয়েছে)
