@@ -14,6 +14,7 @@ import AgentDashboard from "../views/AgentDashboard";
 import SuperAdminDashboard from "../views/SuperAdminDashboard";
 import SetupWorkspace from "../views/SetupWorkspace";
 import FakePaymentLoader from "../views/FakePaymentLoader";
+import NotFound from "../views/NotFound";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -46,12 +47,16 @@ const mainCompanyRouter = createBrowserRouter([
     Component: FakePaymentLoader
   },
   {
-      path:'/setup-workspace',
-      Component:SetupWorkspace
+    path: '/setup-workspace',
+    Component: SetupWorkspace
   },
   {
-    path:'/admin/super-dashboard',
-    Component:SuperAdminDashboard
+    path: '/admin/super-dashboard',
+    Component: SuperAdminDashboard
+  },
+  {
+    path: '*',
+    Component: NotFound
   }
   // এখানে আপনার সুপার অ্যাডমিন ড্যাশবোর্ডের রুটও যোগ করতে পারেন পরবর্তীতে
 ]);
@@ -75,7 +80,7 @@ const agentDemoRouter = createBrowserRouter([
       },
       {
         path: '/project-details/:id',
-        
+
         Component: ProjectDetails,
       },
       {
@@ -89,6 +94,10 @@ const agentDemoRouter = createBrowserRouter([
       {
         path: '/blog',
         Component: Blog
+      },
+      {
+        path: '*',
+        Component: NotFound
       }
     ]
   },
