@@ -1,181 +1,43 @@
-import React, { useRef, useState, useEffect, use } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useLoaderData, useParams, useNavigate } from 'react-router';
 import {
   MapPin, BedDouble, Bath, Maximize2, ArrowLeft,
   Calendar, ShieldCheck, Sparkles, MessageSquare, Building,
-  Volume2, VolumeX, Move, Eye, Download, CheckCircle
+  Download, CheckCircle, Mail, Phone, User
 } from 'lucide-react';
 
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Sphere, useTexture } from '@react-three/drei';
-import * as THREE from 'three';
 import AgentContext from '../context/AgentContext';
 import BookNowModal from '../components/BookNowModal';
-
-
-// --- HIGH-FIDELITY AUDIO GENERATOR ENGINE ---
-function createWaterNoiseNode(ctx) {
-  const bufferSize = ctx.sampleRate * 2;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-
-  let lastOut = 0.0;
-  for (let i = 0; i < bufferSize; i++) {
-    const white = Math.random() * 2 - 1;
-    data[i] = (lastOut + (0.02 * white)) / 1.02;
-    lastOut = data[i];
-    data[i] *= 3.5;
-  }
-
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  source.loop = true;
-  return source;
-}
-
-function createTrafficNoiseNode(ctx) {
-  const bufferSize = ctx.sampleRate * 2;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-
-  let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-  for (let i = 0; i < bufferSize; i++) {
-    const white = Math.random() * 2 - 1;
-    b0 = 0.99886 * b0 + white * 0.0555179;
-    b1 = 0.99332 * b1 + white * 0.0750759;
-    b2 = 0.96900 * b2 + white * 0.1538520;
-    data[i] = b0 + b1 + b2 + white * 0.025;
-    data[i] *= 0.05;
-  }
-
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  source.loop = true;
-  return source;
-}
-
-// --- RENDER COMPONENTS (SPATIAL AUDIO) ---
-function SpatialAudioEngine({ isMuted }) {
-  const { camera } = useThree();
-  const audioContextRef = useRef(null);
-  const nodesRef = useRef([]);
-
-  useEffect(() => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioContext();
-    audioContextRef.current = ctx;
-
-    const waterSource = createWaterNoiseNode(ctx);
-    const waterPanner = ctx.createPanner();
-    waterPanner.panningModel = 'HRTF';
-    waterPanner.positionX.setValueAtTime(-15, ctx.currentTime);
-    waterPanner.positionY.setValueAtTime(-1, ctx.currentTime);
-    waterPanner.positionZ.setValueAtTime(4, ctx.currentTime);
-
-    const waterGain = ctx.createGain();
-    waterGain.gain.setValueAtTime(0.18, ctx.currentTime);
-
-    waterSource.connect(waterPanner);
-    waterPanner.connect(waterGain);
-    waterGain.connect(ctx.destination);
-
-    const trafficSource = createTrafficNoiseNode(ctx);
-    const trafficPanner = ctx.createPanner();
-    trafficPanner.panningModel = 'HRTF';
-    trafficPanner.positionX.setValueAtTime(18, ctx.currentTime);
-    trafficPanner.positionY.setValueAtTime(2, ctx.currentTime);
-    trafficPanner.positionZ.setValueAtTime(-8, ctx.currentTime);
-
-    const trafficGain = ctx.createGain();
-    trafficGain.gain.setValueAtTime(0.4, ctx.currentTime);
-
-    trafficSource.connect(trafficPanner);
-    trafficPanner.connect(trafficGain);
-    trafficGain.connect(ctx.destination);
-
-    waterSource.start(0);
-    trafficSource.start(0);
-
-    nodesRef.current = [waterSource, trafficSource];
-
-    return () => {
-      nodesRef.current.forEach(node => {
-        try { node.stop(); } catch (e) { }
-      });
-      ctx.close();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (audioContextRef.current) {
-      if (isMuted) {
-        audioContextRef.current.suspend();
-      } else {
-        audioContextRef.current.resume();
-      }
-    }
-  }, [isMuted]);
-
-  useFrame(() => {
-    if (audioContextRef.current && audioContextRef.current.listener) {
-      const listener = audioContextRef.current.listener;
-      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
-
-      if (listener.positionX) {
-        listener.positionX.setValueAtTime(camera.position.x, audioContextRef.current.currentTime);
-        listener.positionY.setValueAtTime(camera.position.y, audioContextRef.current.currentTime);
-        listener.positionZ.setValueAtTime(camera.position.z, audioContextRef.current.currentTime);
-
-        listener.forwardX.setValueAtTime(forward.x, audioContextRef.current.currentTime);
-        listener.forwardY.setValueAtTime(forward.y, audioContextRef.current.currentTime);
-        listener.forwardZ.setValueAtTime(forward.z, audioContextRef.current.currentTime);
-
-        listener.upX.setValueAtTime(up.x, audioContextRef.current.currentTime);
-        listener.upZ.setValueAtTime(up.z, audioContextRef.current.currentTime);
-      }
-    }
-  });
-
-  return null;
-}
-
-function DrawingRoomScene({ imageUrl }) {
-  const texture = useTexture(imageUrl);
-  return (
-    <Sphere args={[500, 64, 40]} scale={[-1, 1, 1]}>
-      <meshBasicMaterial map={texture} side={THREE.DoubleSide} toneMapped={false} />
-    </Sphere>
-  );
-}
 
 const ProjectDetails = () => {
   const { user } = use(AgentContext);
 
-  const [singleData, setSingleData] = useState([]);
+  const [singleData, setSingleData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false); // Modal State
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
 
   const { id } = useParams();
-  useEffect(() => {
-    fetch(`http://localhost:4000/projects?agentId=${user.agentId}&id=${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setSingleData(data);
-      });
-  }, []);
-
   const navigate = useNavigate();
 
-  const [is3DMode, setIs3DMode] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  useEffect(() => {
+    fetch(`http://localhost:4000/projects?agentId=${user?.agentId}&id=${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // Handle array or single object response
+        setSingleData(Array.isArray(data) ? data[0] : data);
+      })
+      .catch((err) => console.error("Error fetching project:", err));
+  }, [id, user?.agentId]);
 
   if (!singleData) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center font-mono">
-        <p className="text-slate-400 mb-4 text-xs tracking-widest uppercase">Asset Intelligence Vault Locked</p>
-        <button onClick={() => navigate(-1)} className="text-blue-600 flex items-center gap-2 text-xs uppercase tracking-wider hover:underline font-bold">
-          <ArrowLeft size={14} /> Return to Safety
+      <div className="min-h-screen bg-[#072419] text-white flex flex-col items-center justify-center font-sans">
+        <p className="text-emerald-400 mb-4 text-xs tracking-widest uppercase">Loading Property Details...</p>
+        <button 
+          onClick={() => navigate(-1)} 
+          className="text-white bg-emerald-600 px-4 py-2 rounded-lg flex items-center gap-2 text-xs uppercase tracking-wider font-bold hover:bg-emerald-500 transition-colors"
+        >
+          <ArrowLeft size={14} /> Return Back
         </button>
       </div>
     );
@@ -211,10 +73,10 @@ const ProjectDetails = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert("আপনার মেসেজটি সফলভাবে এজেন্টের কাছে ইমেল আকারে পাঠানো হয়েছে!");
+        alert("আপনার মেসেজটি সফলভাবে এজেন্টের কাছে পাঠানো হয়েছে!");
         e.target.reset();
       } else {
-        alert("দুঃখিত, ইমেল পাঠানো যায়নি। আবার চেষ্টা করুন।");
+        alert("দুঃখিত, মেসেজ পাঠানো যায়নি। আবার চেষ্টা করুন।");
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -225,268 +87,335 @@ const ProjectDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-24 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
       
-      {/* 🟢 Booking Modal Rendered Here */}
+      {/* Booking Modal */}
       <BookNowModal
         isOpen={isBookModalOpen}
         onClose={() => setIsBookModalOpen(false)}
         propertyTitle={singleData?.title}
       />
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      {/* ================= HERO SECTION ================= */}
+      <div className="relative h-[80vh] min-h-[500px] w-full bg-slate-900">
+        <img
+          src={singleData.img || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80"}
+          alt={singleData.title}
+          className="w-full h-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#072419] via-transparent to-black/40" />
 
-        {/* ================= BACK BUTTON & HEADER ACTIONS ================= */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Back Button */}
+        <div className="absolute top-8 left-6 md:left-12 z-20">
           <button
             onClick={() => navigate(-1)}
-            className="text-slate-500 hover:text-blue-600 flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors group"
+            className="bg-black/40 hover:bg-black/60 text-white backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold tracking-wider uppercase transition-all border border-white/20"
           >
-            <ArrowLeft size={14} className="transform group-hover:-translate-x-1 transition-transform" />
-            Back to Master Portfolio
-          </button>
-
-          {/* 🌟 ৩ডি বাটনটি ইমেজ সেকশনে স্থানান্তরিত বিকল্প হিসেবে হেডার ডকে যুক্ত করা হলো */}
-          <button
-            onClick={() => {
-              setIs3DMode(!is3DMode);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            className={`px-4 py-2 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all border flex items-center gap-2 ${
-              is3DMode
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-blue-500 hover:text-blue-600'
-            }`}
-          >
-            <Eye size={14} className={is3DMode ? "" : "text-blue-600"} />
-            <span>{is3DMode ? "Close VR Tour" : "3D VR View"}</span>
+            <ArrowLeft size={14} /> Back
           </button>
         </div>
 
-        {/* ================= HERO IMAGE BANNER / 3D CONTAINER ================= */}
-        <div className="w-full h-[500px] md:h-[550px] rounded-[2.5rem] overflow-hidden relative border border-slate-200/80 shadow-lg mb-12 group bg-slate-100">
+        {/* Hero Title & Actions */}
+        <div className="absolute bottom-12 left-6 md:left-12 right-6 md:right-12 z-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="text-white">
+            <span className="text-emerald-400 text-xs font-semibold tracking-widest uppercase mb-2 block">
+              {singleData.location || "Bashundhara R/A"}
+            </span>
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-2">
+              {singleData.title}
+            </h1>
+            <p className="text-slate-300 text-sm md:text-base max-w-xl">
+              {singleData.location}
+            </p>
+          </div>
 
-          {!is3DMode ? (
-            <>
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent z-10" />
-
-              <div className="absolute top-6 left-8 z-20 flex gap-3">
-                <span className="bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200/80 text-[10px] font-bold tracking-widest px-4 py-2 rounded-xl uppercase shadow-sm">
-                  {singleData.category || "Estate"}
-                </span>
-                <span className="bg-blue-600 text-white text-[10px] font-bold tracking-widest px-4 py-2 rounded-xl uppercase shadow-md shadow-blue-500/20 flex items-center gap-1.5">
-                  <Sparkles size={11} /> {singleData.tag || "Featured"}
-                </span>
-              </div>
-
-              <img
-                src={singleData.img}
-                alt={singleData.title}
-                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-102"
-              />
-            </>
-          ) : (
-            <div className="w-full h-full relative">
-              <Canvas camera={{ position: [0, 0, 0.1], fov: 70 }}>
-                <DrawingRoomScene imageUrl={singleData.img} />
-                <OrbitControls
-                  enableZoom={true}
-                  minDistance={0.01}
-                  maxDistance={2.0}
-                  enablePan={false}
-                  rotateSpeed={-0.3}
-                />
-                <SpatialAudioEngine isMuted={isMuted} />
-              </Canvas>
-
-              <div className="absolute top-6 left-8 z-20 pointer-events-none bg-white/90 border border-slate-200/80 backdrop-blur-md p-4 rounded-2xl flex flex-col gap-1 shadow-md">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-[10px] text-blue-600 tracking-widest uppercase font-black">VR Tour Active</span>
-                </div>
-                <span className="text-[10px] text-slate-500 font-medium">Scroll to Zoom • Drag to look around</span>
-              </div>
-
-              <div className="absolute bottom-6 right-8 z-20 flex items-center gap-2">
-                <button
-                  onClick={() => setIsMuted(!isMuted)}
-                  className={`p-3 rounded-xl border transition-all backdrop-blur-md ${
-                    isMuted
-                      ? 'bg-rose-50 border-rose-200 text-rose-600'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-blue-500'
-                  }`}
-                  title={isMuted ? "Unmute Space" : "Mute Space"}
-                >
-                  {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                </button>
-
-                <button
-                  onClick={() => setIs3DMode(false)}
-                  className="p-3 bg-slate-900 border border-slate-900 text-white rounded-xl text-xs font-bold tracking-wider hover:bg-slate-800 transition-all"
-                >
-                  Exit 3D Mode
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setIsBookModalOpen(true)}
+              className="px-6 py-3 bg shadow-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-lg transition-all"
+            >
+              Request Custom Property
+            </button>
+            <button
+              onClick={() => {
+                const element = document.getElementById('contact-section');
+                element?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all border border-emerald-500/30"
+            >
+              Contact Agent
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* ================= MAIN CONTENT GRID ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      {/* ================= OVERVIEW & HIGHLIGHTS SECTION ================= */}
+      <section className="py-20 px-6 md:px-12 bg-[#fffdf7]">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <span className="text-xs uppercase font-bold tracking-widest text-slate-400 border-b border-slate-300 pb-1 inline-block">
+              Luxury Living Space
+            </span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-[#072419]">
+              {singleData.title}
+            </h2>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              Meticulously designed to redefine modern luxury, <span className="font-semibold text-slate-900">{singleData.title}</span> stands as a triumph of contemporary architecture in the heart of {singleData.location}. Featuring expansive views and premium finishes, this estate seamlessly blends absolute privacy with comfort.
+            </p>
 
-          {/* বাম পাশ: প্রজেক্ট ডিটেইলস */}
-          <div className="lg:col-span-8">
-            <div className="mb-8">
-              <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-3">
-                {singleData.title}
-              </h1>
-
-              <p className="text-slate-500 flex items-center gap-1.5 text-sm font-semibold">
-                <MapPin size={16} className="text-blue-600" /> {singleData.location}
-              </p>
-            </div>
-
-            {/* ৪টি কোর স্পেসিফিকেশন গ্রিড */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 bg-white border border-slate-200/80 rounded-3xl shadow-sm mb-6">
-              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                <BedDouble size={20} className="text-slate-400 mx-auto mb-1.5" />
-                <span className="block text-base font-extrabold text-slate-900">{singleData.beds}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bedrooms</span>
+            {/* Stat Cards */}
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+                <span className="text-3xl font-black text-[#072419] block">{singleData.beds || '1'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Apartments</span>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                <Bath size={20} className="text-slate-400 mx-auto mb-1.5" />
-                <span className="block text-base font-extrabold text-slate-900">{singleData.baths}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bathrooms</span>
+              <div className="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+                <span className="text-3xl font-black text-[#072419] block">{singleData.baths || '16'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Units</span>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                <Maximize2 size={18} className="text-slate-400 mx-auto mb-2" />
-                <span className="block text-xs font-extrabold text-slate-900">{singleData.sqft ? singleData.sqft.split(' ')[0] : 'N/A'}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sq. Footage</span>
-              </div>
-              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
-                <Building size={18} className="text-slate-400 mx-auto mb-2" />
-                <span className="block text-xs font-bold text-emerald-600 uppercase">{singleData.status || 'Active'}</span>
-                <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase block">Build Status</span>
-              </div>
-            </div>
-
-            {/* 🌟 নতুন অ্যাকশন বাটন ডক (এখানে "Book Now" সংযুক্ত করা হয়েছে) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-              
-              {/* ১. ডাউনলোড ব্রোশিওর বাটন */}
-              <button
-                onClick={handleDownloadBrochure}
-                className="w-full px-6 py-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 active:scale-98"
-              >
-                <Download size={15} />
-                <span>Download Brochure</span>
-              </button>
-
-              {/* 🎯 ২. Book Now Button (Modal Triggers Here) */}
-              <button
-                onClick={() => setIsBookModalOpen(true)}
-                className="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-98"
-              >
-                <Calendar size={15} />
-                <span>Book Now / Schedule Tour</span>
-              </button>
-
-            </div>
-
-            {/* ডেসক্রিপশন টেক্সট এরিয়া */}
-            <div className="border-t border-slate-200/80 pt-8">
-              <h3 className="text-lg font-black text-slate-900 mb-3">The Architectural Legacy</h3>
-              <p className="text-slate-600 text-sm font-normal leading-relaxed mb-4">
-                Meticulously designed to redefine modern luxury, <span className="text-slate-900 font-semibold">{singleData.title}</span> stands as a triumph of contemporary architecture in the heart of {singleData.location}. Featuring expansive floor-to-ceiling glass paneling and raw, premium textures, this estate seamlessly blends absolute privacy with panoramic horizons.
-              </p>
-              <p className="text-slate-600 text-sm font-normal leading-relaxed">
-                Every corner of this {singleData.sqft} estate has been curated for high-net-worth capital preservation and premium lifestyle comfort. From structural integrity to bespoke smart home automation, this is not just a residence—it is an appreciating masterpiece.
-              </p>
             </div>
           </div>
 
-          {/* ডান পাশ: ইনভেস্টমেন্ট সাইডবার / কন্টাক্ট ফরম */}
-          <div className="lg:col-span-4 bg-white border border-slate-200/80 p-6 md:p-8 rounded-3xl shadow-sm h-max">
-            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Acquisition Value</span>
-            <div className="text-3xl font-black text-slate-900 tracking-tight mb-6">
-              {singleData.price}
+          {/* Right Image Feature */}
+          <div className="lg:col-span-6 relative">
+            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+              <img
+                src={singleData.img || "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80"}
+                alt="Property View"
+                className="w-full h-[450px] object-cover"
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= SPECIFICATIONS SECTION ================= */}
+      <section className="py-20 px-6 md:px-12 bg-[#072419] text-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">
+              Details & Features
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-8">
+              Specification
+            </h2>
+
+            <div className="space-y-4 text-sm divide-y divide-emerald-900/60">
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">LOCATION</span>
+                <span className="font-bold text-emerald-400">{singleData.location || "Bashundhara R/A"}</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">TOTAL LAND</span>
+                <span className="font-bold text-emerald-400">5 Katha</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">UNITS PER FLOOR</span>
+                <span className="font-bold text-emerald-400">2</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">TOTAL APARTMENTS</span>
+                <span className="font-bold text-emerald-400">10</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">TOTAL STORIED</span>
+                <span className="font-bold text-emerald-400">G+9</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">ELECTRICITY / GAS</span>
+                <span className="font-bold text-emerald-400">Yes</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">LIFT / GENERATOR</span>
+                <span className="font-bold text-emerald-400">Yes</span>
+              </div>
             </div>
 
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-4 flex items-center gap-2">
-              <MessageSquare size={14} className="text-blue-600" /> Request Private Desk
-            </h4>
+            <div className="pt-6">
+              <button
+                onClick={handleDownloadBrochure}
+                className="px-6 py-3.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
+              >
+                <Download size={16} /> Download Brochure
+              </button>
+            </div>
+          </div>
 
-            <form onSubmit={handleContactSubmit} className="space-y-4">
+          {/* Right Showcase Collage */}
+          <div className="lg:col-span-6 bg-[#0c3828] p-6 rounded-3xl border border-emerald-800/40 flex flex-col justify-between">
+            <h3 className="text-emerald-200 font-serif italic text-2xl text-right mb-4">
+              Luxury Interior
+            </h3>
+            <div className="grid grid-cols-2 gap-3 h-full">
+              <img
+                src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=500&q=80"
+                alt="Interior 1"
+                className="w-full h-40 object-cover rounded-xl"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=500&q=80"
+                alt="Interior 2"
+                className="w-full h-40 object-cover rounded-xl"
+              />
+              <img
+                src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=500&q=80"
+                alt="Interior 3"
+                className="w-full h-48 object-cover rounded-xl col-span-2"
+              />
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ================= AVAILABLE UNITS SECTION ================= */}
+      <section className="py-20 px-6 md:px-12 bg-[#072419] border-t border-emerald-900/40 text-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Available Units</h2>
+            <p className="text-emerald-400 text-xs uppercase tracking-widest font-semibold">Choose the perfect space for your lifestyle</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Unit A */}
+            <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
+              <h3 className="text-2xl font-bold text-white mb-1">Unit A</h3>
+              <p className="text-emerald-300 text-sm font-semibold mb-6">{singleData.sqft || "2120 SQFT"}</p>
               
-              {/* Full Name */}
+              <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
+                <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">{singleData.beds || 3} Beds</span></div>
+                <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">{singleData.baths || 3} Baths</span></div>
+                <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
+              </div>
+            </div>
+
+            {/* Unit B */}
+            <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
+              <h3 className="text-2xl font-bold text-white mb-1">Unit B</h3>
+              <p className="text-emerald-300 text-sm font-semibold mb-6">2120 SQFT</p>
+              
+              <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
+                <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">3 Beds</span></div>
+                <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">3 Baths</span></div>
+                <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= LOCATION MAP SECTION ================= */}
+      <section className="py-20 px-6 md:px-12 bg-slate-50 text-slate-900">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-5 space-y-4">
+            <h2 className="text-4xl font-extrabold text-[#072419]">Location</h2>
+            <p className="text-slate-600 text-base font-semibold">
+              {singleData.location || "Bashundhara Residential Area, Dhaka"}
+            </p>
+            <button className="mt-4 px-5 py-2.5 bg-[#072419] text-white rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-emerald-900 transition-colors">
+              <MapPin size={14} /> View On Map
+            </button>
+          </div>
+
+          <div className="lg:col-span-7 rounded-2xl overflow-hidden border border-slate-200 shadow-md bg-white p-2">
+            <img
+              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1000&q=80"
+              alt="Map Preview"
+              className="w-full h-[320px] object-cover rounded-xl"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ================= CONTACT FORM SECTION ================= */}
+      <section id="contact-section" className="py-20 px-6 md:px-12 bg-[#072419] text-white">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-4">
+            <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">Reach Out To Us</span>
+            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+              Let us guide you to <br />
+              <span className="text-emerald-400">the extraordinary</span>
+            </h2>
+            <p className="text-slate-300 text-sm max-w-md">
+              From your first contact, our team will work to help you find your ideal home.
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="lg:col-span-6 bg-white text-slate-900 p-8 rounded-3xl shadow-xl">
+            <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
+                <label className="block text-[10px] uppercase font-extrabold text-slate-500 tracking-wider mb-1">
                   Full Name *
                 </label>
                 <input
                   type="text"
                   name="userName"
                   required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
-                  placeholder="John Doe"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                  placeholder="Enter your full name"
                 />
               </div>
 
-              {/* Email Address */}
               <div>
-                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"  
-                  name="userEmail"
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              {/* Phone Number */}
-              <div>
-                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
-                  Phone Number
+                <label className="block text-[10px] uppercase font-extrabold text-slate-500 tracking-wider mb-1">
+                  Phone Number *
                 </label>
                 <input
                   type="tel"
                   name="userPhone"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
+                  required
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
                   placeholder="+88017XXXXXXXX"
                 />
               </div>
 
-              {/* Your Message */}
               <div>
-                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
-                  Your Message *
+                <label className="block text-[10px] uppercase font-extrabold text-slate-500 tracking-wider mb-1">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="userEmail"
+                  required
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                  placeholder="name@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase font-extrabold text-slate-500 tracking-wider mb-1">
+                  Message / Details
                 </label>
                 <textarea
                   name="userMessage"
-                  required
                   rows="3"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all resize-none"
-                  placeholder="Hi, I am interested in this property..."
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600 focus:bg-white transition-all resize-none"
+                  placeholder="Write your message here..."
                 ></textarea>
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-[0.99] disabled:bg-slate-300 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md disabled:bg-slate-300"
               >
-                {loading ? "Sending..." : "Send Message to Agent"}
+                {loading ? "Sending..." : "Find Property"}
               </button>
+
+              <p className="text-[10px] text-slate-400 text-center mt-2">
+                By submitting this form you agree to our terms & privacy policy.
+              </p>
             </form>
           </div>
 
         </div>
+      </section>
 
-      </div>
     </div>
   );
 };
