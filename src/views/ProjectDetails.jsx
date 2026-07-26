@@ -3,13 +3,15 @@ import { useLoaderData, useParams, useNavigate } from 'react-router';
 import {
   MapPin, BedDouble, Bath, Maximize2, ArrowLeft,
   Calendar, ShieldCheck, Sparkles, MessageSquare, Building,
-  Volume2, VolumeX, Move, Eye, Download
+  Volume2, VolumeX, Move, Eye, Download, CheckCircle
 } from 'lucide-react';
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Sphere, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 import AgentContext from '../context/AgentContext';
+import BookNowModal from '../components/BookNowModal';
+
 
 // --- HIGH-FIDELITY AUDIO GENERATOR ENGINE ---
 function createWaterNoiseNode(ctx) {
@@ -147,31 +149,22 @@ function DrawingRoomScene({ imageUrl }) {
   );
 }
 
-
-
-
 const ProjectDetails = () => {
   const { user } = use(AgentContext);
-  console.log(user);
 
   const [singleData, setSingleData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false); // Modal State
 
   const { id } = useParams();
   useEffect(() => {
     fetch(`http://localhost:4000/projects?agentId=${user.agentId}&id=${id}`)
       .then(res => res.json())
       .then(data => {
-        console.log(data);
-        setSingleData(data)
+        setSingleData(data);
+      });
+  }, []);
 
-      })
-  }, [])
-
-
-console.log(singleData);
-
-  // const singleData = singleProject.toArray().find(singleData => singleData._id === parseInt(id));
   const navigate = useNavigate();
 
   const [is3DMode, setIs3DMode] = useState(false);
@@ -179,100 +172,110 @@ console.log(singleData);
 
   if (!singleData) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center font-mono">
-        <p className="text-slate-500 mb-4 text-xs tracking-widest uppercase">Asset Intelligence Vault Locked</p>
-        <button onClick={() => navigate(-1)} className="text-blue-400 flex items-center gap-2 text-xs uppercase tracking-wider hover:underline">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center font-mono">
+        <p className="text-slate-400 mb-4 text-xs tracking-widest uppercase">Asset Intelligence Vault Locked</p>
+        <button onClick={() => navigate(-1)} className="text-blue-600 flex items-center gap-2 text-xs uppercase tracking-wider hover:underline font-bold">
           <ArrowLeft size={14} /> Return to Safety
         </button>
       </div>
     );
   }
 
-  // ব্রোশিওর ডাউনলোডের অ্যালার্ট ফাংশন
   const handleDownloadBrochure = () => {
     alert("Brochure downloaded successfully!");
   };
-
-
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // ফর্মে কাস্টমারের ইনপুট করা ডাটা এবং প্রোপার্টি অবজেক্টের ডাটা একসাথে করা
     const formData = {
       userName: e.target.userName.value,
       userEmail: e.target.userEmail.value,
       userPhone: e.target.userPhone.value,
       userMessage: e.target.userMessage.value,
-      
-      // 🎯 ডাটাবেজ থেকে প্রোপার্টির সাথে আসা এজেন্টের ডাটা
-      agentEmail: user?.email, // এজেন্টের মেইল আইডি (যেমন: leo@deo.com)
+      agentEmail: user?.email,
       agencyName: user?.agencyName || "Agent",
       propertyTitle: singleData?.title,
       propertyPrice: singleData?.price,
-      propertyLink: window.location.href // কারেন্ট পেজের লাইভ লিংক
+      propertyLink: window.location.href
     };
 
     try {
-      // আপনার ব্যাকএন্ড এপিআই-তে রিকোয়েস্ট পাঠানো
       const response = await fetch('http://localhost:4000/api/contact-agent', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
 
       const data = await response.json();
 
       if (data.success) {
-        alert("আপনার মেসেজটি সফলভাবে এজেন্টের কাছে ইমেল আকারে পাঠানো হয়েছে!");
-        e.target.reset(); // ফরম খালি করা
+        alert("আপনার মেসেজটি সফলভাবে এজেন্টের কাছে ইমেল আকারে পাঠানো হয়েছে!");
+        e.target.reset();
       } else {
-        alert("দুঃখিত, ইমেল পাঠানো যায়নি। আবার চেষ্টা করুন।");
+        alert("দুঃখিত, ইমেল পাঠানো যায়নি। আবার চেষ্টা করুন।");
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("সার্ভার কানেকশনে সমস্যা হয়েছে।");
+      alert("সার্ভার কানেকশনে সমস্যা হয়েছে।");
     } finally {
       setLoading(false);
     }
   };
 
-
-
-
   return (
-    <div className="min-h-screen bg-slate-950 text-white pt-32 pb-24 px-6 relative overflow-hidden">
-      <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-blue-600/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[160px] pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 pt-28 pb-24 px-6 relative overflow-hidden">
+      
+      {/* 🟢 Booking Modal Rendered Here */}
+      <BookNowModal
+        isOpen={isBookModalOpen}
+        onClose={() => setIsBookModalOpen(false)}
+        propertyTitle={singleData?.title}
+      />
 
       <div className="max-w-7xl mx-auto relative z-10">
 
-        {/* ================= BACK BUTTON ================= */}
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-8 text-slate-500 hover:text-blue-400 flex items-center gap-2 text-xs uppercase font-mono tracking-widest transition-colors group"
-        >
-          <ArrowLeft size={14} className="transform group-hover:-translate-x-1 transition-transform" />
-          Back to Master Portfolio
-        </button>
+        {/* ================= BACK BUTTON & HEADER ACTIONS ================= */}
+        <div className="flex items-center justify-between mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-slate-500 hover:text-blue-600 flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors group"
+          >
+            <ArrowLeft size={14} className="transform group-hover:-translate-x-1 transition-transform" />
+            Back to Master Portfolio
+          </button>
 
-        {/* ================= HERO IMAGE BANNER / 3D VIRTUAL TOUR CONTAINER ================= */}
-        <div className="w-full h-[500px] md:h-[550px] rounded-[3.5rem] overflow-hidden relative border border-slate-900 shadow-2xl mb-16 group bg-slate-950">
+          {/* 🌟 ৩ডি বাটনটি ইমেজ সেকশনে স্থানান্তরিত বিকল্প হিসেবে হেডার ডকে যুক্ত করা হলো */}
+          <button
+            onClick={() => {
+              setIs3DMode(!is3DMode);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className={`px-4 py-2 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all border flex items-center gap-2 ${
+              is3DMode
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10'
+                : 'bg-white text-slate-700 border-slate-200 hover:border-blue-500 hover:text-blue-600'
+            }`}
+          >
+            <Eye size={14} className={is3DMode ? "" : "text-blue-600"} />
+            <span>{is3DMode ? "Close VR Tour" : "3D VR View"}</span>
+          </button>
+        </div>
+
+        {/* ================= HERO IMAGE BANNER / 3D CONTAINER ================= */}
+        <div className="w-full h-[500px] md:h-[550px] rounded-[2.5rem] overflow-hidden relative border border-slate-200/80 shadow-lg mb-12 group bg-slate-100">
 
           {!is3DMode ? (
-            /* LAYER A: ২ডি ইমেজ কভার মোড */
             <>
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent z-10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent z-10" />
 
               <div className="absolute top-6 left-8 z-20 flex gap-3">
-                <span className="bg-slate-950/80 backdrop-blur-md text-slate-400 border border-slate-900 text-[10px] font-mono tracking-widest px-4 py-2 rounded-xl uppercase">
-                  {singleData.category}
+                <span className="bg-white/90 backdrop-blur-md text-slate-800 border border-slate-200/80 text-[10px] font-bold tracking-widest px-4 py-2 rounded-xl uppercase shadow-sm">
+                  {singleData.category || "Estate"}
                 </span>
-                <span className="bg-blue-500 text-white text-[10px] font-mono font-bold tracking-widest px-4 py-2 rounded-xl uppercase shadow-lg shadow-blue-500/20 flex items-center gap-1.5">
-                  <Sparkles size={11} /> {singleData.tag}
+                <span className="bg-blue-600 text-white text-[10px] font-bold tracking-widest px-4 py-2 rounded-xl uppercase shadow-md shadow-blue-500/20 flex items-center gap-1.5">
+                  <Sparkles size={11} /> {singleData.tag || "Featured"}
                 </span>
               </div>
 
@@ -283,11 +286,9 @@ console.log(singleData);
               />
             </>
           ) : (
-            /* LAYER B: ৩ডি স্পেশাল অডিও ট্যুর ভিউপোর্ট (জুম ফাংশন সহ) */
             <div className="w-full h-full relative">
               <Canvas camera={{ position: [0, 0, 0.1], fov: 70 }}>
                 <DrawingRoomScene imageUrl={singleData.img} />
-
                 <OrbitControls
                   enableZoom={true}
                   minDistance={0.01}
@@ -295,27 +296,25 @@ console.log(singleData);
                   enablePan={false}
                   rotateSpeed={-0.3}
                 />
-
                 <SpatialAudioEngine isMuted={isMuted} />
               </Canvas>
 
-              {/* লাইভ ইন্ডিকেটরস */}
-              <div className="absolute top-6 left-8 z-20 pointer-events-none bg-slate-950/85 border border-slate-900 backdrop-blur-md p-4 rounded-2xl flex flex-col gap-1 shadow-2xl">
+              <div className="absolute top-6 left-8 z-20 pointer-events-none bg-white/90 border border-slate-200/80 backdrop-blur-md p-4 rounded-2xl flex flex-col gap-1 shadow-md">
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-[9px] font-mono text-blue-400 tracking-widest uppercase font-black">VR Tour Active</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="text-[10px] text-blue-600 tracking-widest uppercase font-black">VR Tour Active</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-light">Scroll to Zoom In/Out • Drag to look around</span>
+                <span className="text-[10px] text-slate-500 font-medium">Scroll to Zoom • Drag to look around</span>
               </div>
 
-              {/* ইন্টারেক্টিভ উইজেট ডক */}
               <div className="absolute bottom-6 right-8 z-20 flex items-center gap-2">
                 <button
                   onClick={() => setIsMuted(!isMuted)}
-                  className={`p-3.5 rounded-xl border transition-all duration-300 backdrop-blur-md ${isMuted
-                      ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                      : 'bg-slate-900/90 border-slate-800 text-blue-400 hover:border-blue-500/40'
-                    }`}
+                  className={`p-3 rounded-xl border transition-all backdrop-blur-md ${
+                    isMuted
+                      ? 'bg-rose-50 border-rose-200 text-rose-600'
+                      : 'bg-white border-slate-200 text-slate-700 hover:border-blue-500'
+                  }`}
                   title={isMuted ? "Unmute Space" : "Mute Space"}
                 >
                   {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -323,176 +322,153 @@ console.log(singleData);
 
                 <button
                   onClick={() => setIs3DMode(false)}
-                  className="p-3.5 bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl text-xs font-mono tracking-wider transition-all duration-300 backdrop-blur-md"
+                  className="p-3 bg-slate-900 border border-slate-900 text-white rounded-xl text-xs font-bold tracking-wider hover:bg-slate-800 transition-all"
                 >
-                  Exit 3D
+                  Exit 3D Mode
                 </button>
-              </div>
-
-              {/* নেভিগেশন গাইড */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none hidden md:flex items-center gap-2 bg-slate-950/80 border border-slate-900 backdrop-blur-md text-[9px] font-mono font-bold px-4 py-2 rounded-lg tracking-wider text-slate-400">
-                <Move size={12} className="text-blue-400 animate-bounce" />
-                <span>Scroll to Zoom • Drag to look around</span>
               </div>
             </div>
           )}
-
         </div>
 
         {/* ================= MAIN CONTENT GRID ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-          {/* বাম পাশ: মূল প্রজেক্ট ডিটেইলস */}
+          {/* বাম পাশ: প্রজেক্ট ডিটেইলস */}
           <div className="lg:col-span-8">
             <div className="mb-8">
-              <h1 className="text-4xl md:text-6xl font-light font-serif tracking-tight mb-4 leading-tight">
+              <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-3">
                 {singleData.title}
               </h1>
 
-              <p className="text-slate-400 flex items-center gap-2 text-sm font-light">
-                <MapPin size={16} className="text-blue-500" /> {singleData.location}
+              <p className="text-slate-500 flex items-center gap-1.5 text-sm font-semibold">
+                <MapPin size={16} className="text-blue-600" /> {singleData.location}
               </p>
             </div>
 
             {/* ৪টি কোর স্পেসিফিকেশন গ্রিড */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 bg-slate-900/10 border border-slate-900 rounded-[2.5rem] backdrop-blur-3xl mb-6">
-              <div className="bg-slate-950/40 border border-slate-900/60 p-5 rounded-[2rem] text-center">
-                <BedDouble size={20} className="text-slate-600 mx-auto mb-2" />
-                <span className="block text-lg font-bold text-slate-200">{singleData.beds}</span>
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Bedrooms</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-2 bg-white border border-slate-200/80 rounded-3xl shadow-sm mb-6">
+              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                <BedDouble size={20} className="text-slate-400 mx-auto mb-1.5" />
+                <span className="block text-base font-extrabold text-slate-900">{singleData.beds}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bedrooms</span>
               </div>
-              <div className="bg-slate-950/40 border border-slate-900/60 p-5 rounded-[2rem] text-center">
-                <Bath size={20} className="text-slate-600 mx-auto mb-2" />
-                <span className="block text-lg font-bold text-slate-200">{singleData.baths}</span>
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Bathrooms</span>
+              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                <Bath size={20} className="text-slate-400 mx-auto mb-1.5" />
+                <span className="block text-base font-extrabold text-slate-900">{singleData.baths}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Bathrooms</span>
               </div>
-              <div className="bg-slate-950/40 border border-slate-900/60 p-5 rounded-[2rem] text-center">
-                <Maximize2 size={18} className="text-slate-600 mx-auto mb-2.5" />
-                <span className="block text-sm font-bold text-slate-200 mt-0.5">{singleData.sqft ? singleData.sqft.split(' ')[0] : 'N/A'}</span>
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Sq. Footage</span>
+              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                <Maximize2 size={18} className="text-slate-400 mx-auto mb-2" />
+                <span className="block text-xs font-extrabold text-slate-900">{singleData.sqft ? singleData.sqft.split(' ')[0] : 'N/A'}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sq. Footage</span>
               </div>
-              <div className="bg-slate-950/40 border border-slate-900/60 p-5 rounded-[2rem] text-center">
-                <Building size={18} className="text-slate-600 mx-auto mb-2.5" />
-                <span className="block text-xs font-mono font-bold text-blue-400 uppercase mt-1">{singleData.status || 'Active'}</span>
-                <span className="text-[10px] font-mono text-slate-500 tracking-wider uppercase block mt-0.5">Build Status</span>
+              <div className="bg-slate-50 p-4 rounded-2xl text-center border border-slate-100">
+                <Building size={18} className="text-slate-400 mx-auto mb-2" />
+                <span className="block text-xs font-bold text-emerald-600 uppercase">{singleData.status || 'Active'}</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wider uppercase block">Build Status</span>
               </div>
             </div>
 
-            {/* 🌟 নতুন অ্যাকশন বাটন ডক (গ্রিডের ঠিক নিচে সংযুক্ত করা হয়েছে) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
+            {/* 🌟 নতুন অ্যাকশন বাটন ডক (এখানে "Book Now" সংযুক্ত করা হয়েছে) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+              
               {/* ১. ডাউনলোড ব্রোশিওর বাটন */}
               <button
                 onClick={handleDownloadBrochure}
-                className="w-full px-6 py-4 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white font-mono text-xs font-bold tracking-[0.15em] uppercase rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 active:scale-98"
+                className="w-full px-6 py-3.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 active:scale-98"
               >
-                <Download size={14} />
+                <Download size={15} />
                 <span>Download Brochure</span>
               </button>
 
-              {/* ২. ভার্চুয়াল ট্যুর বাটন (আগের ফুল ফাংশনালিটি সহ) */}
+              {/* 🎯 ২. Book Now Button (Modal Triggers Here) */}
               <button
-                onClick={() => {
-                  setIs3DMode(true);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`w-full px-6 py-4 font-mono text-xs font-bold tracking-[0.15em] uppercase rounded-2xl transition-all duration-300 flex items-center justify-center gap-2.5 active:scale-98 ${is3DMode
-                    ? 'bg-blue-600 text-white border border-blue-500 shadow-lg shadow-blue-500/20'
-                    : 'bg-blue-600/10 hover:bg-blue-600 border border-blue-500/20 hover:border-blue-500 text-blue-400 hover:text-white shadow-sm'
-                  }`}
+                onClick={() => setIsBookModalOpen(true)}
+                className="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider rounded-2xl transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 active:scale-98"
               >
-                <Eye size={14} className={!is3DMode ? "animate-pulse" : ""} />
-                <span>{is3DMode ? "Virtual Tour Active" : "Explore Virtual Tour"}</span>
+                <Calendar size={15} />
+                <span>Book Now / Schedule Tour</span>
               </button>
+
             </div>
 
-            {/* ডেসক্রিপশন টেক্সট এরিয়া */}
-            <div className="border-t border-slate-900 pt-8">
-              <h3 className="text-xl font-bold mb-4 tracking-tight text-slate-200">The Architectural Legacy</h3>
-              <p className="text-slate-400 text-sm font-light leading-relaxed mb-6">
-                Meticulously designed to redefine modern luxury, <span className="text-slate-200 font-medium">{singleData.title}</span> stands as a triumph of contemporary architecture in the heart of {singleData.location}. Featuring expansive floor-to-ceiling glass paneling and raw, premium textures, this estate seamlessly blends absolute privacy with panoramic horizons.
+            {/* ডেসক্রিপশন টেক্সট এরিয়া */}
+            <div className="border-t border-slate-200/80 pt-8">
+              <h3 className="text-lg font-black text-slate-900 mb-3">The Architectural Legacy</h3>
+              <p className="text-slate-600 text-sm font-normal leading-relaxed mb-4">
+                Meticulously designed to redefine modern luxury, <span className="text-slate-900 font-semibold">{singleData.title}</span> stands as a triumph of contemporary architecture in the heart of {singleData.location}. Featuring expansive floor-to-ceiling glass paneling and raw, premium textures, this estate seamlessly blends absolute privacy with panoramic horizons.
               </p>
-              <p className="text-slate-400 text-sm font-light leading-relaxed">
+              <p className="text-slate-600 text-sm font-normal leading-relaxed">
                 Every corner of this {singleData.sqft} estate has been curated for high-net-worth capital preservation and premium lifestyle comfort. From structural integrity to bespoke smart home automation, this is not just a residence—it is an appreciating masterpiece.
               </p>
             </div>
           </div>
 
-          {/* ডান পাশ: ইনভেস্টমেন্ট সাইডবার অ্যাকুইজিশন ডেক্স */}
-          <div className="lg:col-span-4 bg-slate-900/20 border border-slate-900 p-8 rounded-[2.5rem] backdrop-blur-3xl h-max relative">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block mb-1">Acquisition Value</span>
-            <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-blue-400 tracking-tight mb-6">
+          {/* ডান পাশ: ইনভেস্টমেন্ট সাইডবার / কন্টাক্ট ফরম */}
+          <div className="lg:col-span-4 bg-white border border-slate-200/80 p-6 md:p-8 rounded-3xl shadow-sm h-max">
+            <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest block mb-1">Acquisition Value</span>
+            <div className="text-3xl font-black text-slate-900 tracking-tight mb-6">
               {singleData.price}
             </div>
 
-            
-
-          
-
-            <h4 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-300 mb-4 flex items-center gap-2">
-              <MessageSquare size={13} className="text-blue-400" /> Request Private Desk
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-4 flex items-center gap-2">
+              <MessageSquare size={14} className="text-blue-600" /> Request Private Desk
             </h4>
 
-            <form onSubmit={handleContactSubmit} className="space-y-6 bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 md:p-8 shadow-2xl shadow-blue-950/20 max-w-xl mx-auto">
-
-              {/* ফর্ম হেডার (ঐচ্ছিক, দেখতে সুন্দর লাগবে তাই যুক্ত করা হয়েছে) */}
-              <div className="border-b border-slate-800/60 pb-4 mb-2">
-                <h3 className="text-lg font-black text-white uppercase tracking-wider bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                  Get in Touch
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">Leave your details and our property consultant will reach out shortly.</p>
-              </div>
-
+            <form onSubmit={handleContactSubmit} className="space-y-4">
+              
               {/* Full Name */}
-              <div className="group relative">
-                <label className="block text-[11px] uppercase font-bold text-slate-400 tracking-wider group-focus-within:text-blue-400 transition-colors">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
                   Full Name *
                 </label>
                 <input
                   type="text"
                   name="userName"
                   required
-                  className="mt-1.5 w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="John Doe"
                 />
               </div>
 
               {/* Email Address */}
-              <div className="group relative">
-                <label className="block text-[11px] uppercase font-bold text-slate-400 tracking-wider group-focus-within:text-blue-400 transition-colors">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
                   Email Address *
                 </label>
                 <input
                   type="email"  
                   name="userEmail"
                   required
-                  className="mt-1.5 w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="john@example.com"
                 />
               </div>
 
               {/* Phone Number */}
-              <div className="group relative">
-                <label className="block text-[11px] uppercase font-bold text-slate-400 tracking-wider group-focus-within:text-blue-400 transition-colors">
-                  Phone Number <span className="text-[10px] text-slate-500 lowercase">(optional)</span>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
+                  Phone Number
                 </label>
                 <input
                   type="tel"
                   name="userPhone"
-                  className="mt-1.5 w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
                   placeholder="+88017XXXXXXXX"
                 />
               </div>
 
               {/* Your Message */}
-              <div className="group relative">
-                <label className="block text-[11px] uppercase font-bold text-slate-400 tracking-wider group-focus-within:text-blue-400 transition-colors">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">
                   Your Message *
                 </label>
                 <textarea
                   name="userMessage"
                   required
-                  rows="4"
-                  className="mt-1.5 w-full bg-slate-950/60 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all duration-200 resize-none"
+                  rows="3"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-all resize-none"
                   placeholder="Hi, I am interested in this property..."
                 ></textarea>
               </div>
@@ -501,16 +477,9 @@ console.log(singleData);
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full cursor-pointer relative mt-2 overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-widest py-3.5 px-4 shadow-xl shadow-blue-600/10 active:scale-[0.99] transition-all duration-200 disabled:bg-slate-800 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full mt-2 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-[0.99] disabled:bg-slate-300 disabled:cursor-not-allowed"
               >
-                {loading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-slate-400 border-t-white rounded-full animate-spin"></span>
-                    <span>Sending Message...</span>
-                  </div>
-                ) : (
-                  "Send Message to Agent"
-                )}
+                {loading ? "Sending..." : "Send Message to Agent"}
               </button>
             </form>
           </div>
