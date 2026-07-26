@@ -22,6 +22,7 @@ export default function PropertyManagement() {
     brochureLink: '',
     totalShares: '',
     sharePrice: '',
+    bookingPrice:'',
     buildingType: 'Residential',
     frontRoad: '',
     unitPerFloor: '',
@@ -219,6 +220,10 @@ export default function PropertyManagement() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Price Per Share (৳) <span className="text-indigo-600">*</span></label>
               <input type="number" placeholder="e.g. 2500000" value={newProp.sharePrice} onChange={e => setNewProp({ ...newProp, sharePrice: e.target.value })} className="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Booking Price (৳) <span className="text-indigo-600">*</span></label>
+              <input type="number" placeholder="e.g. 2500000" value={newProp.bookingPrice} onChange={e => setNewProp({ ...newProp, bookingPrice: e.target.value })} className="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
             </div>
           </div>
         </div>

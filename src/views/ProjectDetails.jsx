@@ -134,7 +134,7 @@ const ProjectDetails = () => {
               onClick={() => setIsBookModalOpen(true)}
               className="px-6 py-3 bg shadow-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-lg transition-all"
             >
-              Request Custom Property
+              Book Now
             </button>
             <button
               onClick={() => {
