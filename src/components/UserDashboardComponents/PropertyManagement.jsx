@@ -1,5 +1,5 @@
 import React, { use, useEffect, useState } from 'react';
-import { Plus, Trash2, Check, Image, Layers, Building2, FileText } from 'lucide-react';
+import { Plus, Trash2, Image, Layers, Building2, FileText, Sparkles, MapPin, DollarSign } from 'lucide-react';
 import AgentContext from '../../context/AgentContext';
 
 export default function PropertyManagement() {
@@ -69,10 +69,6 @@ export default function PropertyManagement() {
     setUnits(units.filter((_, i) => i !== index));
   };
 
-  const toggleAmenity = (item) => {
-    setSelectedAmenities(prev => prev.includes(item) ? prev.filter(a => a !== item) : [...prev, item]);
-  };
-
   const handleImageChange = (e) => {
     if (e.target.files) {
       setSelectedImages(Array.from(e.target.files));
@@ -116,7 +112,7 @@ export default function PropertyManagement() {
       setSelectedImages([]);
       setSelectedAmenities([]);
       setUnits([{ unitName: 'Unit A', sqft: '', beds: '', baths: '', balconies: '', isAvailable: true }]);
-      alert("Property Added Successfully!");
+      alert("Property Published Successfully!");
 
     } catch (error) {
       console.error("Error creating property:", error);
@@ -125,7 +121,7 @@ export default function PropertyManagement() {
   };
 
   const deleteProperty = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this property?")) return;
+    if (!window.confirm("Are you sure you want to delete this property listing?")) return;
 
     try {
       const response = await fetch(`http://localhost:4000/projects/${id}`, {
@@ -143,109 +139,190 @@ export default function PropertyManagement() {
   };
 
   return (
-    <div className="space-y-6 bg-slate-50 p-6 min-h-screen text-slate-800">
-      <div>
-        <h2 className="text-xl font-black uppercase tracking-wider flex items-center gap-2 text-slate-900">
-          <Building2 className="text-blue-600" /> Property Management Console
-        </h2>
-        <p className="text-xs text-slate-500">Configure building specifications, share ownership structure, and floor units.</p>
+    <div className="min-h-screen bg-slate-50 text-slate-800 p-4 md:p-8 space-y-8 font-sans">
+      
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold mb-2">
+            <Sparkles size={14} className="text-indigo-600" /> Real Estate Portfolio Console
+          </div>
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            Property Management
+          </h1>
+          <p className="text-xs md:text-sm text-slate-500 mt-1">Configure asset specifications, share structures, and unit configurations.</p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6" encType="multipart/form-data">
+      {/* Main Creation Form */}
+      <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-8">
         
-        {/* 1. Basic Info */}
-        <div className="space-y-2">
-          <h3 className="text-xs font-bold uppercase text-blue-600 tracking-wide">1. Basic Info & Pricing</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input type="text" placeholder="Property Title *" value={newProp.title} onChange={e => setNewProp({ ...newProp, title: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" required />
-            <input type="text" placeholder="Total Valuation Price (e.g. ৳2,50,00,000) *" value={newProp.price} onChange={e => setNewProp({ ...newProp, price: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" required />
-            <input type="text" placeholder="Location" value={newProp.location} onChange={e => setNewProp({ ...newProp, location: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
+        {/* 1. Basic Info & Pricing */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+            <Building2 size={18} className="text-indigo-600" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">1. Basic Info & Valuation</h3>
+          </div>
 
-            <select value={newProp.category} onChange={e => setNewProp({ ...newProp, category: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-              {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
-            </select>
-            <input type="text" placeholder="Tag (e.g. Luxury, Hot Deal)" value={newProp.tag} onChange={e => setNewProp({ ...newProp, tag: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
-            
-            <select value={newProp.status} onChange={e => setNewProp({ ...newProp, status: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-blue-500">
-              <option value="completed">Completed</option>
-              <option value="under-construction">Under Construction</option>
-              <option value="upcoming">Upcoming</option>
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Property Title <span className="text-indigo-600">*</span></label>
+              <input type="text" placeholder="e.g. Grand Vista Skyline" value={newProp.title} onChange={e => setNewProp({ ...newProp, title: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Valuation Price <span className="text-indigo-600">*</span></label>
+              <input type="text" placeholder="e.g. ৳2,50,00,000" value={newProp.price} onChange={e => setNewProp({ ...newProp, price: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Location Address</label>
+              <input type="text" placeholder="e.g. Gulshan 2, Dhaka" value={newProp.location} onChange={e => setNewProp({ ...newProp, location: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Category</label>
+              <select value={newProp.category} onChange={e => setNewProp({ ...newProp, category: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all">
+                {categories.map((cat, i) => <option key={i} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Marketing Tag</label>
+              <input type="text" placeholder="e.g. Premium Deal / Luxury" value={newProp.tag} onChange={e => setNewProp({ ...newProp, tag: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Status</label>
+              <select value={newProp.status} onChange={e => setNewProp({ ...newProp, status: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all">
+                <option value="completed">Completed</option>
+                <option value="under-construction">Under Construction</option>
+                <option value="upcoming">Upcoming</option>
+              </select>
+            </div>
           </div>
         </div>
 
         {/* 2. Fractional Share Structure */}
-        <div className="space-y-2 bg-blue-50/50 p-4 border border-blue-100 rounded-xl">
-          <h3 className="text-xs font-bold uppercase text-blue-700 tracking-wide">2. Fractional Share Structure</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="number" placeholder="Total Share Count (e.g. 10) *" value={newProp.totalShares} onChange={e => setNewProp({ ...newProp, totalShares: e.target.value })} className="px-3 py-2.5 bg-white border border-blue-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" required />
-            <input type="number" placeholder="Price Per Share (৳) *" value={newProp.sharePrice} onChange={e => setNewProp({ ...newProp, sharePrice: e.target.value })} className="px-3 py-2.5 bg-white border border-blue-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" required />
+        <div className="bg-gradient-to-r from-indigo-50/80 via-purple-50/40 to-slate-50/60 p-5 rounded-2xl border border-indigo-100 space-y-3">
+          <div className="flex items-center gap-2">
+            <DollarSign size={16} className="text-indigo-600" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-900">2. Fractional Ownership Structure</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Total Share Count <span className="text-indigo-600">*</span></label>
+              <input type="number" placeholder="e.g. 10" value={newProp.totalShares} onChange={e => setNewProp({ ...newProp, totalShares: e.target.value })} className="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Price Per Share (৳) <span className="text-indigo-600">*</span></label>
+              <input type="number" placeholder="e.g. 2500000" value={newProp.sharePrice} onChange={e => setNewProp({ ...newProp, sharePrice: e.target.value })} className="w-full px-4 py-2.5 bg-white border border-indigo-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" required />
+            </div>
           </div>
         </div>
 
         {/* 3. Building Specifications & Features */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold uppercase text-blue-600 tracking-wide">3. Building Specifications & Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input type="text" placeholder="Building Type (e.g. Residential / Commercial)" value={newProp.buildingType} onChange={e => setNewProp({ ...newProp, buildingType: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
-            <input type="text" placeholder="Front Road (e.g. 40 Feet Road)" value={newProp.frontRoad} onChange={e => setNewProp({ ...newProp, frontRoad: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
-            <input type="number" placeholder="Unit Per Floor (e.g. 4)" value={newProp.unitPerFloor} onChange={e => setNewProp({ ...newProp, unitPerFloor: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
+        <div className="space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 pb-2 border-b border-slate-100">3. Building Specifications & Features</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Building Type</label>
+              <input type="text" placeholder="e.g. Residential / Commercial" value={newProp.buildingType} onChange={e => setNewProp({ ...newProp, buildingType: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Front Road Access</label>
+              <input type="text" placeholder="e.g. 40 Feet Wide Road" value={newProp.frontRoad} onChange={e => setNewProp({ ...newProp, frontRoad: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Units Per Floor</label>
+              <input type="number" placeholder="e.g. 4" value={newProp.unitPerFloor} onChange={e => setNewProp({ ...newProp, unitPerFloor: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
           </div>
 
-          {/* Lifts (Number Inputs) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            <input type="number" placeholder="Passenger Lift Count (e.g. 2)" value={newProp.passengerLift} onChange={e => setNewProp({ ...newProp, passengerLift: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
-            <input type="number" placeholder="Cargo Lift Count (e.g. 1)" value={newProp.cargoLift} onChange={e => setNewProp({ ...newProp, cargoLift: e.target.value })} className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-1">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Passenger Lift Count</label>
+              <input type="number" placeholder="e.g. 2" value={newProp.passengerLift} onChange={e => setNewProp({ ...newProp, passengerLift: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Cargo Lift Count</label>
+              <input type="number" placeholder="e.g. 1" value={newProp.cargoLift} onChange={e => setNewProp({ ...newProp, cargoLift: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
           </div>
 
-          {/* Features Checkboxes */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+          {/* Feature Checkboxes */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3">
             {[
               { id: 'electricityBackup', label: 'Electricity Backup' },
               { id: 'rooftopGardening', label: 'Rooftop Gardening' },
-              { id: 'carParking', label: 'Car Parking' },
-              { id: 'conventionHall', label: 'Convention Hall' },
+              { id: 'carParking', label: 'Dedicated Parking' },
+              { id: 'conventionHall', label: 'Community Hall' },
             ].map(item => (
-              <label key={item.id} className="flex items-center gap-2 bg-slate-50 p-2.5 border border-slate-200 rounded-xl cursor-pointer text-xs text-slate-700 select-none hover:bg-slate-100">
+              <label key={item.id} className="flex items-center gap-3 p-3 bg-slate-50/80 border border-slate-200 rounded-xl cursor-pointer select-none hover:bg-white hover:border-indigo-300 transition-all">
                 <input
                   type="checkbox"
                   checked={newProp[item.id]}
                   onChange={e => setNewProp({ ...newProp, [item.id]: e.target.checked })}
-                  className="rounded bg-white border-slate-300 text-blue-600 focus:ring-0"
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-white"
                 />
-                {item.label}
+                <span className="text-xs text-slate-700 font-semibold">{item.label}</span>
               </label>
             ))}
           </div>
         </div>
 
-        {/* 4. Available Units Dynamic Breakdown */}
-        <div className="space-y-3 bg-slate-50 p-4 border border-slate-200 rounded-xl">
+        {/* 4. Available Units Breakdown */}
+        <div className="space-y-4 bg-emerald-50/30 p-5 rounded-2xl border border-emerald-100">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase text-emerald-700 tracking-wide flex items-center gap-1.5">
-              <Layers size={14} /> Available Units Breakdown
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-2">
+              <Layers size={16} className="text-emerald-600" /> Available Floor Units
             </h3>
-            <button type="button" onClick={addUnitField} className="text-[11px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-lg hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-1 font-semibold">
-              <Plus size={12} /> Add Unit
+            <button type="button" onClick={addUnitField} className="text-xs bg-emerald-600 text-white px-3 py-1.5 rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-1 font-semibold shadow-sm">
+              <Plus size={14} /> Add Unit
             </button>
           </div>
 
           {units.map((unit, index) => (
             <div key={index} className="grid grid-cols-2 md:grid-cols-6 gap-3 p-3 bg-white border border-slate-200 rounded-xl items-center shadow-sm">
-              <input type="text" placeholder="Unit Name" value={unit.unitName} onChange={e => handleUnitChange(index, 'unitName', e.target.value)} className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" required />
-              <input type="number" placeholder="Sqft (e.g. 1450)" value={unit.sqft} onChange={e => handleUnitChange(index, 'sqft', e.target.value)} className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" required />
-              <input type="number" placeholder="Beds" value={unit.beds} onChange={e => handleUnitChange(index, 'beds', e.target.value)} className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
-              <input type="number" placeholder="Baths" value={unit.baths} onChange={e => handleUnitChange(index, 'baths', e.target.value)} className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
-              <input type="number" placeholder="Balconies" value={unit.balconies} onChange={e => handleUnitChange(index, 'balconies', e.target.value)} className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs" />
-              
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-1 text-[11px] text-slate-600 font-medium">
-                  <input type="checkbox" checked={unit.isAvailable} onChange={e => handleUnitChange(index, 'isAvailable', e.target.checked)} />
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Unit Name</label>
+                <input type="text" placeholder="Unit Name" value={unit.unitName} onChange={e => handleUnitChange(index, 'unitName', e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900" required />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Area (Sqft)</label>
+                <input type="number" placeholder="e.g. 1450" value={unit.sqft} onChange={e => handleUnitChange(index, 'sqft', e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900" required />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Bedrooms</label>
+                <input type="number" placeholder="Beds" value={unit.beds} onChange={e => handleUnitChange(index, 'beds', e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900" />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Bathrooms</label>
+                <input type="number" placeholder="Baths" value={unit.baths} onChange={e => handleUnitChange(index, 'baths', e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900" />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 mb-1">Balconies</label>
+                <input type="number" placeholder="Balconies" value={unit.balconies} onChange={e => handleUnitChange(index, 'balconies', e.target.value)} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900" />
+              </div>
+
+              <div className="flex items-center justify-between pt-4 md:pt-0">
+                <label className="flex items-center gap-1.5 text-xs text-slate-700 font-medium cursor-pointer">
+                  <input type="checkbox" checked={unit.isAvailable} onChange={e => handleUnitChange(index, 'isAvailable', e.target.checked)} className="rounded text-emerald-600 bg-white" />
                   Available
                 </label>
                 {units.length > 1 && (
                   <button type="button" onClick={() => removeUnitField(index)} className="text-rose-500 hover:text-rose-700 p-1">
-                    <Trash2 size={14} />
+                    <Trash2 size={16} />
                   </button>
                 )}
               </div>
@@ -254,77 +331,104 @@ export default function PropertyManagement() {
         </div>
 
         {/* 5. Media & Brochure */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <label className="block text-[10px] text-slate-600 uppercase font-bold flex items-center gap-1"><Image size={12} /> Upload Property Images</label>
-            <input type="file" accept="image/*" multiple onChange={handleImageChange} className="w-full text-xs text-slate-500 file:mr-4 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer" />
-            {selectedImages.length > 0 && <p className="text-[10px] text-emerald-600 font-semibold">{selectedImages.length} image(s) attached.</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2">
+            <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Image size={14} className="text-indigo-600" /> Property Images
+            </label>
+            <input type="file" accept="image/*" multiple onChange={handleImageChange} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer" />
+            {selectedImages.length > 0 && <p className="text-xs text-emerald-600 font-bold">{selectedImages.length} file(s) selected.</p>}
           </div>
 
-          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <label className="block text-[10px] text-slate-600 uppercase font-bold flex items-center gap-1"><FileText size={12} /> PDF Brochure Link</label>
-            <input type="text" placeholder="https://drive.google.com/your-brochure.pdf" value={newProp.brochureLink} onChange={e => setNewProp({ ...newProp, brochureLink: e.target.value })} className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:border-blue-500" />
+          <div className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-2">
+            <label className="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <FileText size={14} className="text-indigo-600" /> PDF Brochure Link
+            </label>
+            <input type="text" placeholder="https://drive.google.com/your-brochure.pdf" value={newProp.brochureLink} onChange={e => setNewProp({ ...newProp, brochureLink: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-indigo-600 transition-all" />
           </div>
         </div>
 
+        {/* Description */}
         <div>
-          <textarea placeholder="Detailed Project Description Structure..." value={newProp.description} onChange={e => setNewProp({ ...newProp, description: e.target.value })} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-blue-500" rows="2" />
+          <label className="block text-xs font-bold text-slate-700 mb-1.5">Detailed Description</label>
+          <textarea placeholder="Write full specifications and project highlights..." value={newProp.description} onChange={e => setNewProp({ ...newProp, description: e.target.value })} className="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" rows="3" />
         </div>
 
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm">
-          <Plus size={16} /> Save & Publish Listing
+        {/* Submit Button */}
+        <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3.5 rounded-2xl text-xs font-extrabold uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md shadow-indigo-600/20 cursor-pointer">
+          <Plus size={18} /> Save & Publish Property
         </button>
       </form>
 
-      {/* Properties Table (Light Mode) */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <table className="w-full text-left text-xs text-slate-700">
-          <thead className="bg-slate-100 text-[10px] font-bold text-slate-600 uppercase border-b border-slate-200">
-            <tr>
-              <th className="p-4">Title / Price</th>
-              <th className="p-4">Shares Breakdown</th>
-              <th className="p-4">Units Config</th>
-              <th className="p-4">Lifts & Facilities</th>
-              <th className="p-4 text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {properties.map(p => (
-              <tr key={p._id} className="hover:bg-slate-50/80">
-                <td className="p-4 font-bold text-slate-900 flex items-center gap-3">
-                  {p.images && p.images[0] && <img src={p.images[0]} alt={p.title} className="w-10 h-10 object-cover rounded-lg border border-slate-200" />}
-                  <div>
-                    {p.title}
-                    <div className="text-[10px] font-mono text-emerald-600 font-semibold mt-0.5">{p.price}</div>
-                  </div>
-                </td>
-                <td className="p-4 font-mono text-[11px]">
-                  <span className="text-blue-600 font-bold">{p.availableShares ?? p.totalShares}</span> / {p.totalShares} Shares
-                  <div className="text-[10px] text-slate-400">৳{p.sharePrice}/share</div>
-                </td>
-                <td className="p-4">
-                  <div className="flex flex-wrap gap-1">
-                    {p.availableUnits?.map((u, i) => (
-                      <span key={i} className="bg-slate-100 text-[10px] px-2 py-0.5 rounded text-slate-600 border border-slate-200 font-medium">
-                        {u.unitName}: {u.sqft} sqft
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="p-4 text-[10px]">
-                  {p.passengerLift > 0 && <span className="bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded mr-1 font-semibold">{p.passengerLift} Passenger Lift</span>}
-                  {p.cargoLift > 0 && <span className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded mr-1 font-semibold">{p.cargoLift} Cargo Lift</span>}
-                </td>
-                <td className="p-4 text-center space-x-2">
-                  <button onClick={() => deleteProperty(p._id)} className="bg-slate-100 p-2 rounded-lg text-rose-600 hover:bg-rose-600 hover:text-white transition-colors">
-                    <Trash2 size={13} />
-                  </button>
-                </td>
+      {/* Properties Table Section */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xl shadow-slate-200/50 overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">Listed Properties ({properties.length})</h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="p-4">Property</th>
+                <th className="p-4">Share Breakdown</th>
+                <th className="p-4">Available Units</th>
+                <th className="p-4">Facilities</th>
+                <th className="p-4 text-center">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {properties.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="p-8 text-center text-slate-400 font-medium">No properties listed yet.</td>
+                </tr>
+              ) : (
+                properties.map(p => (
+                  <tr key={p._id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-4 font-semibold text-slate-900 flex items-center gap-3">
+                      {p.images && p.images[0] ? (
+                        <img src={p.images[0]} alt={p.title} className="w-12 h-12 object-cover rounded-xl border border-slate-200" />
+                      ) : (
+                        <div className="w-12 h-12 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400"><Building2 size={20} /></div>
+                      )}
+                      <div>
+                        <div className="font-bold text-slate-900">{p.title}</div>
+                        <div className="text-[11px] text-emerald-600 font-mono font-bold mt-0.5">{p.price}</div>
+                        {p.location && <div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5"><MapPin size={10} />{p.location}</div>}
+                      </div>
+                    </td>
+                    <td className="p-4 font-mono">
+                      <span className="text-indigo-600 font-bold">{p.availableShares ?? p.totalShares}</span> / {p.totalShares} Shares
+                      <div className="text-[10px] text-slate-500 font-sans mt-0.5">৳{p.sharePrice}/share</div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-1">
+                        {p.availableUnits?.map((u, i) => (
+                          <span key={i} className="bg-slate-100 text-[10px] px-2 py-0.5 rounded-md text-slate-700 border border-slate-200 font-medium">
+                            {u.unitName}: {u.sqft} sqft
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="p-4 text-[10px]">
+                      <div className="flex flex-wrap gap-1">
+                        {p.passengerLift > 0 && <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-md font-semibold">{p.passengerLift} Pass Lift</span>}
+                        {p.cargoLift > 0 && <span className="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-md font-semibold">{p.cargoLift} Cargo Lift</span>}
+                      </div>
+                    </td>
+                    <td className="p-4 text-center">
+                      <button onClick={() => deleteProperty(p._id)} className="p-2 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all cursor-pointer">
+                        <Trash2 size={15} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
     </div>
   );
 }
