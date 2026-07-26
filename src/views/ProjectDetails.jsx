@@ -15,6 +15,7 @@ const ProjectDetails = () => {
   const [singleData, setSingleData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  console.log(singleData);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -94,6 +95,10 @@ const ProjectDetails = () => {
         isOpen={isBookModalOpen}
         onClose={() => setIsBookModalOpen(false)}
         propertyTitle={singleData?.title}
+        sharePrice={singleData?.sharePrice}
+        bookingPrice={singleData?.bookingPrice}
+        _id={singleData?._id}
+
       />
 
       {/* ================= HERO SECTION ================= */}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, CheckCircle2, Building, User, Mail, Phone, MapPin, CreditCard, DollarSign, Users } from 'lucide-react';
 
-export default function BookNowModal({ isOpen, onClose, propertyTitle }) {
+export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPrice,sharePrice,_id}) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -349,17 +349,7 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle }) {
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
                       />
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Car Parking No</label>
-                      <input
-                        type="text"
-                        name="carParkingNo"
-                        placeholder="e.g. NO / N/A"
-                        value={formData.carParkingNo}
-                        onChange={handleChange}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                      />
-                    </div>
+                    
                   </div>
                 </div>
 
@@ -370,7 +360,9 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle }) {
                       type="text"
                       name="landSharePrice"
                       placeholder="e.g. 18.5 lac"
-                      value={formData.landSharePrice}
+                      disabled
+                      defaultValue={sharePrice}
+                      value={sharePrice}
                       onChange={handleChange}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
                     />
@@ -381,122 +373,18 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle }) {
                       type="text"
                       name="bookingMoney"
                       placeholder="e.g. 5 lac"
-                      value={formData.bookingMoney}
+                      disabled
+                      defaultValue={bookingPrice}
+                      value={bookingPrice}
                       onChange={handleChange}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Car Parking Price</label>
-                    <input
-                      type="text"
-                      name="carParkingPrice"
-                      placeholder="e.g. N/A"
-                      value={formData.carParkingPrice}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Down Payment</label>
-                    <input
-                      type="text"
-                      name="downPayment"
-                      value={formData.downPayment}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
+                 
+                
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Total Agreed Price</label>
-                    <input
-                      type="text"
-                      name="totalAgreedPrice"
-                      placeholder="e.g. 18.5 lac"
-                      value={formData.totalAgreedPrice}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Due Amount</label>
-                    <input
-                      type="text"
-                      name="dueAmount"
-                      placeholder="e.g. 13.5 lac"
-                      value={formData.dueAmount}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Construction Honorarium</label>
-                    <input
-                      type="text"
-                      name="constructionHonorarium"
-                      value={formData.constructionHonorarium}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Mode of Payment */}
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                  <div className="flex items-center gap-6">
-                    <span className="text-[11px] font-black uppercase text-slate-600">Mode of Payment Tk.:</span>
-                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="paymentMode"
-                        value="Cash"
-                        checked={formData.paymentMode === 'Cash'}
-                        onChange={handleChange}
-                        className="accent-emerald-600"
-                      />
-                      Cash
-                    </label>
-                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-800 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="paymentMode"
-                        value="Cheque"
-                        checked={formData.paymentMode === 'Cheque'}
-                        onChange={handleChange}
-                        className="accent-emerald-600"
-                      />
-                      Cheque / Pay Order
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Bank Name</label>
-                      <input
-                        type="text"
-                        name="bankName"
-                        placeholder="e.g. IFIC Bank"
-                        value={formData.bankName}
-                        onChange={handleChange}
-                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-extrabold text-slate-500 uppercase mb-1">Cheque No & Date</label>
-                      <input
-                        type="text"
-                        name="chequeNoAndDate"
-                        placeholder="e.g. 26/04/26"
-                        value={formData.chequeNoAndDate}
-                        onChange={handleChange}
-                        className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900"
-                      />
-                    </div>
-                  </div>
-                </div>
+               
               </div>
 
               {/* SECTION 4: NOMINEE DETAILS */}
