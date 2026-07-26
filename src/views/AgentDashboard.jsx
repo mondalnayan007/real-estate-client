@@ -9,7 +9,6 @@ import LeadManagement from '../components/UserDashboardComponents/LeadManagement
 import CmsSeoControl from '../components/UserDashboardComponents/CmsSeoControl';
 
 // 🌐 নতুন ১২টি ফ্রন্টএন্ড সাব-কম্পোনেন্টস ইম্পোর্ট
-
 import Settings from '../components/UserDashboardComponents/frontendDesign/SubMenus/Settings';
 import Menu from '../components/UserDashboardComponents/frontendDesign/SubMenus/Menu';
 import PageSection from '../components/UserDashboardComponents/frontendDesign/SubMenus/PageSection';
@@ -18,14 +17,10 @@ import Slider from '../components/UserDashboardComponents/frontendDesign/SubMenu
 import Features from '../components/UserDashboardComponents/frontendDesign/SubMenus/Features';
 import Testimonial from '../components/UserDashboardComponents/frontendDesign/SubMenus/Testimonial';
 import Service from '../components/UserDashboardComponents/frontendDesign/SubMenus/Service';
-
-
 import Gallery from '../components/UserDashboardComponents/frontendDesign/SubMenus/Gallery';
 
-
-
 export default function AgentDashboard() {
-  // একটিমাত্র অ্যাক্টিভ স্টেট যা গ্লোবাল এবং সাব-মেনু উভয় ট্র্যাকিং করবে
+  // একটিমাত্র অ্যাক্টিভ স্টেট যা গ্লোবাল এবং সাব-মেনু উভয় ট্র্যাকিং করবে
   const [activeTab, setActiveTab] = useState('analytics');
   const [isFrontendOpen, setIsFrontendOpen] = useState(true); // ড্রপডাউন ওপেন/ক্লোজ স্টেট
 
@@ -39,10 +34,7 @@ export default function AgentDashboard() {
     { id: 'fe-features', label: 'Features' },
     { id: 'fe-testimonial', label: 'Testimonial' },
     { id: 'fe-service', label: 'Service' },
-    
     { id: 'fe-gallery', label: 'Gallery ' },
-    
-    
   ];
 
   // গ্লোবাল স্টেটসমূহ (ডাটাবেস ও এপিআই সিঙ্ক)
@@ -74,49 +66,110 @@ export default function AgentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col xl:flex-row">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col xl:flex-row">
       
       {/* 📁 SIDEBAR STRUCTURE */}
-      <div className="w-full xl:w-72 bg-slate-900 border-r border-slate-800 p-6 flex flex-col justify-between shrink-0">
+      <div className="w-full xl:w-72 bg-white border-r border-slate-200/80 p-6 flex flex-col justify-between shrink-0 shadow-sm">
         <div>
-          <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-800">
-            <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white text-lg">P</div>
+          {/* Logo / Header */}
+          <div className="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100">
+            <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center font-black text-white text-lg shadow-md shadow-blue-500/20">
+              P
+            </div>
             <div>
-              <h1 className="font-black text-sm tracking-tight">Console Panel</h1>
-              <p className="text-[9px] font-mono font-bold tracking-wider text-blue-500">REAL ESTATE CONSOLE</p>
+              <h1 className="font-extrabold text-slate-900 text-sm tracking-tight">Console Panel</h1>
+              <p className="text-[9px] font-mono font-bold tracking-wider text-blue-600 uppercase">Real Estate Console</p>
             </div>
           </div>
 
-          <nav className="space-y-1 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+          <nav className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
             {/* Core Global Nav Tabs */}
-            <button onClick={() => setActiveTab('analytics')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'analytics' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}><BarChart3 size={15} /> 📊 Analytics & Metrics</button>
-            <button onClick={() => setActiveTab('properties')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'properties' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}><Building2 size={15} /> 🏢 Property Inventory</button>
-            <button onClick={() => setActiveTab('branding')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'branding' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}><Palette size={15} /> 🎨 Branding & Theme</button>
-            <button onClick={() => setActiveTab('leads')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'leads' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}><Inbox size={15} /> 📥 Lead Inbox</button>
-            <button onClick={() => setActiveTab('cms')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === 'cms' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}><FileText size={15} /> 📝 CMS & SEO Control</button>
+            <button 
+              onClick={() => setActiveTab('analytics')} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                activeTab === 'analytics' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <BarChart3 size={16} /> 📊 Analytics & Metrics
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('properties')} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                activeTab === 'properties' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Building2 size={16} /> 🏢 Property Inventory
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('branding')} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                activeTab === 'branding' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Palette size={16} /> 🎨 Branding & Theme
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('leads')} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                activeTab === 'leads' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <Inbox size={16} /> 📥 Lead Inbox
+            </button>
+
+            <button 
+              onClick={() => setActiveTab('cms')} 
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                activeTab === 'cms' 
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <FileText size={16} /> 📝 CMS & SEO Control
+            </button>
 
             {/* 🌐 FRONTEND DROPDOWN ACCORDION MODULE */}
-            <div className="pt-2">
+            <div className="pt-3">
               <button 
                 onClick={() => setIsFrontendOpen(!isFrontendOpen)} 
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${frontendSubMenus.some(m => m.id === activeTab) ? 'bg-slate-850 border border-slate-800 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
+                  frontendSubMenus.some(m => m.id === activeTab) 
+                    ? 'bg-rose-50/80 border border-rose-200/80 text-rose-700' 
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
                 <div className="flex items-center gap-3">
-                  <Monitor size={15} className="text-rose-500" /> Frontend
+                  <Monitor size={16} className="text-rose-500" /> Frontend
                 </div>
-                {isFrontendOpen ? <ChevronUp size={14} className="text-slate-500" /> : <ChevronDown size={14} className="text-slate-500" />}
+                {isFrontendOpen ? <ChevronUp size={14} className="text-slate-400" /> : <ChevronDown size={14} className="text-slate-400" />}
               </button>
 
               {/* Sub Menus Stream */}
               {isFrontendOpen && (
-                <div className="mt-1 ml-4 pl-2 border-l border-slate-800 space-y-0.5 animate-in slide-in-from-top-2 duration-150">
+                <div className="mt-1.5 ml-4 pl-3 border-l-2 border-slate-200 space-y-1 animate-in slide-in-from-top-2 duration-150">
                   {frontendSubMenus.map((sub) => (
                     <button
                       key={sub.id}
                       onClick={() => setActiveTab(sub.id)}
-                      className={`w-full text-left px-4 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-2 ${activeTab === sub.id ? 'text-rose-500 bg-rose-500/5 font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
+                      className={`w-full text-left px-3.5 py-2 rounded-lg text-[11px] font-bold transition-all duration-150 flex items-center gap-2 ${
+                        activeTab === sub.id 
+                          ? 'text-rose-600 bg-rose-50 font-extrabold shadow-sm' 
+                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/70'
+                      }`}
                     >
-                      <span className={`${activeTab === sub.id ? 'text-rose-500' : 'text-slate-600'} text-[9px]`}>▶</span> {sub.label}
+                      <span className={`${activeTab === sub.id ? 'text-rose-500' : 'text-slate-300'} text-[9px]`}>▶</span> 
+                      {sub.label}
                     </button>
                   ))}
                 </div>
@@ -125,11 +178,17 @@ export default function AgentDashboard() {
           </nav>
         </div>
         
-        <button onClick={handleGlobalPublish} className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold uppercase py-3.5 rounded-xl flex items-center justify-center gap-2 mt-6 shrink-0"><Save size={14} /> Save & Deploy Live</button>
+        {/* Deploy Button */}
+        <button 
+          onClick={handleGlobalPublish} 
+          className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] text-white text-xs font-bold uppercase py-3.5 rounded-xl flex items-center justify-center gap-2 mt-6 shrink-0 shadow-lg shadow-emerald-600/20 transition-all duration-200"
+        >
+          <Save size={15} /> Save & Deploy Live
+        </button>
       </div>
 
       {/* 🖥️ DYNAMIC CONTENT PANEL (RIGHT SIDE VIEW) */}
-      <div className="flex-1 p-6 lg:p-10 overflow-y-auto max-h-screen bg-slate-950">
+      <div className="flex-1 p-6 lg:p-10 overflow-y-auto max-h-screen bg-slate-50/70">
         {/* Core Global Views */}
         {activeTab === 'analytics' && <DashboardAnalytics properties={properties} tracking={clickTracking} />}
         {activeTab === 'properties' && <PropertyManagement properties={properties} setProperties={setProperties} />}
@@ -146,9 +205,7 @@ export default function AgentDashboard() {
         {activeTab === 'fe-features' && <Features />}
         {activeTab === 'fe-testimonial' && <Testimonial />}
         {activeTab === 'fe-service' && <Service />}
-        
         {activeTab === 'fe-gallery' && <Gallery />}
-      
       </div>
 
     </div>
