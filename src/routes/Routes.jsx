@@ -16,6 +16,7 @@ import SetupWorkspace from "../views/SetupWorkspace";
 import FakePaymentLoader from "../views/FakePaymentLoader";
 import NotFound from "../views/NotFound";
 import Login from "../views/Login";
+import Dashboard from "../views/Dashboard";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -113,6 +114,10 @@ const agentDemoRouter = createBrowserRouter([
   {
     path: '/admin/dashboard',
     Component: AgentDashboard
+  },
+  {
+    path: '/dashboard',
+    Component: Dashboard
   }
 ]);
 
