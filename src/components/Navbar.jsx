@@ -1,21 +1,23 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link, NavLink } from 'react-router-dom';
-import { Home, Menu, X, LogOut, LayoutGrid, User, LogIn, ChevronDown } from 'lucide-react';
+import { Home, Menu, X, LogOut, LayoutGrid, LogIn, ChevronDown } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
-import { auth } from '../firebase/firebase.config'; // 👈 আপনার Firebase Config পাথ
-import { signOut } from 'firebase/auth';
+import { AuthContext } from '../context/AuthContext'; // 👈 সঠিক AuthContext ইমপোর্ট করুন
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const { settings } = useContext(SettingsContext);
 
-  // 🔐 Auth States
-  const [currentUser, setCurrentUser] = useState(null);
-  const [role, setRole] = useState(null);
+  // 1. Contexts
+  const { settings } = useContext(SettingsContext);
+  const { adminUser, clientUser, logOutAdmin, logOutClient } = useContext(AuthContext);
 
   const navigate = useNavigate();
+
+  // 💡 বর্তমান একটিভ ইউজার ও তার রোল ডিটেক্ট করা
+  const currentUser = adminUser || clientUser;
+  const role = adminUser ? 'admin' : clientUser ? 'client' : null;
 
   // Scroll handler for background color change
   useEffect(() => {
@@ -26,31 +28,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🌟 Auth State Sync (Check LocalStorage on Load & Auth Changes)
-  useEffect(() => {
-    const checkAuth = () => {
-      const userRole = localStorage.getItem('role');
-      setRole(userRole);
-
-      if (userRole === 'admin') {
-        const adminData = JSON.parse(localStorage.getItem('adminUser') || '{}');
-        setCurrentUser(adminData);
-      } else if (userRole === 'client') {
-        const clientData = JSON.parse(localStorage.getItem('user') || '{}');
-        setCurrentUser(clientData);
-      } else {
-        setCurrentUser(null);
-        setRole(null);
-      }
-    };
-
-    checkAuth();
-    // রিফ্রেশ বা অন্য ট্যাবে স্টেট আপডেট সিঙ্ক করতে
-    window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
-  }, []);
-
-  // 🌟 mobile menu body scroll lock
+  // Mobile menu body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -62,22 +40,16 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  // 🚪 Logout Handler
+  // 🚪 Logout Handler (AuthContext-এর লজিক ব্যবহার করে)
   const handleLogoutAction = async () => {
     try {
       if (role === 'admin') {
-        await signOut(auth); // Firebase Logout
+        await logOutAdmin();
+      } else {
+        logOutClient();
       }
-      localStorage.removeItem('role');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('adminUser');
-
-      setCurrentUser(null);
-      setRole(null);
       setProfileOpen(false);
       setIsOpen(false);
-
       navigate('/login');
     } catch (error) {
       console.error("Logout error:", error);
@@ -149,10 +121,10 @@ export default function Navbar() {
                   }`}
                 >
                   <div className="w-7 h-7 bg-[#007b57] text-white font-bold text-xs rounded-full flex items-center justify-center uppercase">
-                    {currentUser.name ? currentUser.name[0] : currentUser.displayName ? currentUser.displayName[0] : currentUser.email ? currentUser.email[0] : 'U'}
+                    {currentUser.name ? currentUser.name[0] : currentUser.email ? currentUser.email[0] : 'U'}
                   </div>
                   <span className="text-xs font-semibold max-w-[100px] truncate">
-                    {currentUser.name || currentUser.displayName || 'Account'}
+                    {currentUser.name || 'Account'}
                   </span>
                   <ChevronDown size={14} className={`transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -165,7 +137,7 @@ export default function Navbar() {
                   >
                     <div className="px-4 py-2 border-b border-gray-100">
                       <p className="text-xs font-bold text-gray-900 truncate">
-                        {currentUser.name || currentUser.displayName || 'User'}
+                        {currentUser.name || 'User'}
                       </p>
                       <p className="text-[10px] text-[#007b57] font-extrabold uppercase tracking-wider mt-0.5">
                         {role} Mode
@@ -242,11 +214,11 @@ export default function Navbar() {
               <div className="w-4/5 flex flex-col items-center gap-3 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 shadow-sm mt-1">
                 <div className="flex items-center gap-3 w-full px-1">
                   <div className="h-10 w-10 rounded-full bg-[#007b57] text-white font-bold flex items-center justify-center text-sm uppercase">
-                    {currentUser.name ? currentUser.name[0] : currentUser.displayName ? currentUser.displayName[0] : 'U'}
+                    {currentUser.name ? currentUser.name[0] : 'U'}
                   </div>
                   <div className="text-left overflow-hidden">
                     <p className="text-xs font-bold text-gray-900 leading-tight tracking-wide uppercase truncate">
-                      {currentUser.name || currentUser.displayName || 'User'}
+                      {currentUser.name || 'User'}
                     </p>
                     <p className="text-[10px] font-mono text-[#007b57] capitalize font-bold mt-0.5 tracking-wider">
                       {role} Account

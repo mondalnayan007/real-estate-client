@@ -12,118 +12,146 @@ import { auth } from '../firebase/firebase.config';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [role, setRole] = useState(null); // 'admin' | 'client' | null
+  // 🟣 SaaS SuperAdmin / Site Owner (Firebase Auth)
+  const [adminUser, setAdminUser] = useState(null);
+  
+  // 🟢 End Customer / Booker (MongoDB Auth)
+  const [clientUser, setClientUser] = useState(null);
+  
   const [loading, setLoading] = useState(true);
   
   const googleProvider = new GoogleAuthProvider();
 
-  // ১. ইমেইল-পাসওয়ার্ড দিয়ে ফায়ারবেস অ্যাকাউন্ট ক্রিয়েশন
+  // -------------------------------------------------------------
+  // 🔑 ১. Firebase Admin Auth (Site Owner / Super Admin)
+  // -------------------------------------------------------------
   const signUpWithEmail = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
-  // ২. গুগল পপআপ সাইন-আপ/সাইন-ইন
   const signUpWithGoogle = () => {
     return signInWithPopup(auth, googleProvider);
   };
 
-// 🚀 ৩. হাইব্রিড লগইন (Firebase Admin -> MongoDB Client Check)
-const loginWithEmailAndPassword = async (email, password) => {
-  // Step A: Firebase Admin Check
-  try {
-    const adminCredential = await signInWithEmailAndPassword(auth, email, password);
-    const adminUser = adminCredential.user;
-    
-    const adminData = {
-      uid: adminUser.uid,
-      email: adminUser.email,
-      name: adminUser.displayName || 'Admin'
-    };
-
-    localStorage.setItem('role', 'admin');
-    localStorage.setItem('adminUser', JSON.stringify(adminData));
-    
-    setRole('admin');
-    setCurrentUser(adminData);
-    return { success: true, role: 'admin' };
-  } catch (firebaseError) {
-    // ফায়ারবেসে অ্যাডমিন না পেলে এটি নিচুতে যাবে
-    console.log("Not a Firebase admin, checking MongoDB Client DB...");
-  }
-
-  // Step B: MongoDB Client Check
-  try {
-    // ⚠️ আপনার Node.js সার্ভার যদি port 5000-এ চলে, তবে নিচের URL-এ 5000 দিন
-    const response = await fetch('http://localhost:4000/api/login', { 
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      localStorage.setItem('role', 'client');
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      setRole('client');
-      setCurrentUser(data.user);
-      return { success: true, role: 'client' };
-    } else {
-      return { success: false, message: data.message || 'Invalid email or password' };
-    }
-  } catch (err) {
-    console.error("MongoDB backend connection error:", err);
-    // 💡 এখানে আসল এররটি রিটার্ন করা হচ্ছে
-    return { 
-      success: false, 
-      message: `Backend connection failed! Make sure Express server is running on port 4000. (${err.message})` 
-    };
-  }
-};
-
-  // 🚪 ৪. অল-ইন-ওয়ান সাইন আউট (Firebase + LocalStorage)
-  const logOut = async () => {
+  const loginAdminWithFirebase = async (email, password) => {
     try {
-      if (role === 'admin') {
-        await signOut(auth);
-      }
-    } catch (error) {
-      console.error("Firebase logout error:", error);
-    } finally {
-      localStorage.removeItem('role');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('adminUser');
+      const adminCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = adminCredential.user;
       
-      setCurrentUser(null);
-      setRole(null);
+      const adminData = {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || 'Site Admin'
+      };
+
+      localStorage.setItem('admin_token', await user.getIdToken());
+      localStorage.setItem('admin_user', JSON.stringify(adminData));
+      
+      setAdminUser(adminData);
+      return { success: true, role: 'admin' };
+    } catch (error) {
+      return { success: false, message: error.message };
     }
   };
 
-  // 🔄 ৫. অ্যাপ লোড হওয়ার সময় ইউজার ও রোল ডিটেক্ট করা
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      const savedRole = localStorage.getItem('role');
+  const logOutAdmin = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Admin logout error:", err);
+    } finally {
+      localStorage.removeItem('admin_token');
+      localStorage.removeItem('admin_user');
+      setAdminUser(null);
+    }
+  };
 
-      if (savedRole === 'admin' && firebaseUser) {
-        setRole('admin');
-        setCurrentUser({
+  // -------------------------------------------------------------
+  // 🟢 ২. MongoDB Client Auth (End Customer / Booking User)
+  // -------------------------------------------------------------
+  const loginClientWithMongoDB = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:4000/api/login', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('client_token', data.token);
+        localStorage.setItem('client_user', JSON.stringify(data.user));
+
+        setClientUser(data.user);
+        return { success: true, role: 'client' };
+      } else {
+        return { success: false, message: data.message || 'Invalid email or password' };
+      }
+    } catch (err) {
+      console.error("MongoDB connection error:", err);
+      return { 
+        success: false, 
+        message: `Backend server unreachable (${err.message})` 
+      };
+    }
+  };
+
+  const logOutClient = () => {
+    localStorage.removeItem('client_token');
+    localStorage.removeItem('client_user');
+    setClientUser(null);
+  };
+
+  // -------------------------------------------------------------
+  // 🚀 ৩. স্মার্ট কম্বাইন্ড লগইন (যা আপনার Login.jsx খুঁজছে!)
+  // -------------------------------------------------------------
+  const loginWithEmailAndPassword = async (email, password) => {
+    // ১. প্রথমে Firebase Admin হিসেবে চেষ্টা করব
+    const adminRes = await loginAdminWithFirebase(email, password);
+    if (adminRes.success) {
+      return { success: true, role: 'admin' };
+    }
+
+    // ২. অ্যাডমিন হিসেবে না মিললে MongoDB Client হিসেবে চেষ্টা করব
+    const clientRes = await loginClientWithMongoDB(email, password);
+    if (clientRes.success) {
+      return { success: true, role: 'client' };
+    }
+
+    // ৩. কোনোটাতেই না মিললে এরর মেসেজ দেবো
+    return { 
+      success: false, 
+      message: clientRes.message || 'Invalid email or password' 
+    };
+  };
+
+  // -------------------------------------------------------------
+  // 🔄 ৪. সেশন ডিটেকশন ও রিলোড ম্যানেজমেন্ট
+  // -------------------------------------------------------------
+  useEffect(() => {
+    // A. LocalStorage থেকে মঙ্গোডিবি ক্লায়েন্ট লোড
+    const savedClient = localStorage.getItem('client_user');
+    if (savedClient) {
+      try {
+        setClientUser(JSON.parse(savedClient));
+      } catch (e) {
+        localStorage.removeItem('client_user');
+      }
+    }
+
+    // B. Firebase অন-অথ স্টেট চেঞ্জার (শুধুমাত্র অ্যাডমিনের জন্য)
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const adminData = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          name: firebaseUser.displayName || 'Admin'
-        });
-      } else if (savedRole === 'client') {
-        const clientData = JSON.parse(localStorage.getItem('user') || 'null');
-        setRole('client');
-        setCurrentUser(clientData);
+          name: firebaseUser.displayName || 'Site Admin'
+        };
+        setAdminUser(adminData);
       } else {
-        setRole(null);
-        setCurrentUser(null);
+        setAdminUser(null);
       }
-
       setLoading(false);
     });
 
@@ -131,13 +159,16 @@ const loginWithEmailAndPassword = async (email, password) => {
   }, []);
 
   const value = {
-    currentUser,
-    role,
+    adminUser,
+    clientUser,
     loading,
     signUpWithEmail,
     signUpWithGoogle,
-    loginWithEmailAndPassword,
-    logOut
+    loginAdminWithFirebase,
+    loginClientWithMongoDB,
+    loginWithEmailAndPassword, // 👈 এটি এক্সপোর্ট করা হলো
+    logOutAdmin,
+    logOutClient
   };
 
   return (
