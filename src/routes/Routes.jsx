@@ -15,6 +15,7 @@ import SuperAdminDashboard from "../views/SuperAdminDashboard";
 import SetupWorkspace from "../views/SetupWorkspace";
 import FakePaymentLoader from "../views/FakePaymentLoader";
 import NotFound from "../views/NotFound";
+import Login from "../views/Login";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -94,6 +95,10 @@ const agentDemoRouter = createBrowserRouter([
       {
         path: '/blog',
         Component: Blog
+      },
+      {
+        path: '/login',
+        Component: Login
       },
       {
         path: '*',

@@ -1,17 +1,19 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-;
-import { Home, Menu, X, LogOut, LayoutGrid } from 'lucide-react';
-import { NavLink } from 'react-router'; // আপনার ইমপোর্ট অনুযায়ী রাখা হয়েছে
+import { useNavigate, Link, NavLink } from 'react-router-dom';
+import { Home, Menu, X, LogOut, LayoutGrid, User, LogIn, ChevronDown } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
+import { auth } from '../firebase/firebase.config'; // 👈 আপনার Firebase Config পাথ
+import { signOut } from 'firebase/auth';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { settings } = useContext(SettingsContext);
-  console.log(settings);
 
+  // 🔐 Auth States
+  const [currentUser, setCurrentUser] = useState(null);
+  const [role, setRole] = useState(null);
 
   const navigate = useNavigate();
 
@@ -24,7 +26,31 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 🌟 FIX 1: মোবাইল মেনু ওপেন হলে পেছনের বডি স্ক্রল লক করার মেকানিজম
+  // 🌟 Auth State Sync (Check LocalStorage on Load & Auth Changes)
+  useEffect(() => {
+    const checkAuth = () => {
+      const userRole = localStorage.getItem('role');
+      setRole(userRole);
+
+      if (userRole === 'admin') {
+        const adminData = JSON.parse(localStorage.getItem('adminUser') || '{}');
+        setCurrentUser(adminData);
+      } else if (userRole === 'client') {
+        const clientData = JSON.parse(localStorage.getItem('user') || '{}');
+        setCurrentUser(clientData);
+      } else {
+        setCurrentUser(null);
+        setRole(null);
+      }
+    };
+
+    checkAuth();
+    // রিফ্রেশ বা অন্য ট্যাবে স্টেট আপডেট সিঙ্ক করতে
+    window.addEventListener('storage', checkAuth);
+    return () => window.removeEventListener('storage', checkAuth);
+  }, []);
+
+  // 🌟 mobile menu body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -36,17 +62,33 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  const handleLogoutAction = () => {
-    setProfileOpen(false);
-    setIsOpen(false);
-    
-    navigate('/');
+  // 🚪 Logout Handler
+  const handleLogoutAction = async () => {
+    try {
+      if (role === 'admin') {
+        await signOut(auth); // Firebase Logout
+      }
+      localStorage.removeItem('role');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('adminUser');
+
+      setCurrentUser(null);
+      setRole(null);
+      setProfileOpen(false);
+      setIsOpen(false);
+
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
-  // 🌟 FIX 2: যেকোনো লিংকে ক্লিক করলে মোবাইল মেনু অটো-ক্লোজ করার হেল্পার ফাংশন
   const closeMenu = () => {
     setIsOpen(false);
   };
+
+  const dashboardPath = role === 'admin' ? '/admin/dashboard' : '/dashboard';
 
   return (
     <>
@@ -60,23 +102,25 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center">
           
           {/* Brand Logo */}
-          {
-            settings ? 
-            <div className='flex gap-2 text-white'>
-              <img className='h-8 w-10' src={settings.logo} alt="" /> 
+          {settings ? (
+            <div 
+              className='flex gap-2 text-white items-center cursor-pointer' 
+              onClick={() => { navigate('/'); closeMenu(); }}
+            >
+              <img className='h-8 w-10 object-contain' src={settings.logo} alt="Logo" /> 
               <span className="font-serif font-normal italic tracking-wide">{settings.brandName}</span>
             </div>
-            : 
+          ) : (
             <div 
-            className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
-              isScrolled ? 'text-blue-600' : 'text-white'
-            }`} 
-            onClick={() => { navigate('/'); closeMenu(); }}
-          >
-            <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-blue-400'}`} />
-            <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
-          </div>
-          }
+              className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
+                isScrolled ? 'text-blue-600' : 'text-white'
+              }`} 
+              onClick={() => { navigate('/'); closeMenu(); }}
+            >
+              <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-blue-400'}`} />
+              <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
+            </div>
+          )}
           
           {/* Navigation Links (Desktop) */}
           <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase ${isScrolled ? 'text-gray-700' : 'text-white/90'}`}>
@@ -88,64 +132,78 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Buttons Wrapper */}
-          <div className="hidden md:flex items-center gap-5">
-            <button className="bg-[#007b57] text-white px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:from-blue-500 hover:to-blue-600 transition-all duration-300 shadow-[0_4px_15px_rgba(37,99,235,0.2)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.3)] active:scale-98">
+          <div className="hidden md:flex items-center gap-4">
+            <button className="bg-[#007b57] text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#006245] transition-all duration-300 shadow-[0_4px_15px_rgba(0,123,87,0.2)] active:scale-95">
               Property Price Predictor
             </button>
 
-            {/* Dynamic Authentication Module Placement */}
-            {/* <div className="relative">
-              {currentUser ? (
-                <div className="relative flex items-center">
-                  <button 
-                    onClick={() => setProfileOpen(!profileOpen)}
-                    className="h-10 w-10 rounded-full border-2 border-blue-600 p-0.5 hover:border-blue-400 hover:scale-105 transition-all duration-300 overflow-hidden bg-slate-800 cursor-pointer shadow-md"
-                  >
-                    <img 
-                      src={currentUser.avatar} 
-                      alt={currentUser.name || 'Profile'} 
-                      className="w-full h-full object-cover rounded-full"
-                    />
-                  </button>
-
-                  {profileOpen && (
-                    <div className="absolute right-0 top-full mt-4 w-52 bg-slate-950/95 backdrop-blur-xl border border-slate-800 p-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50 animate-in fade-in slide-in-from-top-3 duration-200">
-                      <div className="px-3 py-2.5 border-b border-slate-800/60 mb-1.5">
-                        <p className="text-xs font-bold text-white truncate tracking-wide">{currentUser.name}</p>
-                        <p className="text-[9px] font-mono text-blue-400 uppercase font-extrabold tracking-wider mt-1 bg-blue-500/10 inline-block px-2 py-0.5 rounded">{currentUser.role}</p>
-                      </div>
-                      
-                      {currentUser.role === 'admin' && (
-                        <button 
-                          onClick={() => { setProfileOpen(false); navigate('/admin/dashboard'); }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-300 hover:bg-slate-900 hover:text-white rounded-lg transition-all duration-200 text-left"
-                        >
-                          <LayoutGrid size={13} className="text-slate-400" /> Dashboard
-                        </button>
-                      )}
-
-                      <button 
-                        onClick={handleLogoutAction}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all duration-200 text-left mt-1"
-                      >
-                        <LogOut size={13} /> Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link 
-                  to="/signup" 
-                  className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 border ${
+            {/* 🌟 DESKTOP AUTH BUTTON / PROFILE DROPDOWN */}
+            {currentUser ? (
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
                     isScrolled 
-                      ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white shadow-sm' 
-                      : 'border-white/80 text-white hover:bg-white hover:text-slate-900 shadow-none'
+                      ? 'bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200' 
+                      : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
                   }`}
                 >
-                  Sign Up
-                </Link>
-              )}
-            </div> */}
+                  <div className="w-7 h-7 bg-[#007b57] text-white font-bold text-xs rounded-full flex items-center justify-center uppercase">
+                    {currentUser.name ? currentUser.name[0] : currentUser.displayName ? currentUser.displayName[0] : currentUser.email ? currentUser.email[0] : 'U'}
+                  </div>
+                  <span className="text-xs font-semibold max-w-[100px] truncate">
+                    {currentUser.name || currentUser.displayName || 'Account'}
+                  </span>
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                {profileOpen && (
+                  <div 
+                    className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 text-gray-800 animate-in fade-in slide-in-from-top-2 duration-150"
+                    onMouseLeave={() => setProfileOpen(false)}
+                  >
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {currentUser.name || currentUser.displayName || 'User'}
+                      </p>
+                      <p className="text-[10px] text-[#007b57] font-extrabold uppercase tracking-wider mt-0.5">
+                        {role} Mode
+                      </p>
+                    </div>
+
+                    <Link
+                      to={dashboardPath}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold hover:bg-gray-50 transition-colors"
+                    >
+                      <LayoutGrid size={15} className="text-[#007b57]" />
+                      <span>Dashboard</span>
+                    </Link>
+
+                    <button
+                      onClick={handleLogoutAction}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                    >
+                      <LogOut size={15} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-sm active:scale-95 ${
+                  isScrolled
+                    ? 'bg-amber-500 text-white hover:bg-amber-600'
+                    : 'bg-white text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <LogIn size={15} />
+                <span>Login</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Hamburger Menu Toggle */}
@@ -154,7 +212,7 @@ export default function Navbar() {
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? (
-              <X className="text-gray-800" size={24} /> // ওপেন হলে সবসময় ডার্ক আইকন থাকবে রিডিবিলিটির জন্য
+              <X className="text-gray-800" size={24} />
             ) : (
               <Menu className={isScrolled ? 'text-gray-800' : 'text-white'} size={24} />
             )}
@@ -164,66 +222,74 @@ export default function Navbar() {
         {/* Mobile Side-Drawer Overlay Screen */}
         {isOpen && (
           <div className="md:hidden bg-white/95 backdrop-blur-xl w-full absolute top-full left-0 shadow-2xl border-b border-gray-100 py-6 flex flex-col items-center gap-4 text-gray-800 font-semibold text-sm uppercase tracking-wider animate-in fade-in slide-in-from-top-4 duration-300 z-50">
-            {/* 🌟 FIX 3: প্রতিটি লিংকে onClick={closeMenu} অ্যাড করা হয়েছে */}
             <Link to={'/'} onClick={closeMenu}>Home</Link>
             <Link to={'/projects'} onClick={closeMenu}>Projects</Link>
             <Link to={'/team'} onClick={closeMenu}>Team</Link>
             <Link to={'/about'} onClick={closeMenu}>About</Link>
             <Link to={'/blog'} onClick={closeMenu}>Blog</Link>
             
-            <div className="w-4/5 h-[1px] bg-gray-100 my-2"></div>
+            <div className="w-4/5 h-[1px] bg-gray-100 my-1"></div>
             
             <button 
               onClick={closeMenu}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
+              className="bg-[#007b57] text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
             >
               Property Price Predictor
             </button>
 
-            {/* Mobile Profile Interface */}
-            {/* {currentUser ? (
-              <div className="w-4/5 flex flex-col items-center gap-3.5 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 shadow-sm mt-2">
+            {/* 🌟 MOBILE AUTH / PROFILE INTERFACE */}
+            {currentUser ? (
+              <div className="w-4/5 flex flex-col items-center gap-3 bg-gray-50/80 p-4 rounded-2xl border border-gray-100 shadow-sm mt-1">
                 <div className="flex items-center gap-3 w-full px-1">
-                  <img src={currentUser.avatar} alt="Profile" className="h-11 w-11 rounded-full border-2 border-blue-600 object-cover p-0.5" />
-                  <div className="text-left">
-                    <p className="text-sm font-bold text-gray-900 leading-tight tracking-wide uppercase">{currentUser.name}</p>
-                    <p className="text-[10px] font-mono text-blue-600 capitalize font-bold mt-0.5 tracking-wider">{currentUser.role}</p>
+                  <div className="h-10 w-10 rounded-full bg-[#007b57] text-white font-bold flex items-center justify-center text-sm uppercase">
+                    {currentUser.name ? currentUser.name[0] : currentUser.displayName ? currentUser.displayName[0] : 'U'}
+                  </div>
+                  <div className="text-left overflow-hidden">
+                    <p className="text-xs font-bold text-gray-900 leading-tight tracking-wide uppercase truncate">
+                      {currentUser.name || currentUser.displayName || 'User'}
+                    </p>
+                    <p className="text-[10px] font-mono text-[#007b57] capitalize font-bold mt-0.5 tracking-wider">
+                      {role} Account
+                    </p>
                   </div>
                 </div>
-                {currentUser.role === 'admin' && (
-                  <button 
-                    onClick={() => { setIsOpen(false); navigate('/admin/dashboard'); }}
-                    className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold tracking-wider rounded-xl shadow-sm hover:bg-gray-50 transition"
-                  >
-                    Go to Dashboard
-                  </button>
-                )}
+
+                <Link 
+                  to={dashboardPath}
+                  onClick={closeMenu}
+                  className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold tracking-wider rounded-xl shadow-sm text-center flex items-center justify-center gap-2"
+                >
+                  <LayoutGrid size={15} />
+                  <span>Go to Dashboard</span>
+                </Link>
+
                 <button 
                   onClick={handleLogoutAction}
-                  className="w-full py-2.5 bg-rose-50 hover:bg-rose-100/70 text-rose-600 text-xs font-bold tracking-wider rounded-xl transition"
+                  className="w-full py-2.5 bg-rose-50 hover:bg-rose-100/70 text-rose-600 text-xs font-bold tracking-wider rounded-xl transition flex items-center justify-center gap-2"
                 >
-                  Logout Session
+                  <LogOut size={15} />
+                  <span>Logout Session</span>
                 </button>
               </div>
             ) : (
               <Link 
-                to="/signup" 
+                to="/login" 
                 onClick={closeMenu}
-                className="border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase hover:bg-blue-50 transition shadow-sm"
+                className="border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase hover:bg-blue-50 transition shadow-sm flex items-center justify-center gap-2"
               >
-                Sign Up
+                <LogIn size={15} />
+                <span>Login</span>
               </Link>
-            )} */}
+            )}
           </div>
         )}
       </nav>
 
-      {/* 🌟 FIX 4: আসল ম্যাজিক ব্যাকড্রপ ওভারলে */}
-      {/* মেনু ওপেন হলে এই ডিভটি পুরো স্ক্রিন জুড়ে থাকবে এবং মেনু ছাড়া বাকি সব এরিয়া ব্লক করে দেবে */}
+      {/* Backdrop Overlay */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 md:hidden"
-          onClick={closeMenu} // বাইরে যেকোনো জায়গায় ক্লিক করলেই মেনু বন্ধ হয়ে যাবে
+          onClick={closeMenu}
         />
       )}
     </>
