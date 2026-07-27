@@ -240,12 +240,14 @@ const ProjectDetails = () => {
             </div>
 
             <div className="pt-6">
-              <button
+              <a
+              href={singleData.brochureLink}
+                target="_blank" rel="noopener noreferrer"
                 onClick={handleDownloadBrochure}
                 className="px-6 py-3.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
               >
                 <Download size={16} /> Download Brochure
-              </button>
+              </a>
             </div>
           </div>
 
