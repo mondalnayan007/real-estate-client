@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { X, CheckCircle2, Building, User, Mail, Phone, MapPin, CreditCard, DollarSign, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, CheckCircle2, Building2, User, Mail, DollarSign, Users, ShieldCheck, Sparkles } from 'lucide-react';
 
-export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPrice,sharePrice,_id}) {
+export default function BookNowModal({ isOpen, onClose, propertyTitle, bookingPrice, sharePrice, _id }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -11,6 +11,7 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
     location: '',
     projectName: propertyTitle || '',
     applicantName: '',
+    email: '', // 👈 New Email Field
     fatherHusbandName: '',
     motherName: '',
     presentAddress: '',
@@ -25,14 +26,24 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
     religion: '',
     projectAddress: '',
     apartmentType: '',
-    landSharePrice: '',
-    bookingMoney: '',
+    landSharePrice: sharePrice || '',
+    bookingMoney: bookingPrice || '',
     nomineeName: '',
     nomineeAddress: '',
     nomineeRelation: '',
     nomineeMobileNo: '',
     nomineeNationalId: ''
   });
+
+  // Keep props in sync with formData if props change
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      projectName: propertyTitle || prev.projectName,
+      landSharePrice: sharePrice || prev.landSharePrice,
+      bookingMoney: bookingPrice || prev.bookingMoney
+    }));
+  }, [propertyTitle, sharePrice, bookingPrice]);
 
   if (!isOpen) return null;
 
@@ -49,7 +60,6 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
     setLoading(true);
 
     try {
-      // Direct Fetch API Call to Backend Endpoint
       const response = await fetch('http://localhost:4000/api/bookings', {
         method: 'POST',
         headers: {
@@ -79,37 +89,44 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="bg-white border border-slate-100 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl relative my-auto">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-slate-200 bg-slate-50 sticky top-0 z-10">
-          <div>
-            <span className="text-[10px] font-black tracking-widest text-emerald-600 uppercase">Official Application Form</span>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Property Booking Form</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100/80">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <span className="text-[11px] font-bold tracking-wider text-emerald-600 uppercase block">Official Application</span>
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Property Booking Form</h3>
+            </div>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 rounded-full hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all duration-200 focus:outline-none"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Modal Content */}
-        <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+        <div className="p-6 sm:p-8 overflow-y-auto space-y-8">
           {isSubmitted ? (
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle2 size={36} />
+            <div className="text-center py-12 space-y-5">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100 shadow-inner">
+                <CheckCircle2 size={44} />
               </div>
-              <h4 className="text-2xl font-extrabold text-slate-900">Application Submitted!</h4>
-              <p className="text-sm text-slate-600 max-w-md mx-auto">
-                Your booking application for <span className="font-bold text-slate-900">{formData.projectName}</span> has been submitted successfully. Our executive will reach out to you shortly.
-              </p>
+              <div className="space-y-2">
+                <h4 className="text-2xl font-bold text-slate-900">Application Submitted!</h4>
+                <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                  Your booking application for <span className="font-semibold text-slate-800">{formData.projectName}</span> has been received. Our team will contact you shortly.
+                </p>
+              </div>
               <button
                 onClick={handleClose}
-                className="mt-6 px-8 py-3 bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-emerald-800 transition-all shadow-lg"
+                className="mt-4 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
               >
                 Close Application
               </button>
@@ -117,25 +134,28 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* SECTION 1: PROJECT & BASIC INFO */}
+              {/* SECTION 1: PROJECT INFO */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 pb-1 border-b border-slate-200 flex items-center gap-2">
-                  <Building size={14} /> Project Information
-                </h4>
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <Building2 size={16} className="text-emerald-600" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Project Information
+                  </h4>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Date</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Booking Date</label>
                     <input
                       type="date"
                       name="bookingDate"
                       value={formData.bookingDate}
                       onChange={handleChange}
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Location</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Location</label>
                     <input
                       type="text"
                       name="location"
@@ -143,18 +163,18 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
                       value={formData.location}
                       onChange={handleChange}
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Project Name</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Project Name</label>
                     <input
                       type="text"
                       name="projectName"
                       value={formData.projectName}
                       onChange={handleChange}
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
@@ -162,150 +182,169 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
 
               {/* SECTION 2: APPLICANT DETAILS */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 pb-1 border-b border-slate-200 flex items-center gap-2">
-                  <User size={14} /> Applicant Details
-                </h4>
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <User size={16} className="text-emerald-600" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Applicant Details
+                  </h4>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Applicant's Name *</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Applicant's Name *</label>
                     <input
                       type="text"
                       name="applicantName"
                       required
+                      placeholder="Full Name"
                       value={formData.applicantName}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Father's/Husband Name</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1 flex items-center gap-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="example@mail.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Father's / Husband's Name</label>
                     <input
                       type="text"
                       name="fatherHusbandName"
                       value={formData.fatherHusbandName}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Mother's Name</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Mother's Name</label>
                     <input
                       type="text"
                       name="motherName"
                       value={formData.motherName}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Present Address</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Present Address</label>
                     <input
                       type="text"
                       name="presentAddress"
                       value={formData.presentAddress}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Permanent Address</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Permanent Address</label>
                     <input
                       type="text"
                       name="permanentAddress"
                       value={formData.permanentAddress}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Profession</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Profession</label>
                     <input
                       type="text"
                       name="profession"
                       value={formData.profession}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Nationality</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Nationality</label>
                     <input
                       type="text"
                       name="nationality"
                       value={formData.nationality}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Date of Birth</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Date of Birth</label>
                     <input
                       type="text"
                       name="dateOfBirth"
-                      placeholder="e.g. 21 Feb 1969"
+                      placeholder="e.g. 21 Feb 1990"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Religion</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Religion</label>
                     <input
                       type="text"
                       name="religion"
                       value={formData.religion}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Contact No *</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Contact No *</label>
                     <input
                       type="tel"
                       name="contactNo"
                       required
+                      placeholder="+8801..."
                       value={formData.contactNo}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Alt. Contact No</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Alt. Contact No</label>
                     <input
                       type="tel"
                       name="altContactNo"
                       value={formData.altContactNo}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">National ID (NID)</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">National ID (NID)</label>
                     <input
                       type="text"
                       name="nationalId"
                       value={formData.nationalId}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Passport No</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Passport No</label>
                     <input
                       type="text"
                       name="passportNo"
                       value={formData.passportNo}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
@@ -313,138 +352,132 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
 
               {/* SECTION 3: APARTMENT & FINANCIAL BREAKDOWN */}
               <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 pb-1 border-b border-slate-200 flex items-center gap-2">
-                  <DollarSign size={14} /> Apartment & Financial Terms
-                </h4>
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <DollarSign size={16} className="text-emerald-600" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Apartment & Financial Terms
+                  </h4>
+                </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Project Address</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Project Address</label>
                     <input
                       type="text"
                       name="projectAddress"
                       value={formData.projectAddress}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Type of Apartment</label>
-                      <input
-                        type="text"
-                        name="apartmentType"
-                        placeholder="e.g. 7(C)"
-                        value={formData.apartmentType}
-                        onChange={handleChange}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                      />
-                    </div>
-                    
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Land Share Price</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Type of Apartment</label>
                     <input
                       type="text"
-                      name="landSharePrice"
-                      placeholder="e.g. 18.5 lac"
-                      disabled
-                      defaultValue={sharePrice}
-                      value={sharePrice}
+                      name="apartmentType"
+                      placeholder="e.g. 7(C)"
+                      value={formData.apartmentType}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Booking Money</label>
-                    <input
-                      type="text"
-                      name="bookingMoney"
-                      placeholder="e.g. 5 lac"
-                      disabled
-                      defaultValue={bookingPrice}
-                      value={bookingPrice}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                 
-                
-                </div>
-
-               
-              </div>
-
-              {/* SECTION 4: NOMINEE DETAILS */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-emerald-700 pb-1 border-b border-slate-200 flex items-center gap-2">
-                  <Users size={14} /> Nominee Information
-                </h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Nominee Name</label>
-                    <input
-                      type="text"
-                      name="nomineeName"
-                      value={formData.nomineeName}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Relation</label>
-                    <input
-                      type="text"
-                      name="nomineeRelation"
-                      placeholder="e.g. Wife"
-                      value={formData.nomineeRelation}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Mobile No</label>
-                    <input
-                      type="tel"
-                      name="nomineeMobileNo"
-                      value={formData.nomineeMobileNo}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">Address</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Land Share Price</label>
+                    <input
+                      type="text"
+                      name="landSharePrice"
+                      readOnly
+                      value={formData.landSharePrice}
+                      className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 font-semibold cursor-not-allowed select-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Booking Money</label>
+                    <input
+                      type="text"
+                      name="bookingMoney"
+                      readOnly
+                      value={formData.bookingMoney}
+                      className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 font-semibold cursor-not-allowed select-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 4: NOMINEE DETAILS */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                  <Users size={16} className="text-emerald-600" />
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Nominee Information
+                  </h4>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Nominee Name</label>
+                    <input
+                      type="text"
+                      name="nomineeName"
+                      value={formData.nomineeName}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Relation</label>
+                    <input
+                      type="text"
+                      name="nomineeRelation"
+                      placeholder="e.g. Spouse / Brother"
+                      value={formData.nomineeRelation}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Mobile No</label>
+                    <input
+                      type="tel"
+                      name="nomineeMobileNo"
+                      value={formData.nomineeMobileNo}
+                      onChange={handleChange}
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">Address</label>
                     <input
                       type="text"
                       name="nomineeAddress"
                       value={formData.nomineeAddress}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-extrabold text-slate-600 uppercase mb-1">National ID</label>
+                    <label className="block text-[11px] font-semibold text-slate-600 uppercase mb-1">National ID</label>
                     <input
                       type="text"
                       name="nomineeNationalId"
                       value={formData.nomineeNationalId}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-emerald-600"
+                      className="w-full bg-slate-50/60 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                     />
                   </div>
                 </div>
               </div>
 
               {/* DECLARATION DISCLAIMER */}
-              <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200/60">
-                <p className="text-[10px] text-slate-500 leading-normal">
+              <div className="flex items-start gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                <ShieldCheck size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   I hereby declare that the information furnished by me here is true to the best of my knowledge and belief. I agree to accept and abide by all rules, specifications and terms formulated by the company.
                 </p>
               </div>
@@ -453,7 +486,7 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle,bookingPri
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
+                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Submitting Application..." : "Submit Booking Application"}
               </button>
