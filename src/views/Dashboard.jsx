@@ -56,6 +56,10 @@ export default function Dashboard() {
     }
   }, [clientUser]);
 
+useEffect(()=>{
+  fetch(``)
+},[])
+  
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -102,6 +106,8 @@ export default function Dashboard() {
       bankName: paymentMethod === 'bank' ? bankName : 'N/A',
       transactionId
     };
+
+    console.log(paymentPayload);
 
     try {
       const res = await fetch('http://localhost:4000/api/submit-payment', {
