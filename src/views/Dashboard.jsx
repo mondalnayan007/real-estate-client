@@ -38,6 +38,8 @@ export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+ 
 
   // Payment Form States
   const [paymentMethod, setPaymentMethod] = useState('bank');
@@ -56,9 +58,7 @@ export default function Dashboard() {
     }
   }, [clientUser]);
 
-useEffect(()=>{
-  fetch(``)
-},[])
+
   
   const fetchBookings = async () => {
     try {
