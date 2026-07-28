@@ -95,7 +95,9 @@ export default function Dashboard() {
 
     const paymentPayload = {
       bookingId: selectedBooking._id,
+      userId:clientUser._id,
       paymentMethod,
+      
       amount: Number(amount),
       bankName: paymentMethod === 'bank' ? bankName : 'N/A',
       transactionId
@@ -151,7 +153,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 pt-28 flex justify-center items-center">
+      <div className="min-h-screen bg-slate-50/50 pt-12 flex justify-center items-center">
         <div className="relative flex items-center justify-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#007b57]/20 border-t-[#007b57]"></div>
           <FaBuilding size={22} className="absolute text-[#007b57] animate-pulse" />
@@ -161,7 +163,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/30 text-slate-800 pt-20 pb-20 px-4 sm:px-6 lg:px-8 font-['Inter',sans-serif]">
+    <div className="min-h-screen bg-slate-50/30 text-slate-800 pt-10 pb-20 px-4 sm:px-6 lg:px-8 font-['Inter',sans-serif]">
       
       <div className="max-w-7xl mx-auto">
         
