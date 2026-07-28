@@ -32,7 +32,8 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle, bookingPr
     nomineeAddress: '',
     nomineeRelation: '',
     nomineeMobileNo: '',
-    nomineeNationalId: ''
+    nomineeNationalId: '',
+    projectId:_id
   });
 
   // Keep props in sync with formData if props change
