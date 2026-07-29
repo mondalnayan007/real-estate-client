@@ -213,11 +213,11 @@ export default function Dashboard() {
         {/* Navigation & Header Area */}
         <div className="mb-8 border-b border-slate-200/80 pb-6">
           <button 
-            onClick={() => navigate(-1)} 
+            onClick={() => navigate('/')} 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#007b57] hover:text-white text-slate-700 text-xs font-bold transition-all duration-300 mb-4 border border-slate-200/80 shadow-sm hover:shadow-md active:scale-95 group"
           >
             <FiArrowLeft size={16} className="text-[#007b57] group-hover:text-white transition-colors duration-300" />
-            <span>Back to Previous</span>
+            <span>Back </span>
           </button>
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
