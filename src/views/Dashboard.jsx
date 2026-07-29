@@ -38,8 +38,10 @@ export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  
- 
+
+  // Transactions State
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTxns, setLoadingTxns] = useState(false);
 
   // Payment Form States
   const [paymentMethod, setPaymentMethod] = useState('bank');
@@ -58,8 +60,16 @@ export default function Dashboard() {
     }
   }, [clientUser]);
 
+  // 2. Fetch Transactions when selectedBooking changes
+  useEffect(() => {
+    if (selectedBooking) {
+      const bId = selectedBooking._id || selectedBooking.id;
+      fetchTransactions(bId);
+    } else {
+      setTransactions([]);
+    }
+  }, [selectedBooking]);
 
-  
   const fetchBookings = async () => {
     try {
       setLoading(true);
@@ -89,7 +99,33 @@ export default function Dashboard() {
     }
   };
 
-  // 2. Handle Payment Submission
+  const fetchTransactions = async (bookingId) => {
+    if (!bookingId) {
+      setTransactions([]);
+      return;
+    }
+
+    try {
+      setLoadingTxns(true);
+      const res = await fetch(`http://localhost:4000/admin/transactions?bookingId=${bookingId}`);
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.transactions)) {
+        setTransactions(data.transactions);
+      } else if (Array.isArray(data)) {
+        setTransactions(data);
+      } else {
+        setTransactions([]);
+      }
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+      setTransactions([]);
+    } finally {
+      setLoadingTxns(false);
+    }
+  };
+
+  // 3. Handle Payment Submission
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     if (!selectedBooking) return;
@@ -99,15 +135,12 @@ export default function Dashboard() {
 
     const paymentPayload = {
       bookingId: selectedBooking._id,
-      userId:clientUser._id,
+      userId: clientUser._id,
       paymentMethod,
-      
       amount: Number(amount),
       bankName: paymentMethod === 'bank' ? bankName : 'N/A',
       transactionId
     };
-
-    console.log(paymentPayload);
 
     try {
       const res = await fetch('http://localhost:4000/api/submit-payment', {
@@ -123,6 +156,10 @@ export default function Dashboard() {
         setAmount('');
         setTransactionId('');
         setBankName('');
+        
+        // Refresh Transactions and Bookings List
+        const bId = selectedBooking._id || selectedBooking.id;
+        await fetchTransactions(bId);
         await fetchBookings();
       } else {
         setMessage({ type: 'error', text: data.message || 'Payment submission failed.' });
@@ -135,9 +172,9 @@ export default function Dashboard() {
   };
 
   // Helper function to calculate approved paid amount
-  const calculatePaidAmount = (transactions = []) => {
-    if (!Array.isArray(transactions)) return 0;
-    return transactions
+  const calculatePaidAmount = (txnList = transactions) => {
+    if (!Array.isArray(txnList)) return 0;
+    return txnList
       .filter(t => t.status === 'approved')
       .reduce((sum, t) => sum + (t.amount || 0), 0);
   };
@@ -281,7 +318,7 @@ export default function Dashboard() {
                 {/* 1. Main Project Overview Banner */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-6">
                   
-                  {/* Property Main Image Banner with Zoom Effect */}
+                  {/* Property Main Image Banner */}
                   <div className="relative h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-slate-200/80 shadow-inner group cursor-pointer">
                     <img 
                       src={selectedBooking.projectDetails?.img || selectedBooking.projectDetails?.image || selectedBooking.projectDetails?.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'} 
@@ -310,10 +347,10 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Financial Summary Cards with Hover Lift */}
+                  {/* Financial Summary Cards */}
                   {(() => {
                     const totalPrice = selectedBooking.landSharePrice || selectedBooking.totalPrice || selectedBooking.price || 0;
-                    const paidAmount = calculatePaidAmount(selectedBooking.transactions);
+                    const paidAmount = calculatePaidAmount(transactions);
                     const dues = totalPrice - paidAmount;
 
                     return (
@@ -438,7 +475,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* 4. Payment Submission Form */}
-                {((selectedBooking.landSharePrice || selectedBooking.totalPrice || selectedBooking.price || 0) - calculatePaidAmount(selectedBooking.transactions)) > 0 && (
+                {((selectedBooking.landSharePrice || selectedBooking.totalPrice || selectedBooking.price || 0) - calculatePaidAmount(transactions)) > 0 && (
                   <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-6">
                     <div className="flex items-center gap-2 text-slate-900">
                       <FiCreditCard className="text-[#007b57]" size={20} />
@@ -545,59 +582,96 @@ export default function Dashboard() {
 
                 {/* 5. Payment History Section */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4">
-                  <h3 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                    Payment History & Verification Status
-                  </h3>
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div className="flex items-center gap-2 text-slate-900">
+                      <FiClock className="text-[#007b57]" size={18} />
+                      <h3 className="text-xs font-black uppercase tracking-wider">Payment History & Status</h3>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                      {transactions.length} Records
+                    </span>
+                  </div>
 
-                  {(!selectedBooking.transactions || selectedBooking.transactions.length === 0) ? (
-                    <p className="text-xs font-medium text-slate-400 py-2">No transaction records found for this project.</p>
+                  {loadingTxns ? (
+                    <div className="py-8 text-center text-xs font-semibold text-slate-400 flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-[#007b57] border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading transactions...</span>
+                    </div>
+                  ) : transactions.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-slate-400 font-medium bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                      No payment submissions recorded for this booking yet.
+                    </div>
                   ) : (
-                    <div className="space-y-3">
-                      {selectedBooking.transactions.map((txn, index) => (
-                        <div key={txn._id || index} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-slate-50/60 rounded-2xl border border-slate-200/60 gap-3 shadow-sm hover:shadow-md hover:border-[#007b57]/30 hover:bg-white transition-all duration-200">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-black text-slate-900">৳{txn.amount?.toLocaleString()}</span>
-                              <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-md bg-white text-slate-700 border border-slate-200">
-                                {txn.paymentMethod} {txn.bankName !== 'N/A' && `(${txn.bankName})`}
-                              </span>
-                            </div>
-                            <p className="text-[11px] font-mono text-slate-500 mt-1">Txn ID: {txn.transactionId}</p>
-                          </div>
-
-                          <div>
-                            {txn.status === 'pending' && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                                <FiClock size={13} /> Pending Verification
-                              </span>
-                            )}
-                            {txn.status === 'approved' && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                                <FiCheckCircle size={13} /> Approved
-                              </span>
-                            )}
-                            {txn.status === 'rejected' && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full">
-                                <FiXCircle size={13} /> Rejected
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="border-b border-slate-200/80 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                            <th className="py-3 px-3">Date</th>
+                            <th className="py-3 px-3">Method / Bank</th>
+                            <th className="py-3 px-3">Txn / Receipt ID</th>
+                            <th className="py-3 px-3">Amount</th>
+                            <th className="py-3 px-3 text-right">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                          {transactions.map((txn) => {
+                            const statusLower = (txn.status || 'pending').toLowerCase();
+                            return (
+                              <tr key={txn._id} className="hover:bg-slate-50/80 transition-colors">
+                                <td className="py-3.5 px-3 text-slate-500 whitespace-nowrap">
+                                  {txn.createdAt ? new Date(txn.createdAt).toLocaleDateString() : 'N/A'}
+                                </td>
+                                <td className="py-3.5 px-3">
+                                  <span className="font-bold text-slate-800 capitalize block">{txn.paymentMethod}</span>
+                                  {txn.bankName && txn.bankName !== 'N/A' && (
+                                    <span className="text-[10px] text-slate-400 block">{txn.bankName}</span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-3 font-mono font-semibold text-slate-800">
+                                  {txn.transactionId || 'N/A'}
+                                </td>
+                                <td className="py-3.5 px-3 font-black text-slate-900">
+                                  ৳{(txn.amount || 0).toLocaleString()}
+                                </td>
+                                <td className="py-3.5 px-3 text-right">
+                                  {statusLower === 'approved' && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                                      <FiCheckCircle size={12} /> Approved
+                                    </span>
+                                  )}
+                                  {statusLower === 'pending' && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                                      <FiClock size={12} /> Pending
+                                    </span>
+                                  )}
+                                  {statusLower === 'rejected' && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full">
+                                      <FiXCircle size={12} /> Rejected
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
 
               </div>
             ) : (
-              <div className="bg-white rounded-3xl p-16 border border-slate-200/80 text-center text-slate-400 shadow-xl shadow-slate-200/50">
-                Select a project from the left panel to view detailed information.
+              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xl shadow-slate-200/50">
+                <FiInfo size={32} className="mx-auto text-slate-300 mb-3" />
+                <p className="text-slate-500 font-semibold text-xs">Please select a booking from the left list to view details.</p>
               </div>
             )}
           </div>
 
         </div>
+
       </div>
+
     </div>
   );
 }
