@@ -1,417 +1,422 @@
-import React, { useState } from 'react';
-import { Search, Edit3,  List, Save, RotateCcw, Plus, Trash2, Image } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  UserPlus, 
+  Image as ImageIcon, 
+  Trash2, 
+  UploadCloud, 
+  Loader2, 
+  Briefcase, 
+  User, 
+  FileText, 
+  Globe 
+} from 'lucide-react';
 
-export default function TeamPageSection() {
-  const [activeTab, setActiveTab] = useState('list');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+// 2. সোশ্যাল মিডিয়া ব্র্যান্ড আইকনগুলো react-icons থেকে নিন
+import { FaLinkedin, FaFacebook } from 'react-icons/fa6';
 
-  // 📑 পেজ ডাটা স্ট্রাকচার (ডিফল্ট কিছু ডেমো ডাটা ও ইমেজ প্রিভিউ সহ)
-  const [pages, setPages] = useState([
-    { id: 1, title: 'Home', type: 'System Page', position: 1, published: true },
-    { 
-      id: 2, 
-      title: 'Properties Available', 
-      type: 'Properties Page', 
-      position: 2, 
-      published: true,
-      config: { columns: '3' }
-    },
-    { 
-      id: 3, 
-      title: 'Our Agents', 
-      type: 'Teams Page', 
-      position: 3, 
-      published: true,
-      members: [
-        { id: 101, name: 'John Doe', designation: 'CEO & Founder', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150', bio: 'Real estate expert.', social: { fb: '', ln: '' } }
-      ]
-    },
-    { 
-      id: 4, 
-      title: 'Latest Projects', 
-      type: 'Properties Page', 
-      position: 4, 
-      published: true,
-      config: { columns: '4' } 
-    },
-    { id: 5, title: 'FAQ', type: 'System Page', position: 5, published: true },
-    { 
-      id: 8, 
-      title: 'Blogs & News', 
-      type: 'Blog Page', 
-      position: 8, 
-      published: true,
-      blogs: [
-        { id: 201, title: 'Market Trends 2026', image: 'https://images.unsplash.com/photo-1512403754473-2785561399cf?w=150', text: 'Real estate market is booming right now...' }
-      ]
-    },
-    { id: 9, title: 'Pages Overview', type: 'System Page', position: 9, subMenu: 'arrow', published: true, 
-      children: [
-        { id: 10, title: 'Our Services', type: 'System Page', position: 1, published: true }
-      ]
-    },
-  ]);
+export default function TeamManagementSection() {
+  // 🧑‍💻 টিম মেম্বারদের তালিকা স্টেট
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
-  // 🔄 ওয়ান-স্টপ এডিট ফর্ম স্টেট
-  const [selectedPage, setSelectedPage] = useState(null);
-  
-  // 🧑‍💻 টিম মেম্বার লোকাল ফর্ম স্টেট (image সহ)
-  const [memberForm, setMemberForm] = useState({ name: '', designation: '', bio: '', fb: '', ln: '', image: '' });
-  
-  // ✍️ ব্লগ লোকাল ফর্ম স্টেট (image সহ)
-  const [blogForm, setBlogForm] = useState({ title: '', text: '', image: '' });
+  // 📝 ইনপুট ফর্ম স্টেট
+  const [formData, setFormData] = useState({
+    name: '',
+    designation: '',
+    bio: '',
+    facebook: '',
+    linkedin: ''
+  });
 
-  // 🎛️ লাইভ পাবলিশ টগল
-  const handleTogglePublish = (id, parentId = null) => {
-    setPages(prev => prev.map(p => {
-      if (parentId && p.id === parentId && p.children) {
-        return { ...p, children: p.children.map(c => c.id === id ? { ...c, published: !c.published } : c) };
-      } else if (!parentId && p.id === id) {
-        return { ...p, published: !p.published };
-      }
-      return p;
-    }));
-  };
+  // 🖼️ ফাইল ও প্রিভিউ স্টেট
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
-  const handleEditClick = (page) => {
-    setSelectedPage({ ...page });
-    setActiveTab('form');
-  };
+  // ==========================================
+  // 🔄 1. GET ALL MEMBERS (Backend Fetching)
+  // ==========================================
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
 
-  // 🖼️ ইমেজ ফাইল হ্যান্ডলার (Local Preview Generation)
-  const handleImageChange = (e, setFormState) => {
-    const file = e.target.files[0];
-    if (file) {
-      const localImageUrl = URL.createObjectURL(file);
-      setFormState(prev => ({ ...prev, image: localImageUrl }));
+  const fetchTeamMembers = async () => {
+    setFetching(true);
+    try {
+      // API Call simulation
+      setTimeout(() => {
+        setMembers([
+          {
+            _id: '1',
+            name: 'Alex Rivera',
+            designation: 'Lead Architect & Designer',
+            bio: 'Passionate about modern minimalism and sustainable building architectures.',
+            imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400',
+            social: { facebook: 'https://facebook.com', linkedin: 'https://linkedin.com' }
+          }
+        ]);
+        setFetching(false);
+      }, 500);
+
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      setFetching(false);
     }
   };
 
-  // ➕ টিম মেম্বার যোগ করার ফাংশন
-  const addTeamMember = () => {
-    if (!memberForm.name || !memberForm.designation) return alert('Name & Designation required!');
-    const newMember = {
-      id: Date.now(),
-      name: memberForm.name,
-      designation: memberForm.designation,
-      bio: memberForm.bio,
-      image: memberForm.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150', // ডিফল্ট অবতার যদি ইমেজ না দেয়
-      social: { fb: memberForm.fb, ln: memberForm.ln }
-    };
-    setSelectedPage({
-      ...selectedPage,
-      members: [...(selectedPage.members || []), newMember]
-    });
-    setMemberForm({ name: '', designation: '', bio: '', fb: '', ln: '', image: '' });
+  // 🖼️ স্থানীয় ছবি প্রিভিউ জেনারেটর
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
-  // ➕ ব্লগ পোস্ট যোগ করার ফাংশন
-  const addBlogPost = () => {
-    if (!blogForm.title || !blogForm.text) return alert('Blog Title & Content required!');
-    const newBlog = {
-      id: Date.now(),
-      title: blogForm.title,
-      text: blogForm.text,
-      image: blogForm.image || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=150' // ডিফল্ট ইমেজ
-    };
-    setSelectedPage({
-      ...selectedPage,
-      blogs: [...(selectedPage.blogs || []), newBlog]
+  // ☁️ Cloudinary Upload Helper Function
+  const uploadToCloudinary = async (file) => {
+    const cloudName = 'YOUR_CLOUDINARY_CLOUD_NAME'; // 👈 আপনার Cloudinary Cloud Name বসান
+    const uploadPreset = 'YOUR_UNSIGNED_UPLOAD_PRESET'; // 👈 আপনার Upload Preset বসান
+
+    const cloudinaryData = new FormData();
+    cloudinaryData.append('file', file);
+    cloudinaryData.append('upload_preset', uploadPreset);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: cloudinaryData,
     });
-    setBlogForm({ title: '', text: '', image: '' });
+
+    if (!res.ok) throw new Error('Cloudinary upload failed!');
+    const data = await res.json();
+    return data.secure_url; // Cloudinary Hosted Image URL
   };
 
-  // 🚀 ফাইনাল সেভ লজিক
-  const handleSavePageConfig = (e) => {
+  // ==========================================
+  // 🚀 2. SUBMIT / UPLOAD MEMBER DATA
+  // ==========================================
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setPages(prev => prev.map(p => {
-      if (p.id === selectedPage.id) return selectedPage;
-      if (p.children) {
-        return { ...p, children: p.children.map(c => c.id === selectedPage.id ? selectedPage : c) };
-      }
-      return p;
-    }));
-    alert(`${selectedPage.title} Dynamic layout updated successfully!`);
-    setActiveTab('list');
-    setSelectedPage(null);
+    if (!formData.name || !formData.designation || !formData.bio) {
+      return alert('Please fill in all required fields!');
+    }
+    if (!imageFile) {
+      return alert('Please upload a member profile photo!');
+    }
+
+    setLoading(true);
+
+    try {
+      // Step A: Upload Image to Cloudinary
+      const uploadedImageUrl = await uploadToCloudinary(imageFile);
+
+      // Step B: Prepare Final Data Payload
+      const payload = {
+        name: formData.name,
+        designation: formData.designation,
+        bio: formData.bio,
+        imageUrl: uploadedImageUrl,
+        social: {
+          facebook: formData.facebook,
+          linkedin: formData.linkedin,
+        }
+      };
+
+      // Step C: Send Payload to Backend API
+      /*
+      const response = await fetch('/api/v1/team-members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const newMemberData = await response.json();
+      */
+
+      // Demo State Update
+      setMembers(prev => [{ ...payload, _id: Date.now().toString() }, ...prev]);
+
+      alert('Team member added successfully!');
+      
+      // Reset Form State
+      setFormData({ name: '', designation: '', bio: '', facebook: '', linkedin: '' });
+      setImageFile(null);
+      setImagePreview(null);
+
+    } catch (error) {
+      console.error('Submission Error:', error);
+      alert('Failed to upload team member data. Make sure Cloudinary credentials are valid.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const filteredPages = pages.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  // ==========================================
+  // 🗑️ 3. DELETE MEMBER DATA
+  // ==========================================
+  const handleDeleteMember = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this member?')) return;
+
+    try {
+      // API call placeholder
+      setMembers(prev => prev.filter(m => m._id !== id));
+    } catch (error) {
+      console.error('Delete Error:', error);
+      alert('Could not delete member.');
+    }
+  };
 
   return (
-    <div className="bg-[#020617] min-h-screen text-slate-100 font-sans antialiased">
-      
-      {/* 🔝 নেভিগেশন ট্যাব */}
-      <div className="border-b border-slate-900 bg-[#070a13] flex items-center px-4">
-        <button 
-          onClick={() => { setActiveTab('list'); setSelectedPage(null); }}
-          className={`flex items-center gap-2 px-6 py-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all ${
-            activeTab === 'list' ? 'border-rose-600 text-rose-500 bg-rose-950/5' : 'border-transparent text-slate-400'
-          }`}
-        >
-          <List size={14} /> Live Page Nodes
-        </button>
-        {selectedPage && (
-          <button className="flex items-center gap-2 px-6 py-4 text-xs font-black uppercase tracking-wider border-b-2 border-rose-600 text-rose-500 bg-rose-950/5">
-            <Edit3 size={14} /> Customizing: {selectedPage.title}
-          </button>
-        )}
-      </div>
-
-      <div className="p-6 max-w-[1600px] mx-auto space-y-4">
+    <div className="bg-slate-50 min-h-screen text-slate-800 font-sans p-4 md:p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* ========================================== */}
-        {/* 📑 লিস্ট ভিউ ট্যাব */}
-        {/* ========================================== */}
-        {activeTab === 'list' && (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#090d1a] p-4 rounded-xl border border-slate-900 shadow-xl">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <select value={rowsPerPage} onChange={(e) => setRowsPerPage(Number(e.target.value))} className="bg-[#020617] border border-slate-800 text-slate-200 px-3 py-1.5 rounded-lg text-xs">
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                </select>
-                <span>rows per page</span>
-              </div>
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-2.5 text-slate-500" size={14} />
-                <input type="text" placeholder="Search target pages..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#020617] border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none" />
-              </div>
-            </div>
-
-            <div className="overflow-x-auto rounded-xl border border-slate-900 bg-[#070b16] shadow-2xl">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-900 text-[10px] font-black text-slate-400 uppercase tracking-wider bg-[#090e1c]">
-                    <th className="py-4 px-4 w-16">SL</th>
-                    <th className="py-4 px-4">Dynamic Module Type</th>
-                    <th className="py-4 px-4">Page Title</th>
-                    <th className="py-4 px-4 text-center w-24">Position</th>
-                    <th className="py-4 px-4 text-center w-28">Publish</th>
-                    <th className="py-4 px-4 text-center w-24">Customize Content</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-900/60 text-xs">
-                  {filteredPages.slice(0, rowsPerPage).map((page, index) => (
-                    <React.Fragment key={page.id}>
-                      <tr className="hover:bg-slate-900/30 transition-colors">
-                        <td className="py-3.5 px-4 text-slate-500 font-mono">{index + 1}</td>
-                        <td className="py-3.5 px-4"><span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-400">{page.type}</span></td>
-                        <td className="py-3.5 px-4 font-bold text-slate-200">{page.title}</td>
-                        <td className="py-3.5 px-4 text-center text-slate-400 font-mono">{page.position}</td>
-                        <td className="py-3.5 px-4 text-center">
-                          <button onClick={() => handleTogglePublish(page.id)} className={`w-9 h-5 rounded-full p-0.5 transition-colors ${page.published ? 'bg-rose-500' : 'bg-slate-800'}`}>
-                            <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-200 ${page.published ? 'translate-x-4' : 'translate-x-0'}`} />
-                          </button>
-                        </td>
-                        <td className="py-3.5 px-4 text-center">
-                          <button onClick={() => handleEditClick(page)} className="px-3 py-1.5 bg-rose-950/20 hover:bg-rose-900/40 border border-rose-900/40 rounded-lg text-rose-400 font-bold text-[11px] transition-all flex items-center gap-1 mx-auto">
-                            <Edit3 size={11} /> Settings
-                          </button>
-                        </td>
-                      </tr>
-
-                      {/* চাইল্ড পেজ */}
-                      {page.children && page.children.map((child) => (
-                        <tr key={child.id} className="bg-slate-950/40 hover:bg-slate-900/20">
-                          <td className="py-3 px-4"></td>
-                          <td className="py-3 px-4 text-slate-500 italic pl-6">{child.type}</td>
-                          <td className="py-3 px-4 text-rose-400/90 font-semibold pl-8"><span className="text-slate-600 font-mono">↳</span> {child.title}</td>
-                          <td className="py-3 px-4 text-center text-slate-500 font-mono">{child.position}</td>
-                          <td className="py-3 px-4 text-center">
-                            <button onClick={() => handleTogglePublish(child.id, page.id)} className={`w-9 h-5 rounded-full p-0.5 transition-colors ${child.published ? 'bg-rose-500' : 'bg-slate-800'}`}>
-                              <div className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-200 ${child.published ? 'translate-x-4' : 'translate-x-0'}`} />
-                            </button>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <button onClick={() => handleEditClick(child)} className="px-3 py-1.5 bg-rose-950/20 hover:bg-rose-900/40 border border-rose-900/40 rounded-lg text-rose-400 font-bold text-[11px] transition-all flex items-center gap-1 mx-auto">
-                              <Edit3 size={11} /> Settings
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {/* 🔝 হেডার সেকশন */}
+        <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-xl font-black uppercase tracking-wider flex items-center gap-2" style={{ color: '#185F35' }}>
+              <UserPlus size={24} /> Team Member Management
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Upload team credentials, manage roles, and host images seamlessly via Cloudinary.
+            </p>
           </div>
-        )}
+          <div className="bg-[#185F35]/10 border border-[#185F35]/20 text-[#185F35] text-xs px-4 py-1.5 rounded-full font-bold">
+            Total Members: {members.length}
+          </div>
+        </div>
 
         {/* ========================================== */}
-        {/* ✍️ ডাইনামিক এডিট ফর্ম */}
+        {/* ✍️ ১. মেম্বার ডাটা আপলোড ফর্ম (WHITE THEME) */}
         {/* ========================================== */}
-        {activeTab === 'form' && selectedPage && (
-          <form onSubmit={handleSavePageConfig} className="bg-[#070b16] border border-slate-900 rounded-xl p-6 max-w-3xl mx-auto space-y-6 shadow-2xl">
-            <div className="border-b border-slate-900 pb-4">
-              <h3 className="text-sm font-black uppercase text-rose-500 tracking-wider">Configure Layout Architecture</h3>
-              <p className="text-xs text-slate-400 mt-1">Editing custom blocks for: <span className="text-white font-bold">{selectedPage.title} ({selectedPage.type})</span></p>
+        <form onSubmit={handleSubmit} className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <h3 className="text-xs font-black uppercase tracking-wider text-[#185F35]">
+              Add New Member
+            </h3>
+            <span className="text-[10px] text-slate-400 font-semibold">* Required Fields</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            {/* 🖼️ ছবি আপলোড বাক্স (4 Columns) */}
+            <div className="md:col-span-4 flex flex-col">
+              <label className="text-[11px] uppercase font-bold text-slate-600 mb-2 flex items-center gap-1">
+                <ImageIcon size={13} className="text-[#185F35]" /> Profile Photo *
+              </label>
+              
+              <div className="relative flex-1 min-h-[220px] bg-slate-50 border-2 border-dashed border-slate-200 hover:border-[#185F35] rounded-xl flex flex-col items-center justify-center p-4 transition-all group overflow-hidden">
+                {imagePreview ? (
+                  <>
+                    <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-xs font-bold text-white bg-[#185F35] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow">
+                        <UploadCloud size={14} /> Change Photo
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center space-y-2 pointer-events-none">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto text-slate-400 group-hover:text-[#185F35] transition-colors">
+                      <UploadCloud size={20} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-700">Click to upload photo</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, WEBP up to 5MB</p>
+                    </div>
+                  </div>
+                )}
+
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
             </div>
 
-            {/* বেসিক ইনফো */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Rename Page Title</label>
-                <input type="text" value={selectedPage.title} onChange={(e) => setSelectedPage({...selectedPage, title: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
-              </div>
-              <div>
-                <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Layout Sequence Position</label>
-                <input type="number" value={selectedPage.position} onChange={(e) => setSelectedPage({...selectedPage, position: Number(e.target.value)})} className="w-full bg-[#020617] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
-              </div>
-            </div>
+            {/* 📝 টেক্সট ইনপুট সেকশন (8 Columns) */}
+            <div className="md:col-span-8 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-600 mb-1 flex items-center gap-1">
+                    <User size={13} className="text-[#185F35]" /> Full Name *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. John Doe"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#185F35] focus:bg-white transition-all"
+                    required
+                  />
+                </div>
 
-            {/* 🏢 ১. PROPERTIES / PROJECTS PAGE */}
-            {(selectedPage.type === 'properties Page' || selectedPage.type === 'Properties Page') && (
-              <div className="bg-[#020617] p-5 rounded-xl border border-slate-900 space-y-3">
-                <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wide">📦 Properties Layout Engine</h4>
-                <div className="grid grid-cols-3 gap-3 pt-2">
-                  {['2', '3', '4'].map((col) => (
-                    <label key={col} className={`border p-3 rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${selectedPage.config?.columns === col ? 'border-rose-600 bg-rose-950/10 text-white' : 'border-slate-800 bg-[#070b16] text-slate-400'}`}>
-                      <input type="radio" name="columns" value={col} checked={selectedPage.config?.columns === col} onChange={(e) => setSelectedPage({...selectedPage, config: { ...selectedPage.config, columns: e.target.value }})} className="sr-only" />
-                      <span className="text-xs font-bold">{col} Columns Grid</span>
-                    </label>
-                  ))}
+                {/* Designation */}
+                <div>
+                  <label className="text-[11px] uppercase font-bold text-slate-600 mb-1 flex items-center gap-1">
+                    <Briefcase size={13} className="text-[#185F35]" /> Designation / Role *
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Senior Real Estate Consultant"
+                    value={formData.designation}
+                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-[#185F35] focus:bg-white transition-all"
+                    required
+                  />
                 </div>
               </div>
-            )}
 
-            {/* 👥 ২. TEAMS / AGENTS PAGE (Image Upload সহ) */}
-            {selectedPage.type === 'Teams Page' && (
-              <div className="bg-[#020617] p-5 rounded-xl border border-slate-900 space-y-4">
-                <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wide">👥 Team Member Upload Registry</h4>
-                
-                <div className="grid grid-cols-2 gap-3 bg-[#070b16] p-4 rounded-xl border border-slate-900">
-                  {/* ইমেজ আপলোড ও প্রিভিউ সেকশন */}
-                  <div className="col-span-2 flex items-center gap-4 bg-[#020617] p-3 rounded-xl border border-slate-800/60">
-                    <div className="w-14 h-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-                      {memberForm.image ? (
-                        <img src={memberForm.image} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <Image className="text-slate-600" size={20} />
+              {/* Bio Description */}
+              <div>
+                <label className="text-[11px] uppercase font-bold text-slate-600 mb-1 flex items-center gap-1">
+                  <FileText size={13} className="text-[#185F35]" /> Brief Description / Bio *
+                </label>
+                <textarea 
+                  rows="3"
+                  placeholder="Write a short summary about this team member..."
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-[#185F35] focus:bg-white transition-all resize-none"
+                  required
+                />
+              </div>
+
+              {/* Social Links (Optional) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <input 
+                    type="url" 
+                    placeholder="Facebook Profile URL (Optional)"
+                    value={formData.facebook}
+                    onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-[#185F35] focus:bg-white"
+                  />
+                </div>
+                <div>
+                  <input 
+                    type="url" 
+                    placeholder="LinkedIn Profile URL (Optional)"
+                    value={formData.linkedin}
+                    onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-[#185F35] focus:bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Action Button */}
+          <div className="flex justify-end pt-3 border-t border-slate-100">
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{ backgroundColor: loading ? '#0e3920' : '#185F35' }}
+              className="hover:opacity-95 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md shadow-[#185F35]/20 transition-all cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Uploading to Cloudinary...
+                </>
+              ) : (
+                <>
+                  <UploadCloud size={16} /> Save Team Member
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* ========================================== */}
+        {/* 👥 ২. মেম্বার কার্ড প্রিভিউ (PREMIUM LIGHT CARDS) */}
+        {/* ========================================== */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h3 className="text-xs font-black uppercase text-slate-700 tracking-wider">
+              Active Team Roster
+            </h3>
+            <span className="text-[11px] text-slate-500 font-medium">Synced with Backend</span>
+          </div>
+
+          {fetching ? (
+            <div className="text-center py-12 text-slate-400 flex items-center justify-center gap-2">
+              <Loader2 className="animate-spin text-[#185F35]" size={18} /> Loading Team Data...
+            </div>
+          ) : members.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs">
+              No team members found. Fill out the form above to register members.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {members.map((member) => (
+                <div 
+                  key={member._id}
+                  className="bg-white border border-slate-200/90 hover:border-[#185F35]/40 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
+                >
+                  <div>
+                    {/* Member Image Container */}
+                    <div className="relative h-52 bg-slate-100 overflow-hidden">
+                      <img 
+                        src={member.imageUrl} 
+                        alt={member.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+                      
+                      {/* Delete Button */}
+                      <button 
+                        onClick={() => handleDeleteMember(member._id)}
+                        className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-rose-600 text-slate-600 hover:text-white rounded-xl backdrop-blur-md shadow-sm transition-colors"
+                        title="Remove Member"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+
+                      <div className="absolute bottom-3 left-4 right-4 text-white">
+                        <h4 className="text-base font-bold drop-shadow-sm">
+                          {member.name}
+                        </h4>
+                        <p className="text-xs font-semibold text-emerald-300">
+                          {member.designation}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Member Bio */}
+                    <div className="p-4">
+                      <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                        {member.bio}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-slate-400">
+                    <span className="text-[10px] font-mono text-slate-400">ID: #{member._id.slice(-5)}</span>
+                    
+                    <div className="flex items-center gap-2.5">
+                      {member.social?.facebook && (
+                        <a href={member.social.facebook} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
+                          <Facebook size={14} />
+                        </a>
+                      )}
+                      {member.social?.linkedin && (
+                        <a href={member.social.linkedin} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
+                          <Linkedin size={14} />
+                        </a>
+                      )}
+                      {!member.social?.facebook && !member.social?.linkedin && (
+                        <Globe size={14} className="opacity-30" />
                       )}
                     </div>
-                    <div className="w-full">
-                      <label className="text-[10px] text-slate-400 font-bold block mb-1">Member Profile Photo</label>
-                      <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, setMemberForm)} className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer w-full" />
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Full Name *</label>
-                    <input type="text" placeholder="John Doe" value={memberForm.name} onChange={(e) => setMemberForm({...memberForm, name: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Designation *</label>
-                    <input type="text" placeholder="Senior Agent" value={memberForm.designation} onChange={(e) => setMemberForm({...memberForm, designation: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Short Biography</label>
-                    <textarea placeholder="Bio details..." value={memberForm.bio} onChange={(e) => setMemberForm({...memberForm, bio: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none h-14" />
-                  </div>
-                  <button type="button" onClick={addTeamMember} className="col-span-2 mt-1 w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors">
-                    <Plus size={14} /> Add Member to List
-                  </button>
-                </div>
-
-                {/* মেম্বার লিস্ট ভিউ */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Registered Members ({selectedPage.members?.length || 0})</span>
-                  <div className="max-h-44 overflow-y-auto space-y-2 pr-2">
-                    {selectedPage.members?.map((member) => (
-                      <div key={member.id} className="flex justify-between items-center bg-[#070b16] p-3 rounded-lg border border-slate-900">
-                        <div className="flex items-center gap-3">
-                          <img src={member.image} alt={member.name} className="w-9 h-9 rounded-lg object-cover bg-slate-900 border border-slate-800" />
-                          <div>
-                            <p className="text-xs font-bold text-white">{member.name}</p>
-                            <p className="text-[10px] text-rose-400">{member.designation}</p>
-                          </div>
-                        </div>
-                        <button type="button" onClick={() => setSelectedPage({ ...selectedPage, members: selectedPage.members.filter(m => m.id !== member.id) })} className="text-slate-500 hover:text-red-400 p-1">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* 📝 ৩. BLOG PAGE (Image Upload সহ) */}
-            {selectedPage.type === 'Blog Page' && (
-              <div className="bg-[#020617] p-5 rounded-xl border border-slate-900 space-y-4">
-                <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wide">📝 Content / Blog Publisher Engine</h4>
-                
-                <div className="bg-[#070b16] p-4 rounded-xl border border-slate-900 space-y-3">
-                  {/* ব্লগ কভার ইমেজ আপলোড ও প্রিভিউ */}
-                  <div className="flex items-center gap-4 bg-[#020617] p-3 rounded-xl border border-slate-800/60">
-                    <div className="w-20 h-14 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center overflow-hidden shrink-0">
-                      {blogForm.image ? (
-                        <img src={blogForm.image} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <Image className="text-slate-600" size={20} />
-                      )}
-                    </div>
-                    <div className="w-full">
-                      <label className="text-[10px] text-slate-400 font-bold block mb-1">Blog Banner / Cover Image</label>
-                      <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, setBlogForm)} className="text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer w-full" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Article / Blog Title *</label>
-                    <input type="text" placeholder="e.g., Real Estate Investment Tips" value={blogForm.title} onChange={(e) => setBlogForm({...blogForm, title: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Blog Body Content *</label>
-                    <textarea placeholder="Write whole article content here..." value={blogForm.text} onChange={(e) => setBlogForm({...blogForm, text: e.target.value})} className="w-full bg-[#020617] border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none h-20" />
-                  </div>
-                  <button type="button" onClick={addBlogPost} className="w-full py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors">
-                    <Plus size={14} /> Insert Blog Post
-                  </button>
-                </div>
-
-                {/* ব্লগ লিস্ট ভিউ */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase block">Published Blogs ({selectedPage.blogs?.length || 0})</span>
-                  <div className="max-h-44 overflow-y-auto space-y-2 pr-2">
-                    {selectedPage.blogs?.map((blog) => (
-                      <div key={blog.id} className="flex justify-between items-start bg-[#070b16] p-3 rounded-lg border border-slate-900">
-                        <div className="flex items-start gap-3 max-w-[85%]">
-                          <img src={blog.image} alt={blog.title} className="w-14 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800 shrink-0" />
-                          <div className="truncate">
-                            <p className="text-xs font-bold text-white truncate">{blog.title}</p>
-                            <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">{blog.text}</p>
-                          </div>
-                        </div>
-                        <button type="button" onClick={() => setSelectedPage({ ...selectedPage, blogs: selectedPage.blogs.filter(b => b.id !== blog.id) })} className="text-slate-500 hover:text-red-400 p-1 shrink-0">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ⚙️ ৪. SYSTEM / GENERAL PAGE */}
-            {selectedPage.type === 'System Page' && (
-              <div className="bg-[#020617] p-5 rounded-xl border border-slate-900 text-center py-8">
-                <p className="text-xs text-slate-400">This is a core <span className="text-rose-400 font-bold">System Page</span>. No custom content blocks needed.</p>
-              </div>
-            )}
-
-            {/* 🔘 অ্যাকশন বাটন কন্ট্রোল */}
-            <div className="flex gap-3 pt-3 border-t border-slate-900">
-              <button type="submit" className="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-rose-600/10">
-                <Save size={14} /> Save Page Parameters
-              </button>
-              <button type="button" onClick={() => { setSelectedPage(null); setActiveTab('list'); }} className="bg-[#020617] border border-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                <RotateCcw size={14} /> Back to Dashboard
-              </button>
+              ))}
             </div>
-          </form>
-        )}
+          )}
+        </div>
 
       </div>
     </div>
