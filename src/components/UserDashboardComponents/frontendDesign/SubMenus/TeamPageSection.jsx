@@ -45,7 +45,7 @@ export default function TeamManagementSection() {
     setFetching(true);
     try {
       // 👈 আপনার ব্যাকএন্ডের GET API URL এখানে বসান
-      const response = await fetch('http://localhost:5000/api/v1/team-members'); 
+      const response = await fetch(`http://localhost:4000/api/admin/team-members?${user?.agentId}`); 
       const result = await response.json();
 
       if (response.ok) {
