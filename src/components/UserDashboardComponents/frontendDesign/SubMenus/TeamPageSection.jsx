@@ -11,7 +11,7 @@ import {
   Globe 
 } from 'lucide-react';
 
-// 2. সোশ্যাল মিডিয়া ব্র্যান্ড আইকনগুলো react-icons থেকে নিন
+// react-icons থেকে সোশ্যাল মিডিয়া আইকন
 import { FaLinkedin, FaFacebook } from 'react-icons/fa6';
 
 export default function TeamManagementSection() {
@@ -34,37 +34,32 @@ export default function TeamManagementSection() {
   const [imagePreview, setImagePreview] = useState(null);
 
   // ==========================================
-  // 🔄 1. GET ALL MEMBERS (Backend Fetching)
+  // 🔄 1. GET ALL MEMBERS (Backend Fetch Request)
   // ==========================================
-  useEffect(() => {
-    fetchTeamMembers();
-  }, []);
-
   const fetchTeamMembers = async () => {
     setFetching(true);
     try {
-      // API Call simulation
-      setTimeout(() => {
-        setMembers([
-          {
-            _id: '1',
-            name: 'Alex Rivera',
-            designation: 'Lead Architect & Designer',
-            bio: 'Passionate about modern minimalism and sustainable building architectures.',
-            imageUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400',
-            social: { facebook: 'https://facebook.com', linkedin: 'https://linkedin.com' }
-          }
-        ]);
-        setFetching(false);
-      }, 500);
+      // 👈 আপনার ব্যাকএন্ডের GET API URL এখানে বসান
+      const response = await fetch('http://localhost:5000/api/v1/team-members'); 
+      const result = await response.json();
 
+      if (response.ok) {
+        setMembers(result.data || result); // Response Structure অনুযায়ী সেট করা হয়েছে
+      } else {
+        console.error('Failed to fetch:', result.message);
+      }
     } catch (error) {
       console.error('Error fetching members:', error);
+    } finally {
       setFetching(false);
     }
   };
 
-  // 🖼️ স্থানীয় ছবি প্রিভিউ জেনারেটর
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
+  // 🖼️ স্থানীয় ছবি প্রিভিউ জেনারেটর
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -73,78 +68,59 @@ export default function TeamManagementSection() {
     }
   };
 
-  // ☁️ Cloudinary Upload Helper Function
-  const uploadToCloudinary = async (file) => {
-    const cloudName = 'YOUR_CLOUDINARY_CLOUD_NAME'; // 👈 আপনার Cloudinary Cloud Name বসান
-    const uploadPreset = 'YOUR_UNSIGNED_UPLOAD_PRESET'; // 👈 আপনার Upload Preset বসান
-
-    const cloudinaryData = new FormData();
-    cloudinaryData.append('file', file);
-    cloudinaryData.append('upload_preset', uploadPreset);
-
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: 'POST',
-      body: cloudinaryData,
-    });
-
-    if (!res.ok) throw new Error('Cloudinary upload failed!');
-    const data = await res.json();
-    return data.secure_url; // Cloudinary Hosted Image URL
-  };
-
   // ==========================================
-  // 🚀 2. SUBMIT / UPLOAD MEMBER DATA
+  // 🚀 2. SUBMIT DATA TO BACKEND (MULTER READY)
   // ==========================================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.name || !formData.designation || !formData.bio) {
       return alert('Please fill in all required fields!');
     }
     if (!imageFile) {
-      return alert('Please upload a member profile photo!');
+      return alert('Please select a member profile photo!');
     }
 
     setLoading(true);
 
     try {
-      // Step A: Upload Image to Cloudinary
-      const uploadedImageUrl = await uploadToCloudinary(imageFile);
-
-      // Step B: Prepare Final Data Payload
-      const payload = {
-        name: formData.name,
-        designation: formData.designation,
-        bio: formData.bio,
-        imageUrl: uploadedImageUrl,
-        social: {
-          facebook: formData.facebook,
-          linkedin: formData.linkedin,
-        }
-      };
-
-      // Step C: Send Payload to Backend API
-      /*
-      const response = await fetch('/api/v1/team-members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const newMemberData = await response.json();
-      */
-
-      // Demo State Update
-      setMembers(prev => [{ ...payload, _id: Date.now().toString() }, ...prev]);
-
-      alert('Team member added successfully!');
+      // 📦 Multer এর জন্য FormData তৈরি করা হচ্ছে
+      const submitData = new FormData();
       
-      // Reset Form State
-      setFormData({ name: '', designation: '', bio: '', facebook: '', linkedin: '' });
-      setImageFile(null);
-      setImagePreview(null);
+      // key নাম 'image' রাখা হয়েছে (Multer: upload.single('image'))
+      submitData.append('image', imageFile); 
+      submitData.append('name', formData.name);
+      submitData.append('designation', formData.designation);
+      submitData.append('bio', formData.bio);
+      submitData.append('facebook', formData.facebook);
+      submitData.append('linkedin', formData.linkedin);
+
+      // 📤 Backend API Call
+      // 👈 আপনার ব্যাকএন্ডের POST API URL এখানে বসান
+      const response = await fetch('http://localhost:5000/api/v1/team-members', {
+        method: 'POST',
+        body: submitData, // FormData পাঠালে 'Content-Type' হেডার দিতে হয় না
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Team member added successfully!');
+        
+        // ফর্ম রিসেট
+        setFormData({ name: '', designation: '', bio: '', facebook: '', linkedin: '' });
+        setImageFile(null);
+        setImagePreview(null);
+
+        // নতুন ডাটা দিয়ে মেম্বারদের লিস্ট আপডেট
+        fetchTeamMembers();
+      } else {
+        alert(result.message || 'Failed to save member.');
+      }
 
     } catch (error) {
       console.error('Submission Error:', error);
-      alert('Failed to upload team member data. Make sure Cloudinary credentials are valid.');
+      alert('Network error! Could not connect to the server.');
     } finally {
       setLoading(false);
     }
@@ -157,8 +133,16 @@ export default function TeamManagementSection() {
     if (!window.confirm('Are you sure you want to remove this member?')) return;
 
     try {
-      // API call placeholder
-      setMembers(prev => prev.filter(m => m._id !== id));
+      // 👈 আপনার ব্যাকএন্ডের DELETE API URL এখানে বসান
+      const response = await fetch(`http://localhost:5000/api/v1/team-members/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setMembers(prev => prev.filter(m => m._id !== id));
+      } else {
+        alert('Failed to delete member.');
+      }
     } catch (error) {
       console.error('Delete Error:', error);
       alert('Could not delete member.');
@@ -176,7 +160,7 @@ export default function TeamManagementSection() {
               <UserPlus size={24} /> Team Member Management
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Upload team credentials, manage roles, and host images seamlessly via Cloudinary.
+              Upload team credentials and sync directly with your backend API.
             </p>
           </div>
           <div className="bg-[#185F35]/10 border border-[#185F35]/20 text-[#185F35] text-xs px-4 py-1.5 rounded-full font-bold">
@@ -185,7 +169,7 @@ export default function TeamManagementSection() {
         </div>
 
         {/* ========================================== */}
-        {/* ✍️ ১. মেম্বার ডাটা আপলোড ফর্ম (WHITE THEME) */}
+        {/* ✍️ ১. মেম্বার ডাটা আপলোড ফর্ম */}
         {/* ========================================== */}
         <form onSubmit={handleSubmit} className="bg-white border border-slate-200/80 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
           <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
@@ -197,7 +181,7 @@ export default function TeamManagementSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             
-            {/* 🖼️ ছবি আপলোড বাক্স (4 Columns) */}
+            {/* 🖼️ ছবি আপলোড বাক্স */}
             <div className="md:col-span-4 flex flex-col">
               <label className="text-[11px] uppercase font-bold text-slate-600 mb-2 flex items-center gap-1">
                 <ImageIcon size={13} className="text-[#185F35]" /> Profile Photo *
@@ -234,7 +218,7 @@ export default function TeamManagementSection() {
               </div>
             </div>
 
-            {/* 📝 টেক্সট ইনপুট সেকশন (8 Columns) */}
+            {/* 📝 টেক্সট ইনপুট সেকশন */}
             <div className="md:col-span-8 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Full Name */}
@@ -283,7 +267,7 @@ export default function TeamManagementSection() {
                 />
               </div>
 
-              {/* Social Links (Optional) */}
+              {/* Social Links */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div>
                   <input 
@@ -318,7 +302,7 @@ export default function TeamManagementSection() {
             >
               {loading ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" /> Uploading to Cloudinary...
+                  <Loader2 size={16} className="animate-spin" /> Saving Data...
                 </>
               ) : (
                 <>
@@ -330,7 +314,7 @@ export default function TeamManagementSection() {
         </form>
 
         {/* ========================================== */}
-        {/* 👥 ২. মেম্বার কার্ড প্রিভিউ (PREMIUM LIGHT CARDS) */}
+        {/* 👥 ২. মেম্বার কার্ড প্রিভিউ */}
         {/* ========================================== */}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
@@ -342,7 +326,7 @@ export default function TeamManagementSection() {
 
           {fetching ? (
             <div className="text-center py-12 text-slate-400 flex items-center justify-center gap-2">
-              <Loader2 className="animate-spin text-[#185F35]" size={18} /> Loading Team Data...
+              <Loader2 className="animate-spin text-[#185F35]" size={18} /> Fetching Agents...
             </div>
           ) : members.length === 0 ? (
             <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs">
@@ -359,7 +343,7 @@ export default function TeamManagementSection() {
                     {/* Member Image Container */}
                     <div className="relative h-52 bg-slate-100 overflow-hidden">
                       <img 
-                        src={member.imageUrl} 
+                        src={member.imageUrl || member.image} 
                         alt={member.name} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -394,20 +378,20 @@ export default function TeamManagementSection() {
 
                   {/* Card Footer */}
                   <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-slate-400">
-                    <span className="text-[10px] font-mono text-slate-400">ID: #{member._id.slice(-5)}</span>
+                    <span className="text-[10px] font-mono text-slate-400">ID: #{member._id?.slice(-5)}</span>
                     
                     <div className="flex items-center gap-2.5">
-                      {member.social?.facebook && (
-                        <a href={member.social.facebook} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
-                          <Facebook size={14} />
+                      {member.facebook && (
+                        <a href={member.facebook} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
+                          <FaFacebook size={14} />
                         </a>
                       )}
-                      {member.social?.linkedin && (
-                        <a href={member.social.linkedin} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
-                          <Linkedin size={14} />
+                      {member.linkedin && (
+                        <a href={member.linkedin} target="_blank" rel="noreferrer" className="hover:text-[#185F35] transition-colors">
+                          <FaLinkedin size={14} />
                         </a>
                       )}
-                      {!member.social?.facebook && !member.social?.linkedin && (
+                      {!member.facebook && !member.linkedin && (
                         <Globe size={14} className="opacity-30" />
                       )}
                     </div>
