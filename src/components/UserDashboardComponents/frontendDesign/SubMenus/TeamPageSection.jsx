@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { 
   UserPlus, 
   Image as ImageIcon, 
@@ -13,8 +13,12 @@ import {
 
 // react-icons থেকে সোশ্যাল মিডিয়া আইকন
 import { FaLinkedin, FaFacebook } from 'react-icons/fa6';
+import AgentContext from '../../../../context/AgentContext';
 
 export default function TeamManagementSection() {
+
+  const {user} = useContext(AgentContext);
+  console.log(user);
   // 🧑‍💻 টিম মেম্বারদের তালিকা স্টেট
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +30,8 @@ export default function TeamManagementSection() {
     designation: '',
     bio: '',
     facebook: '',
-    linkedin: ''
+    linkedin: '',
+    agentId:user.agentId
   });
 
   // 🖼️ ফাইল ও প্রিভিউ স্টেট
@@ -94,10 +99,11 @@ export default function TeamManagementSection() {
       submitData.append('bio', formData.bio);
       submitData.append('facebook', formData.facebook);
       submitData.append('linkedin', formData.linkedin);
+      submitData.append('agentId', formData.agentId);
 
       // 📤 Backend API Call
       // 👈 আপনার ব্যাকএন্ডের POST API URL এখানে বসান
-      const response = await fetch('http://localhost:5000/api/v1/team-members', {
+      const response = await fetch('http://localhost:4000/api/admin/team-members', {
         method: 'POST',
         body: submitData, // FormData পাঠালে 'Content-Type' হেডার দিতে হয় না
       });
