@@ -11,13 +11,13 @@ import CmsSeoControl from '../components/UserDashboardComponents/CmsSeoControl';
 // 🌐 নতুন ১২টি ফ্রন্টএন্ড সাব-কম্পোনেন্টস ইম্পোর্ট
 import Settings from '../components/UserDashboardComponents/frontendDesign/SubMenus/Settings';
 import Menu from '../components/UserDashboardComponents/frontendDesign/SubMenus/Menu';
-import PageSection from '../components/UserDashboardComponents/frontendDesign/SubMenus/PageSection';
 import ManagePage from '../components/UserDashboardComponents/frontendDesign/SubMenus/ManagePage';
 import Slider from '../components/UserDashboardComponents/frontendDesign/SubMenus/Slider';
 import Features from '../components/UserDashboardComponents/frontendDesign/SubMenus/Features';
 import Testimonial from '../components/UserDashboardComponents/frontendDesign/SubMenus/Testimonial';
 import Service from '../components/UserDashboardComponents/frontendDesign/SubMenus/Service';
 import Gallery from '../components/UserDashboardComponents/frontendDesign/SubMenus/Gallery';
+import TeamPageSection from '../components/UserDashboardComponents/frontendDesign/SubMenus/TeamPageSection';
 
 export default function AgentDashboard() {
   // একটিমাত্র অ্যাক্টিভ স্টেট যা গ্লোবাল এবং সাব-মেনু উভয় ট্র্যাকিং করবে
@@ -28,7 +28,7 @@ export default function AgentDashboard() {
   const frontendSubMenus = [
     { id: 'fe-setting', label: 'Setting' },
     { id: 'fe-menu', label: 'Menu' },
-    { id: 'fe-pageSection', label: 'Page Section' },
+    { id: 'fe-pageSection', label: 'Team Page Section' },
     { id: 'fe-managePage', label: 'Manage Page' },
     { id: 'fe-slider', label: 'Slider' },
     { id: 'fe-features', label: 'Features' },
@@ -199,7 +199,7 @@ export default function AgentDashboard() {
         {/* Frontend Dynamic Views Mapping */}
         {activeTab === 'fe-setting' && <Settings />}
         {activeTab === 'fe-menu' && <Menu />}
-        {activeTab === 'fe-pageSection' && <PageSection />}
+        {activeTab === 'fe-pageSection' && <TeamPageSection />}
         {activeTab === 'fe-managePage' && <ManagePage />}
         {activeTab === 'fe-slider' && <Slider />}
         {activeTab === 'fe-features' && <Features />}

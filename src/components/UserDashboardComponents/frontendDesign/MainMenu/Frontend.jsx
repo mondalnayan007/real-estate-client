@@ -4,13 +4,13 @@ import { Monitor, ChevronDown, ChevronUp,  LayoutGrid } from 'lucide-react';
 // সাব-কম্পোনেন্টসমূহ ইম্পোর্ট (নিচে এগুলো বিস্তারিত লেখা আছে)
  import Settings from '../SubMenus/Settings';
 import Menu from '../SubMenus/Menu';
-import PageSection from '../SubMenus/PageSection';
 import ManagePage from '../SubMenus/ManagePage';
 import Slider from '../SubMenus/Slider';
 import Features from '../SubMenus/Features';
 import Testimonial from '../SubMenus/Testimonial';
 import Service from '../SubMenus/Service';
 import Gallery from '../SubMenus/Gallery';
+import TeamPageSection from '../SubMenus/TeamPageSection';
 
 export default function UserDashboard() {
   const [isFrontendOpen, setIsFrontendOpen] = useState(true);
@@ -18,7 +18,7 @@ export default function UserDashboard() {
 
   // ১২টি সাব-মেনুর লিস্ট
   const menuItems = [
-    'Setting', 'Menu', 'Page Section', 'Manage Page', 'Slider', 
+    'Setting', 'Menu', 'Team Page Section', 'Manage Page', 'Slider', 
     'Features', 'Testimonial', 'Service', 'Faq', 'Gallery Category', 'Gallery', 'News'
   ];
 
@@ -64,7 +64,7 @@ export default function UserDashboard() {
       <div className="flex-1 p-6 md:p-10 overflow-y-auto max-h-screen bg-slate-950">
         {activeSubMenu === 'Setting' && <Settings />}
         {activeSubMenu === 'Menu' && <Menu />}
-        {activeSubMenu === 'Page Section' && <PageSection />}
+        {activeSubMenu === 'Team Page Section ' && <TeamPageSection />}
         {activeSubMenu === 'Manage Page' && <ManagePage />}
         {activeSubMenu === 'Slider' && <Slider />}
         {activeSubMenu === 'Features' && <Features />}

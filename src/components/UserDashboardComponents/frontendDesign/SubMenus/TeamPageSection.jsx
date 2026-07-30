@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Edit3, PlusCircle, List, Save, RotateCcw, Plus, Trash2, Image } from 'lucide-react';
+import { Search, Edit3,  List, Save, RotateCcw, Plus, Trash2, Image } from 'lucide-react';
 
-export default function DynamicPageManager() {
+export default function TeamPageSection() {
   const [activeTab, setActiveTab] = useState('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(25);
