@@ -29,7 +29,7 @@ const DualSliderCard = ({ assets }) => {
         <div>
             <div className="flex gap-6 animate-marquee whitespace-nowrap py-4 hover:[animation-play-state:paused]">
                 
-                <div className="w-[340px] sm:w-[380px] shrink-0 bg-slate-950 border-2 border-blue-500/20 rounded-[2rem] overflow-hidden shadow-[0_0_30px_rgba(59,130,246,0.1)] group relative aspect-[4/3] cursor-pointer">
+                <div className="w-[340px] sm:w-[380px] shrink-0  group relative aspect-[4/3] cursor-pointer">
                     <Link to={`/project-details/${id}`}>
                         
                         {/* ১. ডাইনামিক ব্যাকগ্রাউন্ড ইমেজ */}

@@ -23,36 +23,21 @@ export default function DualSliders() {
 
 
   return (
-    <section className="py-20 bg-slate-950 overflow-hidden flex flex-col gap-16 relative select-none">
+    <section className=" overflow-hidden flex flex-col gap-16 relative select-none">
 
       {/* Dynamic Ambient Blur Background Flare */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute  w-[600px] h-[300px] bg-blue-600/10 rounded-full blur-[160px] pointer-events-none" />
 
-      {/* Intro Heading Typography Wrapper Block */}
-      <div className="max-w-7xl mx-auto w-full px-6 md:px-12 flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[10px] font-bold tracking-widest uppercase rounded-md">
-            <Sparkles size={10} className="animate-pulse" /> Asset Compendium
-          </div>
-          <h2 className="text-3xl md:text-5xl font-light font-serif tracking-tight leading-none text-white">
-            Curated Architectural <span className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-blue-500">Excellence.</span>
-          </h2>
-        </div>
-        <p className="text-slate-400 text-xs md:text-sm font-light max-w-sm leading-relaxed border-l border-slate-800 pl-4">
-          A real-time panoramic viewport sequence crossing luxury estates currently held under private portfolio custody.
-        </p>
-      </div>
-
+   
       {/* ================= SLIDER CONTAINERS ================= */}
       <div className="flex flex-col  w-full relative z-10">
 
         {/* FIRST SLIDER: LEFT TO RIGHT */}
 
         <Marquee  pauseOnHover='true'
-          gradient='true'
-          gradientColor='black'
+         
           direction='right'>
-            <div className="flex w-full  ">
+            <div className="flex w-full gap-4 ">
               {
                 reversedAssets.map(assets => <DualSliderCard assets={assets}></DualSliderCard>)
               }
@@ -62,9 +47,8 @@ export default function DualSliders() {
 
         {/* SECOND SLIDER: RIGHT TO LEFT (REVERSE) */}
         <Marquee pauseOnHover='true'
-          gradient='true'
-          gradientColor='black'>
-          <div className="flex w-full ">
+          >
+          <div className="flex w-full gap-4">
 
 
             {
