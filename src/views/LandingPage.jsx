@@ -15,7 +15,7 @@ export default function LandingPage() {
   
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500">
+    <div className="min-h-screen  bg-slate-950 text-white selection:bg-blue-500">
       
       <HeroCarousel />
       <OurVision />
@@ -23,9 +23,7 @@ export default function LandingPage() {
       <HomePageProjects></HomePageProjects>
       <ClientReviews />
       <Newsletter />
-      
-    
-      
+     
       
     </div>
   );

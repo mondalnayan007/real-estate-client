@@ -1,38 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, BedDouble, Bath, Maximize2, ArrowUpRight, Plus } from 'lucide-react';
+import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-// useParams ইম্পোর্ট করার প্রয়োজন নেই এখানে
 
-const categories = ['All Properties', 'Luxury Villas', 'Penthouses', 'Modern Mansions'];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.98 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1,
-    transition: { type: 'spring', stiffness: 70, damping: 16 } 
-  },
-  exit: { 
-    opacity: 0, 
-    scale: 0.95, 
-    y: 20,
-    transition: { duration: 0.25, ease: 'easeInOut' } 
-  }
-};
+const locations = [
+  'All',
+  'Bashundhara Residential Area',
+  'Jolshiri Abashon',
+  'The Premium Royal City',
+  'The Premium Smart City',
+  'Ashulia Model town'
+];
 
 export default function HomePageProjects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
-  const [activeTab, setActiveTab] = useState('All Properties');
+  const [activeTab, setActiveTab] = useState('All');
+  const scrollRef = useRef(null);
 
   useEffect(() => {
     fetch('data.json')
@@ -41,166 +24,141 @@ export default function HomePageProjects() {
       .catch(err => console.error("Error fetching data:", err));
   }, []);
 
-  const filteredProjects = activeTab === 'All Properties'
+  // Filter based on location/community tab
+  const filteredProjects = activeTab === 'All'
     ? premiumProjects
-    : premiumProjects.filter(project => project.category === activeTab);
+    : premiumProjects.filter(project => 
+        project.location?.toLowerCase().includes(activeTab.toLowerCase()) || 
+        project.category?.toLowerCase().includes(activeTab.toLowerCase())
+      );
 
-  const displayedProjects = filteredProjects.slice(0, 6);
+  // Left & Right Horizontal Scroll Handler
+  const handleScroll = (direction) => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      scrollRef.current.scrollTo({
+        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
-    <section className="py-24 bg-slate-950 text-white px-6 overflow-hidden">
-      {/* বড় লিংকটি এখান থেকে সরিয়ে সাধারণ div করা হলো */}
+    <section className="py-16 bg-white text-slate-800 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header Section */}
-        <div className="text-center mb-16">
-          <motion.span 
-            initial={{ opacity: 0, y: -10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-blue-400 tracking-[0.2em] text-xs font-bold uppercase block mb-3"
-          >
-            Our Portfolio
-          </motion.span>
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-light font-serif tracking-tight mb-4"
-          >
-            Architectural <span className="font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-blue-500 tracking-tighter">Masterpieces</span>
-          </motion.h2>
-          <motion.div 
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="w-12 h-[1px] bg-blue-500/50 mx-auto"
-          />
+        {/* 🔝 Title Section with Green Line Underline */}
+        <div className="mb-8">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#0B1B2B] tracking-tight">
+            Projects by Community
+          </h2>
+          <div className="w-16 h-[4px] bg-[#185F35] mt-2 rounded-full" />
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16">
-          {categories.map((tab) => (
+        {/* 🔘 Filter Buttons & Slider Navigation Controls */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+          
+          {/* Location Filter Pills */}
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+            {locations.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-300 border ${
+                  activeTab === tab
+                    ? 'bg-[#185F35] text-white border-[#185F35] shadow-md'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Left & Right Slide Buttons */}
+          <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`relative px-6 py-2.5 rounded-full text-xs font-mono tracking-wider transition-all duration-300 border overflow-hidden z-10 ${
-                activeTab === tab 
-                  ? 'border-transparent text-white' 
-                  : 'border-slate-900 bg-slate-900/40 text-slate-400 hover:text-white hover:border-slate-800'
-              }`}
+              onClick={() => handleScroll('left')}
+              className="p-3 bg-[#0F172A] text-white rounded-lg hover:bg-black transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+              aria-label="Previous Slide"
             >
-              {activeTab === tab && (
-                <motion.div 
-                  layoutId="activeTabIndicator"
-                  className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full -z-10 shadow-[0_4px_20px_rgba(37,99,235,0.35)]"
-                  transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-                />
-              )}
-              {tab}
+              <ChevronLeft size={18} />
             </button>
-          ))}
+            <button
+              onClick={() => handleScroll('right')}
+              className="p-3 bg-[#0F172A] text-white rounded-lg hover:bg-black transition-all duration-200 shadow-md active:scale-95 cursor-pointer"
+              aria-label="Next Slide"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Dynamic Animated Grid */}
-        <motion.div 
-          layout
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10"
+        {/* 🏙️ Horizontal Dynamic Card Carousel (Single Row) */}
+        <div 
+          ref={scrollRef}
+          className="flex items-center gap-6 overflow-x-auto scroll-smooth scrollbar-none pb-6"
         >
           <AnimatePresence mode="popLayout">
-            {displayedProjects.map((item) => (
-              /* ম্যাজিক এখানে: প্রতিটি কার্ড এখন আলাদাভাবে তার নিজস্ব item.id-তে লিংকড */
+            {filteredProjects.map((item) => (
               <motion.div
-                key={item.id}
+                key={item.id || item._id}
                 layout
-                variants={cardVariants}
-                initial="hidden"
-                animate="show"
-                exit="exit"
-                whileHover={{ y: -8 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 18 }}
-                className="group bg-slate-900/60 border border-slate-900 hover:border-slate-800/80 rounded-[2rem] overflow-hidden shadow-2xl relative backdrop-blur-3xl"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="w-[280px] sm:w-[310px] md:w-[320px] shrink-0 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
               >
-                {/* কার্ডে ক্লিক করলে ডাইনামিক আইডিতে নিয়ে যাবে */}
-                <Link to={`/project-details/${item.id}`}>
+                <Link to={`/project-details/${item.id || item._id}`} className="block h-full">
                   
-                  {/* Image Container */}
-                  <div className="relative overflow-hidden h-72">
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-90" />
-                    
-                    <span className="absolute top-4 left-4 z-20 bg-slate-950/80 backdrop-blur-md text-blue-400 border border-slate-900 text-[10px] font-mono tracking-widest px-3 py-1.5 rounded-xl uppercase">
-                      {item.tag}
-                    </span>
-
+                  {/* Image & Status Tag */}
+                  <div className="relative h-64 overflow-hidden bg-slate-100">
                     <img 
-                      src={item.img} 
+                      src={item.img || item.image} 
                       alt={item.title} 
-                      className="w-full h-full object-cover transition-transform duration-[1.2s] cubic-bezier(0.16, 1, 0.3, 1) group-hover:scale-105"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
 
-                    {/* Dark Glass Accent Button */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                      <div className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-                        <ArrowUpRight className="text-blue-400 h-5 w-5" />
-                      </div>
-                    </div>
+                    {/* Green "On Sale" Badge */}
+                    <span className="absolute top-4 right-4 bg-[#185F35] text-white text-[11px] font-bold px-3 py-1 rounded-md shadow-md uppercase tracking-wider">
+                      {item.status || 'On Sale'}
+                    </span>
                   </div>
 
-                  {/* Info Text Area */}
-                  <div className="p-7 relative">
-                    <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold block mb-2">{item.category}</span>
-                    <h3 className="text-xl font-bold text-slate-100 tracking-tight mb-2 group-hover:text-blue-400 transition-colors duration-300">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-400 flex items-center gap-1.5 text-xs font-light mb-5">
-                      <MapPin size={13} className="text-slate-500"/> {item.location}
-                    </p>
-                    
-                    <div className="w-full h-[1px] bg-slate-950 mb-5" />
-
-                    {/* Specifications */}
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-4 text-[11px] font-mono text-slate-400">
-                        <span className="flex items-center gap-1.5"><BedDouble size={14} className="text-slate-600"/> {item.beds} Bed</span>
-                        <span className="flex items-center gap-1.5"><Bath size={14} className="text-slate-600"/> {item.baths} Bath</span>
-                        <span className="flex items-center gap-1.5"><Maximize2 size={12} className="text-slate-600"/> {item.sqft}</span>
+                  {/* Card Main Info */}
+                  <div className="p-5 flex flex-col justify-between">
+                    <div>
+                      {/* Location Badge */}
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#185F35] uppercase tracking-wider mb-1.5">
+                        <MapPin size={13} className="shrink-0" />
+                        <span className="truncate">{item.location || 'Ashulia Model Town'}</span>
                       </div>
+
+                      {/* Project Title */}
+                      <h3 className="text-lg font-bold text-slate-900 leading-snug tracking-tight mb-1 group-hover:text-[#185F35] transition-colors duration-200 line-clamp-1">
+                        {item.title}
+                      </h3>
+
+                      {/* Subtitle / Structural Info */}
+                      <p className="text-slate-500 text-xs font-medium mb-4">
+                        {item.structure || item.beds ? `${item.beds || 'B+G+9'}` : 'Condominium'}
+                      </p>
                     </div>
-                    
-                    {/* Pricing Tag */}
-                    <div className="mt-5 pt-4 border-t border-slate-950 flex justify-between items-center">
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Investment Value</span>
-                      <span className="text-lg font-black text-white tracking-tight">{item.price}</span>
+
+                    {/* Bottom Border Line & Arrow Link */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-slate-500 text-xs font-semibold group-hover:text-slate-900 transition-colors">
+                      <span className="truncate max-w-[200px]">{item.location || 'Ashulia Model town'}</span>
+                      <ChevronRight size={16} className="text-[#185F35] transition-transform group-hover:translate-x-1" />
                     </div>
+
                   </div>
                 </Link>
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
-
-        {/* Explore More Properties CTA Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-center mt-20"
-        >
-          <Link 
-            to={'/projects'}
-            className="group relative inline-flex items-center gap-3 bg-slate-900 hover:bg-blue-600 text-white font-mono text-xs font-bold tracking-[0.15em] uppercase px-10 py-5 rounded-2xl border border-slate-800 hover:border-blue-500 transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_10px_35px_rgba(37,99,235,0.25)] hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <span>Explore More Properties</span>
-            <Plus size={14} className="text-slate-400 group-hover:text-white group-hover:rotate-90 transition-transform duration-300" />
-          </Link>
-        </motion.div>
+        </div>
 
       </div>
     </section>
