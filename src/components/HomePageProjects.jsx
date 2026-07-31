@@ -4,7 +4,8 @@ import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AgentContext from '../context/AgentContext';
 
-const locations = [
+// ব্যাকআপ / ডিফল্ট লোকেশন অ্যারে
+const defaultLocations = [
   'All',
   'Bashundhara Residential Area',
   'Jolshiri Abashon',
@@ -15,17 +16,47 @@ const locations = [
 
 export default function HomePageProjects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
+  const [locations, setLocations] = useState(defaultLocations); // ডাইনামিক স্টেট
   const [activeTab, setActiveTab] = useState('All');
-  const [isHovered, setIsHovered] = useState(false); // মাউস হোভার ট্র্যাকিংয়ের জন্য
+  const [isHovered, setIsHovered] = useState(false);
   const scrollRef = useRef(null);
   const { user } = useContext(AgentContext);
+
+  // 🔹 ডেটা থেকে সবচেয়ে জনপ্রিয় (Most Frequent) লোকেশন বের করার লজিক
+  const extractTopLocations = (projects) => {
+    if (!projects || projects.length === 0) return defaultLocations;
+
+    const locationCounts = {};
+
+    projects.forEach(project => {
+      const loc = project.location?.trim();
+      if (loc) {
+        locationCounts[loc] = (locationCounts[loc] || 0) + 1;
+      }
+    });
+
+    // সবচেয়ে বেশি বার আসা লোকেশনগুলো ক্রমানুসারে সাজানো
+    const sortedLocations = Object.keys(locationCounts).sort(
+      (a, b) => locationCounts[b] - locationCounts[a]
+    );
+
+    // যদি কোনো লোকেশন পাওয়া যায়, তবে Top 5 টা নিয়ে শুরুতে 'All' যুক্ত করা
+    if (sortedLocations.length > 0) {
+      return ['All', ...sortedLocations.slice(0, 5)];
+    }
+
+    return defaultLocations;
+  };
 
   useEffect(() => {
     // ১. default data.json লোড করার ফাংশন
     const fetchDefaultData = () => {
       fetch('data.json')
         .then(res => res.json())
-        .then(data => setPremiumProjects(data))
+        .then(data => {
+          setPremiumProjects(data);
+          setLocations(extractTopLocations(data));
+        })
         .catch(err => console.error("Error fetching default data:", err));
     };
 
@@ -36,6 +67,7 @@ export default function HomePageProjects() {
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {
             setPremiumProjects(data);
+            setLocations(extractTopLocations(data));
           } else {
             fetchDefaultData();
           }
@@ -61,10 +93,9 @@ export default function HomePageProjects() {
   const handleScroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth, scrollWidth } = scrollRef.current;
-      const cardWidth = 320; // একটি কার্ডের গড় প্রস্থ
+      const cardWidth = 320;
 
       if (direction === 'right') {
-        // যদি একদম শেষ মাথায় চলে যায়, তবে পুনরায় শুরুতে ফেরত পাঠাবে
         if (scrollLeft + clientWidth >= scrollWidth - 10) {
           scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -76,13 +107,13 @@ export default function HomePageProjects() {
     }
   };
 
-  // ⏱️ প্রতি ৮ সেকেন্ড পর পর অটোমেটিক স্লাইড হওয়ার লজিক
+  // ⏱️ প্রতি ৫ সেকেন্ড পর পর অটোমেটিক স্লাইড হওয়ার লজিক
   useEffect(() => {
     if (isHovered || filteredProjects.length === 0) return;
 
     const interval = setInterval(() => {
       handleScroll('right');
-    }, 8000); // 8000ms = 8 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [isHovered, filteredProjects]);
@@ -102,7 +133,7 @@ export default function HomePageProjects() {
         {/* 🔘 Filter Buttons & Slider Navigation Controls */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
           
-          {/* Location Filter Pills */}
+          {/* Dynamic Location Filter Pills */}
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
             {locations.map((tab) => (
               <button
@@ -138,11 +169,11 @@ export default function HomePageProjects() {
           </div>
         </div>
 
-        {/* 🏙️ Horizontal Dynamic Card Carousel (Auto-slider added) */}
+        {/* 🏙️ Horizontal Dynamic Card Carousel */}
         <div 
           ref={scrollRef}
-          onMouseEnter={() => setIsHovered(true)}  // মাউস আনলে অটো স্লাইড বন্ধ হবে
-          onMouseLeave={() => setIsHovered(false)} // মাউস সরালে অটো স্লাইড আবার চলবে
+          onMouseEnter={() => setIsHovered(true)} 
+          onMouseLeave={() => setIsHovered(false)}
           className="flex items-center gap-6 overflow-x-auto scroll-smooth scrollbar-none pb-6"
         >
           <AnimatePresence mode="popLayout">
