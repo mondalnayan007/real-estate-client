@@ -4,7 +4,7 @@ import { Mail, Award, Briefcase, X, ArrowRight } from 'lucide-react';
 import { LiaLinkedinIn, LiaFacebookF } from 'react-icons/lia';
 import AgentContext from '../context/AgentContext';
 
-// প্রিমিয়াম টিম মেম্বারদের ডাটাবেজ
+// প্রিমিয়াম টিম মেম্বারদের ডিফল্ট ডাটাবেজ
 const teamMembers = [
   {
     id: 1,
@@ -15,7 +15,6 @@ const teamMembers = [
     bio: 'Over 15 years of transforming luxury real estate portfolios across New York and London. Specializing in high-yield investments for ultra-high-net-worth individuals and corporate funds.',
     linkedin: '#',
     facebook: '#',
-    
   },
   {
     id: 2,
@@ -26,7 +25,6 @@ const teamMembers = [
     bio: 'Specializes in off-market penthouses and coastal estates for private institutional clients. Recognized globally for landmark property developments and private equity structuring.',
     linkedin: '#',
     facebook: '#',
-    
   },
   {
     id: 3,
@@ -37,7 +35,6 @@ const teamMembers = [
     bio: 'Ensuring every structural asset listed meets our strict aesthetic and structural gold standards. She leads a dedicated team of master architects across European markets.',
     linkedin: '#',
     facebook: '#',
-    
   },
   {
     id: 4,
@@ -48,24 +45,31 @@ const teamMembers = [
     bio: 'Maximizing ROI for private desk investors through calculated, data-driven estate acquisitions. Expert in tax-optimized real estate holdings and estate planning.',
     linkedin: '#',
     facebook: '#',
-   
   }
 ];
 
 export default function Team() {
-  // ফুল ডেসক্রিপশন দেখার জন্য সিলেক্টেড মেম্বার স্টেট
   const [selectedMember, setSelectedMember] = useState(null);
+  const { user } = useContext(AgentContext);
+  const [membersData, setMembersData] = useState([]);
 
-const {user} = useContext(AgentContext)
-  const [membersData,setMembersData] = useState('');
+  useEffect(() => {
+    // ইউজার এবং Agent ID থাকলে API কল করবে
+    if (user?.agentId) {
+      fetch(`http://localhost:4000/api/admin/team-members?agentId=${user.agentId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setMembersData(data);
+          }
+        })
+        .catch((err) => console.error("Error fetching team members:", err));
+    }
+  }, [user]);
 
-  useEffect(()=>{
-    fetch(`http://localhost:4000/api/admin/team-members?${user?.agentId}`)
-    .then(res=>res.json())
-    .then(data => setMembersData(data))
-  },[])
+  // conditional variable: ইউজার থাকলে ও ডাটা লোড হলে API-র ডাটা, অন্যথায় Default ডাটা
+  const displayMembers = (user && membersData.length > 0) ? membersData : teamMembers;
 
-  console.log(membersData);
   return (
     <section className="py-24 bg-slate-50 text-slate-800 px-6 overflow-hidden relative">
       {/* ব্যাকগ্রাউন্ড গ্লো */}
@@ -73,16 +77,14 @@ const {user} = useContext(AgentContext)
 
       <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* ========================================== */}
         {/* 🔝 Header Section */}
-        {/* ========================================== */}
         <div className="text-center mb-20 max-w-3xl mx-auto">
           <motion.span 
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             style={{ color: '#185F35' }}
-            className="tracking-[0.3em] text-xs font-mono font-bold uppercase block mb-3"
+            className="tracking-[0.3em] font-mono font-bold uppercase block mb-3"
           >
             MEET OUR TEAM
           </motion.span>
@@ -117,40 +119,40 @@ const {user} = useContext(AgentContext)
           />
         </div>
 
-        {/* ========================================== */}
-        {/* 👥 Clean Team Cards Grid */}
-        {/* ========================================== */}
+        {/* 👥 Dynamic Clean Team Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member) => (
+          {displayMembers.map((member, index) => (
             <div
-              key={member.id}
-              className="bg-white border border-slate-200/90 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between"
+              key={member._id || member.id || index}
+              className="group bg-white border border-slate-200/90 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:border-[#185F35]/30 hover:-translate-y-2 transition-all duration-300 ease-out flex flex-col justify-between"
             >
-              {/* Profile Image */}
+              {/* Profile Image with Hover Zoom */}
               <div className="relative h-72 overflow-hidden bg-slate-100 shrink-0">
                 <img 
-                  src={member.img} 
+                  src={member.img || member.imageUrl} 
                   alt={member.name} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 group-hover:opacity-90" />
 
                 {/* Specialty Tag */}
-                <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center gap-1.5 text-white/90 text-[11px] font-medium backdrop-blur-md bg-black/30 px-3 py-1 rounded-full w-max border border-white/20">
-                  <Briefcase size={12} className="text-emerald-400" />
-                  <span>{member.specialty}</span>
-                </div>
+                {member.specialty && (
+                  <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center gap-1.5 text-white/90 text-[11px] font-medium backdrop-blur-md bg-black/40 px-3 py-1.5 rounded-full w-max border border-white/20 transition-transform duration-300 group-hover:-translate-y-1">
+                    <Briefcase size={12} className="text-emerald-400" />
+                    <span>{member.specialty}</span>
+                  </div>
+                )}
               </div>
 
               {/* Member Details */}
               <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                  <h3 className="text-xl font-bold text-slate-900 tracking-tight transition-colors duration-200 group-hover:text-[#185F35]">
                     {member.name}
                   </h3>
 
                   <p className="text-xs font-semibold uppercase tracking-wider mt-0.5 mb-3" style={{ color: '#185F35' }}>
-                    {member.role}
+                    {member.role || member.designation}
                   </p>
 
                   {/* 2-line clean description */}
@@ -161,10 +163,11 @@ const {user} = useContext(AgentContext)
                   {/* Read More Trigger Button */}
                   <button
                     onClick={() => setSelectedMember(member)}
-                    className="mt-2 text-xs font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+                    className="mt-3 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:opacity-80"
                     style={{ color: '#185F35' }}
                   >
-                    Read Full Bio <ArrowRight size={12} />
+                    <span>Read Full Bio</span>
+                    <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-1.5" />
                   </button>
                 </div>
 
@@ -175,13 +178,28 @@ const {user} = useContext(AgentContext)
                   </span>
 
                   <div className="flex items-center gap-2">
-                    
-                    <a href={member.facebook} className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors duration-200" title="Facebook">
-                      <LiaFacebookF size={13} />
-                    </a>
-                    <a href={member.linkedin} className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors duration-200" title="LinkedIn">
-                      <LiaLinkedinIn size={13} />
-                    </a>
+                    {member.facebook && (
+                      <a 
+                        href={member.facebook} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 shadow-sm" 
+                        title="Facebook"
+                      >
+                        <LiaFacebookF size={14} />
+                      </a>
+                    )}
+                    {member.linkedin && (
+                      <a 
+                        href={member.linkedin} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-200 hover:scale-110 active:scale-95 shadow-sm" 
+                        title="LinkedIn"
+                      >
+                        <LiaLinkedinIn size={14} />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -189,9 +207,7 @@ const {user} = useContext(AgentContext)
           ))}
         </div>
 
-        {/* ========================================== */}
-        {/* 🪟 Full Bio Modal (On Read More Click) */}
-        {/* ========================================== */}
+        {/* 🪟 Full Bio Modal */}
         <AnimatePresence>
           {selectedMember && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -204,14 +220,14 @@ const {user} = useContext(AgentContext)
                 {/* Close Button */}
                 <button
                   onClick={() => setSelectedMember(null)}
-                  className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full z-10 transition-colors cursor-pointer"
+                  className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/70 hover:rotate-90 text-white rounded-full z-10 transition-all duration-300 cursor-pointer"
                 >
                   <X size={16} />
                 </button>
 
                 {/* Modal Header Image */}
                 <div className="relative h-48 bg-slate-100">
-                  <img src={selectedMember.img} alt={selectedMember.name} className="w-full h-full object-cover" />
+                  <img src={selectedMember.img || selectedMember.imageUrl} alt={selectedMember.name} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-4 left-6 right-6 text-white">
                     <span className="text-xs uppercase font-mono tracking-widest text-emerald-400 font-bold block mb-1">
@@ -223,10 +239,12 @@ const {user} = useContext(AgentContext)
 
                 {/* Modal Content */}
                 <div className="p-6">
-                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4 bg-slate-100 w-max px-3 py-1 rounded-full border border-slate-200">
-                    <Briefcase size={13} style={{ color: '#185F35' }} />
-                    <span>Specialty: {selectedMember.specialty}</span>
-                  </div>
+                  {selectedMember.specialty && (
+                    <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4 bg-slate-100 w-max px-3 py-1 rounded-full border border-slate-200">
+                      <Briefcase size={13} style={{ color: '#185F35' }} />
+                      <span>Specialty: {selectedMember.specialty}</span>
+                    </div>
+                  )}
 
                   <p className="text-slate-600 text-sm leading-relaxed mb-6 font-light">
                     {selectedMember.bio}
@@ -235,13 +253,16 @@ const {user} = useContext(AgentContext)
                   <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                     <span className="text-xs font-mono font-bold text-slate-400 uppercase">Contact Directly</span>
                     <div className="flex items-center gap-2">
-                     
-                      <a href={selectedMember.facebook} className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors">
-                        <LiaFacebookF size={15} />
-                      </a>
-                      <a href={selectedMember.linkedin} className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors">
-                        <LiaLinkedinIn size={15} />
-                      </a>
+                      {selectedMember.facebook && (
+                        <a href={selectedMember.facebook} target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-200 hover:scale-110 active:scale-95">
+                          <LiaFacebookF size={15} />
+                        </a>
+                      )}
+                      {selectedMember.linkedin && (
+                        <a href={selectedMember.linkedin} target="_blank" rel="noreferrer" className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-200 hover:scale-110 active:scale-95">
+                          <LiaLinkedinIn size={15} />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -250,18 +271,16 @@ const {user} = useContext(AgentContext)
           )}
         </AnimatePresence>
 
-        {/* ========================================== */}
         {/* 📞 Bottom Call To Action */}
-        {/* ========================================== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
-          className="mt-20 border border-slate-200 bg-white/80 backdrop-blur-md rounded-3xl p-6 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4 justify-between shadow-xl shadow-slate-200/50"
+          className="mt-20 border border-slate-200/80 bg-white/80 backdrop-blur-md rounded-3xl p-6 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-4 justify-between shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:border-[#185F35]/20 transition-all duration-300"
         >
           <div className="flex items-center gap-4 text-left">
-            <div className="p-3 rounded-2xl border shrink-0" style={{ backgroundColor: '#185F35' + '15', color: '#185F35', borderColor: '#185F35' + '30' }}>
+            <div className="p-3 rounded-2xl border shrink-0 transition-transform duration-300 hover:scale-110" style={{ backgroundColor: '#185F35' + '15', color: '#185F35', borderColor: '#185F35' + '30' }}>
               <Award size={24} />
             </div>
             <div>
@@ -269,9 +288,10 @@ const {user} = useContext(AgentContext)
               <p className="text-xs text-slate-500 font-light mt-0.5">Our private brokers are available 24/7 for tailored consulting.</p>
             </div>
           </div>
+          
           <button 
             style={{ backgroundColor: '#185F35' }}
-            className="whitespace-nowrap hover:opacity-90 text-white font-mono text-[11px] font-bold tracking-wider uppercase px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-[#185F35]/25 cursor-pointer"
+            className="whitespace-nowrap text-white font-mono text-[11px] font-bold tracking-wider uppercase px-6 py-3.5 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-[#185F35]/30 active:scale-95 cursor-pointer"
           >
             Schedule Call
           </button>
