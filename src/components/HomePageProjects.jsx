@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AgentContext from '../context/AgentContext';
 
 const locations = [
   'All',
@@ -15,14 +16,38 @@ const locations = [
 export default function HomePageProjects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('All');
+  const [isHovered, setIsHovered] = useState(false); // মাউস হোভার ট্র্যাকিংয়ের জন্য
   const scrollRef = useRef(null);
+  const { user } = useContext(AgentContext);
 
   useEffect(() => {
-    fetch('data.json')
-      .then(res => res.json())
-      .then(data => setPremiumProjects(data))
-      .catch(err => console.error("Error fetching data:", err));
-  }, []);
+    // ১. default data.json লোড করার ফাংশন
+    const fetchDefaultData = () => {
+      fetch('data.json')
+        .then(res => res.json())
+        .then(data => setPremiumProjects(data))
+        .catch(err => console.error("Error fetching default data:", err));
+    };
+
+    // ২. যদি ইউজার থাকে এবং তার agentId থাকে
+    if (user?.agentId) {
+      fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setPremiumProjects(data);
+          } else {
+            fetchDefaultData();
+          }
+        })
+        .catch(err => {
+          console.error("Error fetching agent data, fallback to default:", err);
+          fetchDefaultData();
+        });
+    } else {
+      fetchDefaultData();
+    }
+  }, [user]);
 
   // Filter based on location/community tab
   const filteredProjects = activeTab === 'All'
@@ -35,20 +60,38 @@ export default function HomePageProjects() {
   // Left & Right Horizontal Scroll Handler
   const handleScroll = (direction) => {
     if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollAmount = clientWidth * 0.75;
-      scrollRef.current.scrollTo({
-        left: direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
-        behavior: 'smooth'
-      });
+      const { scrollLeft, clientWidth, scrollWidth } = scrollRef.current;
+      const cardWidth = 320; // একটি কার্ডের গড় প্রস্থ
+
+      if (direction === 'right') {
+        // যদি একদম শেষ মাথায় চলে যায়, তবে পুনরায় শুরুতে ফেরত পাঠাবে
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollTo({ left: scrollLeft + cardWidth, behavior: 'smooth' });
+        }
+      } else {
+        scrollRef.current.scrollTo({ left: scrollLeft - cardWidth, behavior: 'smooth' });
+      }
     }
   };
+
+  // ⏱️ প্রতি ৮ সেকেন্ড পর পর অটোমেটিক স্লাইড হওয়ার লজিক
+  useEffect(() => {
+    if (isHovered || filteredProjects.length === 0) return;
+
+    const interval = setInterval(() => {
+      handleScroll('right');
+    }, 8000); // 8000ms = 8 seconds
+
+    return () => clearInterval(interval);
+  }, [isHovered, filteredProjects]);
 
   return (
     <section className="py-16 bg-white text-slate-800 px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
-        {/* 🔝 Title Section with Green Line Underline */}
+        {/* 🔝 Title Section */}
         <div className="mb-8">
           <h2 className="text-3xl md:text-4xl font-extrabold text-[#0B1B2B] tracking-tight">
             Projects by Community
@@ -95,9 +138,11 @@ export default function HomePageProjects() {
           </div>
         </div>
 
-        {/* 🏙️ Horizontal Dynamic Card Carousel (Single Row) */}
+        {/* 🏙️ Horizontal Dynamic Card Carousel (Auto-slider added) */}
         <div 
           ref={scrollRef}
+          onMouseEnter={() => setIsHovered(true)}  // মাউস আনলে অটো স্লাইড বন্ধ হবে
+          onMouseLeave={() => setIsHovered(false)} // মাউস সরালে অটো স্লাইড আবার চলবে
           className="flex items-center gap-6 overflow-x-auto scroll-smooth scrollbar-none pb-6"
         >
           <AnimatePresence mode="popLayout">
@@ -121,7 +166,6 @@ export default function HomePageProjects() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
 
-                    {/* Green "On Sale" Badge */}
                     <span className="absolute top-4 right-4 bg-[#185F35] text-white text-[11px] font-bold px-3 py-1 rounded-md shadow-md uppercase tracking-wider">
                       {item.status || 'On Sale'}
                     </span>
@@ -130,24 +174,20 @@ export default function HomePageProjects() {
                   {/* Card Main Info */}
                   <div className="p-5 flex flex-col justify-between">
                     <div>
-                      {/* Location Badge */}
                       <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#185F35] uppercase tracking-wider mb-1.5">
                         <MapPin size={13} className="shrink-0" />
                         <span className="truncate">{item.location || 'Ashulia Model Town'}</span>
                       </div>
 
-                      {/* Project Title */}
                       <h3 className="text-lg font-bold text-slate-900 leading-snug tracking-tight mb-1 group-hover:text-[#185F35] transition-colors duration-200 line-clamp-1">
                         {item.title}
                       </h3>
 
-                      {/* Subtitle / Structural Info */}
                       <p className="text-slate-500 text-xs font-medium mb-4">
                         {item.structure || item.beds ? `${item.beds || 'B+G+9'}` : 'Condominium'}
                       </p>
                     </div>
 
-                    {/* Bottom Border Line & Arrow Link */}
                     <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-slate-500 text-xs font-semibold group-hover:text-slate-900 transition-colors">
                       <span className="truncate max-w-[200px]">{item.location || 'Ashulia Model town'}</span>
                       <ChevronRight size={16} className="text-[#185F35] transition-transform group-hover:translate-x-1" />

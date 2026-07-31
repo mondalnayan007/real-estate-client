@@ -6,7 +6,7 @@ import AgentContext from '../context/AgentContext';
 export default function OurVision() {
 
   const {user} = useContext(AgentContext)
-  console.log(user);
+ 
 
   return (
     <section className="w-full text-[#185F35] bg-white py-16 transition-colors duration-300">
