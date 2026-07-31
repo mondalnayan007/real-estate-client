@@ -1,7 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Mail, ShieldCheck, Award, Briefcase } from 'lucide-react';
-import { LiaLinkedinIn } from 'react-icons/lia';
+import React, { useContext, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Award, Briefcase, X, ArrowRight } from 'lucide-react';
+import { LiaLinkedinIn, LiaFacebookF } from 'react-icons/lia';
+import AgentContext from '../context/AgentContext';
 
 // প্রিমিয়াম টিম মেম্বারদের ডাটাবেজ
 const teamMembers = [
@@ -11,9 +12,10 @@ const teamMembers = [
     role: 'Chief Executive Officer',
     specialty: 'Bespoke Asset Management',
     img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80',
-    bio: 'Over 15 years of transforming luxury real estate portfolios across New York and London.',
+    bio: 'Over 15 years of transforming luxury real estate portfolios across New York and London. Specializing in high-yield investments for ultra-high-net-worth individuals and corporate funds.',
     linkedin: '#',
-    email: 'seraphina@primeestates.com'
+    facebook: '#',
+    
   },
   {
     id: 2,
@@ -21,9 +23,10 @@ const teamMembers = [
     role: 'Managing Director',
     specialty: 'High-Net-Worth Acquisitions',
     img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80',
-    bio: 'Specializes in off-market penthouses and coastal estates for private institutional clients.',
+    bio: 'Specializes in off-market penthouses and coastal estates for private institutional clients. Recognized globally for landmark property developments and private equity structuring.',
     linkedin: '#',
-    email: 'alexander@primeestates.com'
+    facebook: '#',
+    
   },
   {
     id: 3,
@@ -31,9 +34,10 @@ const teamMembers = [
     role: 'Head of Architectural Design',
     specialty: 'Luxury Structural Curation',
     img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80',
-    bio: 'Ensuring every structural asset listed meets our strict aesthetic and structural gold standards.',
+    bio: 'Ensuring every structural asset listed meets our strict aesthetic and structural gold standards. She leads a dedicated team of master architects across European markets.',
     linkedin: '#',
-    email: 'elena@primeestates.com'
+    facebook: '#',
+    
   },
   {
     id: 4,
@@ -41,44 +45,38 @@ const teamMembers = [
     role: 'Senior Wealth Advisor',
     specialty: 'Real Estate Investment Trust',
     img: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80',
-    bio: 'Maximizing ROI for private desk investors through calculated, data-driven estate acquisitions.',
+    bio: 'Maximizing ROI for private desk investors through calculated, data-driven estate acquisitions. Expert in tax-optimized real estate holdings and estate planning.',
     linkedin: '#',
-    email: 'marcus@primeestates.com'
+    facebook: '#',
+   
   }
 ];
 
-// ফ্রেমার মোশন অ্যানিমেশন ভেরিয়েন্টস
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15 }
-  }
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 40, scale: 0.98 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1,
-    transition: { type: 'spring', stiffness: 60, damping: 15 } 
-  }
-};
-
 export default function Team() {
+  // ফুল ডেসক্রিপশন দেখার জন্য সিলেক্টেড মেম্বার স্টেট
+  const [selectedMember, setSelectedMember] = useState(null);
+
+const {user} = useContext(AgentContext)
+  const [membersData,setMembersData] = useState('');
+
+  useEffect(()=>{
+    fetch(`http://localhost:4000/api/admin/team-members?${user?.agentId}`)
+    .then(res=>res.json())
+    .then(data => setMembersData(data))
+  },[])
+
+  console.log(membersData);
   return (
     <section className="py-24 bg-slate-50 text-slate-800 px-6 overflow-hidden relative">
-      {/* ব্যাকগ্রাউন্ড গ্লো (ব্র্যান্ড কালার প্রাইমারি টোন) */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#185F35]/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* ব্যাকগ্রাউন্ড গ্লো */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-[#185F35]/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* ========================================== */}
-        {/* 🔝 Updated Header Section (Matching Image) */}
+        {/* 🔝 Header Section */}
         {/* ========================================== */}
         <div className="text-center mb-20 max-w-3xl mx-auto">
-          {/* Subheading */}
           <motion.span 
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -89,7 +87,6 @@ export default function Team() {
             MEET OUR TEAM
           </motion.span>
           
-          {/* Main Title */}
           <motion.h2 
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -101,7 +98,6 @@ export default function Team() {
             Board of <span className="text-emerald-500 font-extrabold">Leadership</span>
           </motion.h2>
 
-          {/* Description Paragraph */}
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -112,7 +108,6 @@ export default function Team() {
             Dedicated professionals committed to delivering excellence in every project we undertake.
           </motion.p>
 
-          {/* Bottom Gradient Accent Line */}
           <motion.div 
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
@@ -123,86 +118,141 @@ export default function Team() {
         </div>
 
         {/* ========================================== */}
-        {/* 👥 Team Cards Grid */}
+        {/* 👥 Clean Team Cards Grid */}
         {/* ========================================== */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-60px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {teamMembers.map((member) => (
-            <motion.div
+            <div
               key={member.id}
-              variants={cardVariants}
-              whileHover={{ y: -10 }}
-              transition={{ type: 'spring', stiffness: 120, damping: 20 }}
-              className="group bg-white border border-slate-200/80 hover:border-[#185F35]/40 rounded-[2.5rem] overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-[#185F35]/10 transition-all duration-300 flex flex-col justify-between"
+              className="bg-white border border-slate-200/90 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between"
             >
-              {/* Image Box */}
-              <div className="relative h-80 overflow-hidden bg-slate-100">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent z-10 opacity-70 group-hover:opacity-50 transition-opacity duration-300" />
-                
+              {/* Profile Image */}
+              <div className="relative h-72 overflow-hidden bg-slate-100 shrink-0">
                 <img 
                   src={member.img} 
                   alt={member.name} 
-                  className="w-full h-full object-cover transition-all duration-[1s] cubic-bezier(0.16, 1, 0.3, 1) group-hover:scale-105"
+                  className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-                <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-md border border-slate-200/80 p-2 rounded-xl shadow-sm" style={{ color: '#185F35' }}>
-                  <ShieldCheck size={16} />
+                {/* Specialty Tag */}
+                <div className="absolute bottom-3 left-4 right-4 z-10 flex items-center gap-1.5 text-white/90 text-[11px] font-medium backdrop-blur-md bg-black/30 px-3 py-1 rounded-full w-max border border-white/20">
+                  <Briefcase size={12} className="text-emerald-400" />
+                  <span>{member.specialty}</span>
                 </div>
               </div>
 
               {/* Member Details */}
-              <div className="p-6 pt-4 relative flex-grow flex flex-col justify-between">
+              <div className="p-6 flex-grow flex flex-col justify-between">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest font-bold block mb-1" style={{ color: '#185F35' }}>
-                    {member.role}
-                  </span>
-                  
-                  <h3 className="text-xl font-bold text-slate-900 tracking-tight group-hover:text-[#185F35] transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-slate-900 tracking-tight">
                     {member.name}
                   </h3>
 
-                  <div className="flex items-center gap-1.5 text-slate-600 text-[11px] font-mono mt-2 mb-4 bg-slate-100/80 w-max px-2.5 py-1 rounded-md border border-slate-200/60">
-                    <Briefcase size={12} style={{ color: '#185F35' }} />
-                    <span>{member.specialty}</span>
-                  </div>
+                  <p className="text-xs font-semibold uppercase tracking-wider mt-0.5 mb-3" style={{ color: '#185F35' }}>
+                    {member.role}
+                  </p>
 
-                  <p className="text-slate-600 text-xs font-light leading-relaxed mb-6">
+                  {/* 2-line clean description */}
+                  <p className="text-slate-600 text-xs font-light leading-relaxed line-clamp-2">
                     {member.bio}
                   </p>
+
+                  {/* Read More Trigger Button */}
+                  <button
+                    onClick={() => setSelectedMember(member)}
+                    className="mt-2 text-xs font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+                    style={{ color: '#185F35' }}
+                  >
+                    Read Full Bio <ArrowRight size={12} />
+                  </button>
                 </div>
 
-                {/* Social & Contact Actions */}
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div className="flex gap-2">
-                    <a 
-                      href={`mailto:${member.email}`} 
-                      className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-300 shadow-sm"
-                    >
-                      <Mail size={14} />
+                {/* Social Icons */}
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
+                    Connect
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    
+                    <a href={member.facebook} className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors duration-200" title="Facebook">
+                      <LiaFacebookF size={13} />
                     </a>
-                    <a 
-                      href={member.linkedin} 
-                      className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-all duration-300 shadow-sm"
-                    >
-                      <LiaLinkedinIn size={14} />
+                    <a href={member.linkedin} className="p-2 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors duration-200" title="LinkedIn">
+                      <LiaLinkedinIn size={13} />
                     </a>
                   </div>
-
-                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider group-hover:text-slate-600 transition-colors duration-300">
-                    Verified Desk
-                  </span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Bottom Banner */}
+        {/* ========================================== */}
+        {/* 🪟 Full Bio Modal (On Read More Click) */}
+        {/* ========================================== */}
+        <AnimatePresence>
+          {selectedMember && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative border border-slate-100"
+              >
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedMember(null)}
+                  className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full z-10 transition-colors cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+
+                {/* Modal Header Image */}
+                <div className="relative h-48 bg-slate-100">
+                  <img src={selectedMember.img} alt={selectedMember.name} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-4 left-6 right-6 text-white">
+                    <span className="text-xs uppercase font-mono tracking-widest text-emerald-400 font-bold block mb-1">
+                      {selectedMember.role}
+                    </span>
+                    <h3 className="text-2xl font-bold">{selectedMember.name}</h3>
+                  </div>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-4 bg-slate-100 w-max px-3 py-1 rounded-full border border-slate-200">
+                    <Briefcase size={13} style={{ color: '#185F35' }} />
+                    <span>Specialty: {selectedMember.specialty}</span>
+                  </div>
+
+                  <p className="text-slate-600 text-sm leading-relaxed mb-6 font-light">
+                    {selectedMember.bio}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <span className="text-xs font-mono font-bold text-slate-400 uppercase">Contact Directly</span>
+                    <div className="flex items-center gap-2">
+                     
+                      <a href={selectedMember.facebook} className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors">
+                        <LiaFacebookF size={15} />
+                      </a>
+                      <a href={selectedMember.linkedin} className="p-2.5 bg-slate-100 hover:bg-[#185F35] text-slate-600 hover:text-white rounded-xl transition-colors">
+                        <LiaLinkedinIn size={15} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* ========================================== */}
+        {/* 📞 Bottom Call To Action */}
+        {/* ========================================== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -221,7 +271,7 @@ export default function Team() {
           </div>
           <button 
             style={{ backgroundColor: '#185F35' }}
-            className="whitespace-nowrap hover:opacity-90 text-white font-mono text-[11px] font-bold tracking-wider uppercase px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-[#185F35]/25"
+            className="whitespace-nowrap hover:opacity-90 text-white font-mono text-[11px] font-bold tracking-wider uppercase px-6 py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-[#185F35]/25 cursor-pointer"
           >
             Schedule Call
           </button>
