@@ -17,16 +17,16 @@ const WhatsAppIcon = ({ size = 24, className = "" }) => (
 
 export default function ContactFab() {
     const {user} = useContext(AgentContext);
-    console.log(user);
+    
   return (
     <div className=" z-50">
-      <div className="fab fab-flower">
+      <div className="fab fab-flower fixed bottom-16 right-8">
         
         {/* 🟢 Main Trigger Button (Real WhatsApp Styled) */}
         <div 
           tabIndex={0} 
           role="button" 
-          className="btn btn-lg btn-circle text-white shadow-2xl hover:scale-110 fixed bottom-10 right-10 transition-transform bg-[#25D366] hover:bg-[#20ba5a] border-none flex items-center justify-center"
+          className="btn btn-lg btn-circle text-white shadow-2xl hover:scale-110   transition-transform bg-[#25D366] hover:bg-[#20ba5a] border-none flex items-center justify-center"
         >
           <WhatsAppIcon size={32} />
         </div>
@@ -36,7 +36,7 @@ export default function ContactFab() {
         {/* 1. Email Action */}
         <a 
           href={`mailto:&{user?.email}`}
-          className="btn btn-lg btn-circle bg-[#185F35] hover:bg-[#134c2a] text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
+          className="btn btn-lg btn-circle bg-[#185F35] hover:bg-red-600 text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
           title="Send Email"
         >
           <Mail size={22} />
@@ -45,7 +45,7 @@ export default function ContactFab() {
         {/* 2. Phone Call Action */}
         <a 
           href={`tel:${user?.whatsappNumber}`}
-          className="btn btn-lg btn-circle bg-slate-800 hover:bg-black text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
+          className="btn btn-lg btn-circle bg-slate-800 hover:bg-blue-600 text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
           title="Call Us"
         >
           <Phone size={22} />
