@@ -1,19 +1,26 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, Link, NavLink } from 'react-router-dom';
+import { useNavigate, Link, NavLink, useLocation } from 'react-router-dom'; // 👈 useLocation ইমপোর্ট করা হয়েছে
 import { Home, Menu, X, LogOut, LayoutGrid, LogIn, ChevronDown } from 'lucide-react';
 import { SettingsContext } from '../context/SettingsContext';
-import { AuthContext } from '../context/AuthContext'; // 👈 সঠিক AuthContext ইমপোর্ট করুন
+import { AuthContext } from '../context/AuthContext';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  // 1. Contexts
+  // 1. Location & Contexts
+  const location = useLocation(); // 👈 বর্তমান পেজের পাথ জানার জন্য
   const { settings } = useContext(SettingsContext);
   const { adminUser, clientUser, logOutAdmin, logOutClient } = useContext(AuthContext);
 
   const navigate = useNavigate();
+
+  // 💡 চেক করা হচ্ছে বর্তমান পেজটি হোম পেজ কিনা
+  const isHomePage = location.pathname === '/';
+
+  // 💡 যদি ইউজার স্ক্রোল করে অথবা অন্য কোনো পেজে থাকে (হোম পেজ ছাড়া), তবে Solid White Theme একটিভ হবে
+  const isSolidNavbar = isScrolled || !isHomePage;
 
   // 💡 বর্তমান একটিভ ইউজার ও তার রোল ডিটেক্ট করা
   const currentUser = adminUser || clientUser;
@@ -40,7 +47,7 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
-  // 🚪 Logout Handler (AuthContext-এর লজিক ব্যবহার করে)
+  // 🚪 Logout Handler
   const handleLogoutAction = async () => {
     try {
       if (role === 'admin') {
@@ -66,7 +73,7 @@ export default function Navbar() {
     <>
       <nav 
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          isScrolled 
+          isSolidNavbar 
             ? 'bg-white/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 py-4' 
             : 'bg-gradient-to-b from-black/40 via-black/10 to-transparent backdrop-blur-[2px] py-5'
         }`}
@@ -76,7 +83,9 @@ export default function Navbar() {
           {/* Brand Logo */}
           {settings ? (
             <div 
-              className='flex gap-2 text-white items-center cursor-pointer' 
+              className={`flex gap-2 items-center cursor-pointer font-bold ${
+                isSolidNavbar ? 'text-gray-900' : 'text-white'
+              }`} 
               onClick={() => { navigate('/'); closeMenu(); }}
             >
               <img className='h-8 w-10 object-contain' src={settings.logo} alt="Logo" /> 
@@ -85,23 +94,25 @@ export default function Navbar() {
           ) : (
             <div 
               className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
-                isScrolled ? 'text-[#185F35]' : 'text-white'
+                isSolidNavbar ? 'text-[#185F35]' : 'text-white'
               }`} 
               onClick={() => { navigate('/'); closeMenu(); }}
             >
-              <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-[#185F35]' : 'text-white'}`} />
+              <Home className={`h-6 w-6 transition-colors duration-300 ${isSolidNavbar ? 'text-[#185F35]' : 'text-white'}`} />
               <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
             </div>
           )}
           
           {/* Navigation Links (Desktop) */}
-          <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase ${isScrolled ? 'text-gray-700' : 'text-white/90'}`}>
-            <NavLink to={'/'}>Home</NavLink>
-            <NavLink to={'/projects'}>Projects</NavLink>
-            <NavLink to={'/team'}>Team</NavLink>
-            <NavLink to={'/about'}>About</NavLink>
-            <NavLink to={'/blog'}>Blog</NavLink>
-            <NavLink to={'/contact'}>Contact</NavLink>
+          <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase transition-colors duration-300 ${
+            isSolidNavbar ? 'text-gray-700' : 'text-white/90'
+          }`}>
+            <NavLink to={'/'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Home</NavLink>
+            <NavLink to={'/projects'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Projects</NavLink>
+            <NavLink to={'/team'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Team</NavLink>
+            <NavLink to={'/about'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>About</NavLink>
+            <NavLink to={'/blog'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Blog</NavLink>
+            <NavLink to={'/contact'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Contact</NavLink>
           </div>
 
           {/* Desktop Buttons Wrapper */}
@@ -116,7 +127,7 @@ export default function Navbar() {
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
-                    isScrolled 
+                    isSolidNavbar 
                       ? 'bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200' 
                       : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
                   }`}
@@ -168,7 +179,7 @@ export default function Navbar() {
               <Link
                 to="/login"
                 className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-sm active:scale-95 ${
-                  isScrolled
+                  isSolidNavbar
                     ? 'bg-amber-500 text-white hover:bg-amber-600'
                     : 'bg-white text-gray-900 hover:bg-gray-100'
                 }`}
@@ -187,7 +198,7 @@ export default function Navbar() {
             {isOpen ? (
               <X className="text-gray-800" size={24} />
             ) : (
-              <Menu className={isScrolled ? 'text-gray-800' : 'text-white'} size={24} />
+              <Menu className={isSolidNavbar ? 'text-gray-800' : 'text-white'} size={24} />
             )}
           </button>
         </div>
@@ -200,6 +211,7 @@ export default function Navbar() {
             <Link to={'/team'} onClick={closeMenu}>Team</Link>
             <Link to={'/about'} onClick={closeMenu}>About</Link>
             <Link to={'/blog'} onClick={closeMenu}>Blog</Link>
+            <Link to={'/contact'} onClick={closeMenu}>Contact</Link>
             
             <div className="w-4/5 h-[1px] bg-gray-100 my-1"></div>
             
