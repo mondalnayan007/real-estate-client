@@ -7,6 +7,7 @@ import Newsletter from '../Newsletter';
 
 import HomePageProjects from '../components/HomePageProjects';
 import AgentContext from '../context/AgentContext';
+import StatsSection from '../components/StatsSection';
 
 
 export default function LandingPage() {
@@ -22,6 +23,7 @@ export default function LandingPage() {
       
       <HomePageProjects></HomePageProjects>
       <ClientReviews />
+      <StatsSection></StatsSection>
       <Newsletter />
      
       
