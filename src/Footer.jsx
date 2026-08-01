@@ -9,7 +9,7 @@ export default function Footer() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   const {
-    address, brandName, email,phone, facebookUrl, footerAboutText,
+    address, brandName, email, phone, facebookUrl, footerAboutText,
     instagramUrl, linkedinUrl, logo, twitterUrl, workingHours, youtubeUrl
   } = settings || {};
 
@@ -25,10 +25,10 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#0b3323] text-slate-200 font-sans border-t border-[#0e402c]">
-      
+
       {/* 📌 Main Upper Footer Content */}
       <div className="max-w-7xl mx-auto px-6 pt-16 pb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        
+
         {/* 1️⃣ Brand & Description Column */}
         <div className="space-y-4">
           {settings ? (
@@ -40,9 +40,8 @@ export default function Footer() {
             </div>
           ) : (
             <div
-              className={`flex items-center gap-2.5 font-sans font-black text-xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
-                isScrolled ? 'text-[#00a859]' : 'text-white'
-              }`}
+              className={`flex items-center gap-2.5 font-sans font-black text-xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${isScrolled ? 'text-[#00a859]' : 'text-white'
+                }`}
               onClick={() => { navigate('/'); }}
             >
               <Home className="h-6 w-6 text-[#00a859]" />
@@ -91,7 +90,7 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-bold text-base mb-4">Contact Us</h4>
           <div className="space-y-4 text-sm">
-            
+
             {/* Address */}
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 text-[#00a859] shrink-0 mt-1" />
@@ -149,23 +148,23 @@ export default function Footer() {
 
       </div>
 
-      {/* 🟢 Mobile App Banner Bar (ছবিতে থাকা সবুজ ব্যানার সেকশন) */}
-      <div className="bg-[#008f4c] py-8 px-6 text-white relative">
+      {/* 🟢 Mobile App Banner Bar (ছবিতে থাকা গ্রাডিয়েন্ট ব্যাকগ্রাউন্ড) */}
+      <div className="bg-gradient-to-r from-[#006e3a] via-[#008f4c] to-[#00ab5b] py-8 px-6 text-white relative">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          
+
           <div>
             <h3 className="text-2xl font-bold mb-1">Mobile App</h3>
             <p className="text-slate-100 text-sm mb-2">Get Your Own Home Throught Us</p>
             <div className="flex items-center gap-2 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-300"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
               <span>Get It On App Stores Now!</span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            
+
             {/* Play Store Button */}
-            <a href="#" className="flex items-center gap-3 bg-black hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl transition-all">
+            <a href="#" className="flex items-center gap-3 bg-black hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl transition-all shadow-md">
               <FaGooglePlay size={20} />
               <div className="text-left leading-tight">
                 <span className="text-[10px] uppercase block text-gray-400">Get it on</span>
@@ -174,7 +173,7 @@ export default function Footer() {
             </a>
 
             {/* App Store Button */}
-            <a href="#" className="flex items-center gap-3 bg-black hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl transition-all">
+            <a href="#" className="flex items-center gap-3 bg-black hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl transition-all shadow-md">
               <FaApple size={24} />
               <div className="text-left leading-tight">
                 <span className="text-[10px] uppercase block text-gray-400">Download on the</span>
@@ -190,7 +189,7 @@ export default function Footer() {
       {/* 📌 Bottom Copyright Bar */}
       <div className="bg-[#08291c] py-4 px-6 text-xs text-slate-400 text-left">
         <div className="max-w-7xl mx-auto">
-          <p>&copy; {new Date().getFullYear()} {brandName || "The Premium Homes Ltd."} All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {brandName || "The PrimeEstate"} All rights reserved.</p>
         </div>
       </div>
 

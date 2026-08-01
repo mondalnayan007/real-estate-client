@@ -85,11 +85,11 @@ export default function Navbar() {
           ) : (
             <div 
               className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
-                isScrolled ? 'text-blue-600' : 'text-white'
+                isScrolled ? 'text-[#185F35]' : 'text-white'
               }`} 
               onClick={() => { navigate('/'); closeMenu(); }}
             >
-              <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-600' : 'text-blue-400'}`} />
+              <Home className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-[#185F35]' : 'text-white'}`} />
               <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
             </div>
           )}
