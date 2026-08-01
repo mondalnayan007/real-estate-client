@@ -8,23 +8,53 @@ import { FaFacebookF, FaLinkedinIn, FaYoutube, FaInstagram } from 'react-icons/f
 export default function ContactSection() {
   // 🟢 Tab Switcher State
   const [activeTab, setActiveTab] = useState('corporate');
+  const [loading, setLoading] = useState(false);
 
-  // 🟢 Form State
+  // 🟢 Form State (কি-গুলোর নাম ঠিক রাখা হয়েছে)
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
+    userName: '',
+    userEmail: '',
+    userPhone: '',
     subject: '',
-    message: ''
+    userMessage: ''
   });
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Submitted:", formData);
+    setLoading(true); // 👈 লোডিং শুরু করা হলো
+
+    try {
+      const response = await fetch('http://localhost:4000/api/contact-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("আপনার মেসেজটি সফলভাবে পাঠানো হয়েছে!");
+        // ফর্ম স্টেট রিসেট করা
+        setFormData({
+          userName: '',
+          userEmail: '',
+          userPhone: '',
+          subject: '',
+          userMessage: ''
+        });
+      } else {
+        alert(data.message || "দুঃখিত, মেসেজ পাঠানো যায়নি। আবার চেষ্টা করুন।");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("সার্ভার কানেকশনে সমস্যা হয়েছে।");
+    } finally {
+      setLoading(false); // 👈 লোডিং শেষ করা হলো
+    }
   };
 
   // 🏢 Office Location Data Map
@@ -96,8 +126,8 @@ export default function ContactSection() {
                       <label className="block text-slate-200 mb-1.5">Your Name *</label>
                       <input 
                         type="text" 
-                        name="name"
-                        value={formData.name}
+                        name="userName" // 👈 ঠিক করা হয়েছে (আগে name ছিল)
+                        value={formData.userName}
                         onChange={handleInputChange}
                         placeholder="John Doe" 
                         className="w-full px-3.5 py-3 rounded-lg bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-normal"
@@ -108,8 +138,8 @@ export default function ContactSection() {
                       <label className="block text-slate-200 mb-1.5">Email Address *</label>
                       <input 
                         type="email" 
-                        name="email"
-                        value={formData.email}
+                        name="userEmail" // 👈 ঠিক করা হয়েছে (আগে email ছিল)
+                        value={formData.userEmail}
                         onChange={handleInputChange}
                         placeholder="john@example.com" 
                         className="w-full px-3.5 py-3 rounded-lg bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-normal"
@@ -124,8 +154,8 @@ export default function ContactSection() {
                       <label className="block text-slate-200 mb-1.5">Phone Number *</label>
                       <input 
                         type="text" 
-                        name="phone"
-                        value={formData.phone}
+                        name="userPhone" // 👈 ঠিক করা হয়েছে (আগে phone ছিল)
+                        value={formData.userPhone}
                         onChange={handleInputChange}
                         placeholder="+880 1XXX-XXXXXX" 
                         className="w-full px-3.5 py-3 rounded-lg bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-normal"
@@ -151,8 +181,8 @@ export default function ContactSection() {
                     <label className="block text-slate-200 mb-1.5">Message *</label>
                     <textarea 
                       rows={5}
-                      name="message"
-                      value={formData.message}
+                      name="userMessage" // 👈 ঠিক করা হয়েছে (আগে message ছিল)
+                      value={formData.userMessage}
                       onChange={handleInputChange}
                       placeholder="Tell us about your requirements..." 
                       className="w-full px-3.5 py-3 rounded-lg bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm font-normal resize-none"
@@ -163,9 +193,10 @@ export default function ContactSection() {
                   {/* Submit Button */}
                   <button 
                     type="submit" 
-                    className="w-full bg-[#00a859] hover:bg-[#008f4c] text-white font-bold py-3.5 rounded-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md mt-2"
+                    disabled={loading}
+                    className="w-full bg-[#00a859] hover:bg-[#008f4c] cursor-pointer text-white font-bold py-3.5 rounded-lg transition-all flex items-center justify-center gap-2 text-sm shadow-md mt-2 disabled:opacity-50"
                   >
-                    <Send size={16} /> Send Message
+                    <Send size={16} /> {loading ? "Sending..." : "Send Message"}
                   </button>
 
                 </form>

@@ -61,6 +61,7 @@ const ProjectDetails = () => {
       agencyName: user?.agencyName || "Agent",
       propertyTitle: singleData?.title,
       propertyPrice: singleData?.price,
+      propertyId: singleData?._id,
       propertyLink: window.location.href
     };
 

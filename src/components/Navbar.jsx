@@ -217,7 +217,7 @@ export default function Navbar() {
             
             <button 
               onClick={closeMenu}
-              className="bg-[#007b57] text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
+              className="bg-[#007b57]  text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
             >
               Property Price Predictor
             </button>
