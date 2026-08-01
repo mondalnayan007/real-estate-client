@@ -18,6 +18,7 @@ const subdomain = hostname.split('.')[0];
   brandName: '',
   title: '',
   email: '',
+  phone:'',
   workingHours: '',
   logo: null,
   favIcon: null,
@@ -162,6 +163,10 @@ const subdomain = hostname.split('.')[0];
             <div>
               <label className={labelStyle}> Email *</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="e.g. info@yourdomain.com" className={inputStyle} required />
+            </div>
+            <div>
+              <label className={labelStyle}> Phone*</label>
+              <input type="number" name="phone" value={formData.phone} onChange={handleChange} placeholder="e.g. +8801********" className={inputStyle} required />
             </div>
           </div>
 
