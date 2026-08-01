@@ -212,7 +212,7 @@ export default function Navbar() {
 
             <div className="w-4/5 h-[1px] bg-gray-100 my-1"></div>
 
-            <div className="aura text-[#7b7300] w-4/5 flex justify-center">
+            <div className="aura aura-dual text-blue-400 rounded-full w-4/5 flex justify-center">
               <button
                 onClick={closeMenu}
                 className="bg-[#007b57] text-white px-5 py-3 rounded-full w-full text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"

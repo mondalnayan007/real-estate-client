@@ -23,13 +23,16 @@ export default function ContactFab() {
       <div className="fab fab-flower fixed bottom-16 right-8">
         
         {/* 🟢 Main Trigger Button (Real WhatsApp Styled) */}
-        <div 
+        <div className='aura aura-xl  text-blue-600 rounded-full duration-2000'>
+          <div 
           tabIndex={0} 
           role="button" 
           className="btn btn-lg btn-circle text-white shadow-2xl hover:scale-110   transition-transform bg-[#25D366] hover:bg-[#20ba5a] border-none flex items-center justify-center"
         >
           <WhatsAppIcon size={32} />
         </div>
+        </div>
+        
 
         {/* 🔘 Dynamic Child Buttons with Extended Distance */}
         
