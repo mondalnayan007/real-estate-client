@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Star, CheckCircle2, FolderKanban } from 'lucide-react';
+import { Users, Star, CheckCircle2, FolderKanban ,Landmark } from 'lucide-react';
 
 export default function StatsSection() {
   const stats = [
@@ -44,7 +44,7 @@ export default function StatsSection() {
       value: "52",
       suffix: "+",
       label: "Ongoing Projects",
-      icon: FolderKanban,
+      icon: Landmark ,
       bgColor: "bg-purple-50/60 hover:bg-[#F7E9FF]",
       iconBg: "bg-purple-600",
       textColor: "text-slate-800",
