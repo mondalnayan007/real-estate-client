@@ -71,42 +71,38 @@ export default function Navbar() {
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-          isSolidNavbar 
-            ? 'bg-white/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 py-4' 
-            : 'bg-gradient-to-b from-black/40 via-black/10 to-transparent backdrop-blur-[2px] py-5'
-        }`}
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${isSolidNavbar
+          ? 'bg-white/90 backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-gray-100 py-4'
+          : 'bg-gradient-to-b from-black/40 via-black/10 to-transparent backdrop-blur-[2px] py-5'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-8 flex justify-between items-center">
-          
+
           {/* Brand Logo */}
           {settings ? (
-            <div 
-              className={`flex gap-2 items-center cursor-pointer font-bold ${
-                isSolidNavbar ? 'text-gray-900' : 'text-white'
-              }`} 
+            <div
+              className={`flex gap-2 items-center cursor-pointer font-bold ${isSolidNavbar ? 'text-gray-900' : 'text-white'
+                }`}
               onClick={() => { navigate('/'); closeMenu(); }}
             >
-              <img className='h-8 w-10 object-contain' src={settings.logo} alt="Logo" /> 
+              <img className='h-8 w-10 object-contain' src={settings.logo} alt="Logo" />
               <span className="font-serif font-normal italic tracking-wide">{settings.brandName}</span>
             </div>
           ) : (
-            <div 
-              className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${
-                isSolidNavbar ? 'text-[#185F35]' : 'text-white'
-              }`} 
+            <div
+              className={`flex items-center gap-2.5 font-sans font-black text-2xl tracking-tight cursor-pointer select-none transition-transform duration-300 active:scale-95 ${isSolidNavbar ? 'text-[#185F35]' : 'text-white'
+                }`}
               onClick={() => { navigate('/'); closeMenu(); }}
             >
               <Home className={`h-6 w-6 transition-colors duration-300 ${isSolidNavbar ? 'text-[#185F35]' : 'text-white'}`} />
               <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
             </div>
           )}
-          
+
           {/* Navigation Links (Desktop) */}
-          <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase transition-colors duration-300 ${
-            isSolidNavbar ? 'text-gray-700' : 'text-white/90'
-          }`}>
+          <div className={`hidden md:flex gap-8 text-sm font-semibold tracking-wide uppercase transition-colors duration-300 ${isSolidNavbar ? 'text-gray-700' : 'text-white/90'
+            }`}>
             <NavLink to={'/'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Home</NavLink>
             <NavLink to={'/projects'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Projects</NavLink>
             <NavLink to={'/team'} className={({ isActive }) => isActive ? "text-[#007b57] font-bold" : ""}>Team</NavLink>
@@ -116,21 +112,23 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Buttons Wrapper */}
-          <div className="hidden md:flex items-center gap-4">
-            <button className="bg-[#007b57] text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#006245] transition-all duration-300 shadow-[0_4px_15px_rgba(0,123,87,0.2)] active:scale-95">
-              Property Price Predictor
-            </button>
+          <div className="hidden md:flex items-center gap-4 ">
+            <div className='aura aura-dual text-blue-400 rounded-full'>
+              <button className="bg-[#007b57] text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#006245] transition-all duration-300 shadow-[0_4px_15px_rgba(0,123,87,0.2)] active:scale-95">
+                Property Price Predictor
+              </button>
+            </div>
+
 
             {/* 🌟 DESKTOP AUTH BUTTON / PROFILE DROPDOWN */}
             {currentUser ? (
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
-                    isSolidNavbar 
-                      ? 'bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200' 
-                      : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${isSolidNavbar
+                    ? 'bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200'
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                    }`}
                 >
                   <div className="w-7 h-7 bg-[#007b57] text-white font-bold text-xs rounded-full flex items-center justify-center uppercase">
                     {currentUser.name ? currentUser.name[0] : currentUser.email ? currentUser.email[0] : 'U'}
@@ -143,7 +141,7 @@ export default function Navbar() {
 
                 {/* Profile Dropdown Menu */}
                 {profileOpen && (
-                  <div 
+                  <div
                     className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 text-gray-800 animate-in fade-in slide-in-from-top-2 duration-150"
                     onMouseLeave={() => setProfileOpen(false)}
                   >
@@ -178,11 +176,10 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-sm active:scale-95 ${
-                  isSolidNavbar
-                    ? 'bg-amber-500 text-white hover:bg-amber-600'
-                    : 'bg-white text-gray-900 hover:bg-gray-100'
-                }`}
+                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-sm active:scale-95 ${isSolidNavbar
+                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  : 'bg-white text-gray-900 hover:bg-gray-100'
+                  }`}
               >
                 <LogIn size={15} />
                 <span>Login</span>
@@ -191,8 +188,8 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Hamburger Menu Toggle */}
-          <button 
-            className="md:hidden p-1.5 rounded-lg transition-colors focus:outline-none z-50" 
+          <button
+            className="md:hidden p-1.5 rounded-lg transition-colors focus:outline-none z-50"
             onClick={() => setIsOpen(!isOpen)}
           >
             {isOpen ? (
@@ -212,15 +209,17 @@ export default function Navbar() {
             <Link to={'/about'} onClick={closeMenu}>About</Link>
             <Link to={'/blog'} onClick={closeMenu}>Blog</Link>
             <Link to={'/contact'} onClick={closeMenu}>Contact</Link>
-            
+
             <div className="w-4/5 h-[1px] bg-gray-100 my-1"></div>
-            
-            <button 
-              onClick={closeMenu}
-              className="bg-[#007b57]  text-white px-5 py-3 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
-            >
-              Property Price Predictor
-            </button>
+
+            <div className="aura text-[#7b7300] w-4/5 flex justify-center">
+              <button
+                onClick={closeMenu}
+                className="bg-[#007b57] text-white px-5 py-3 rounded-full w-full text-center text-xs font-bold tracking-widest uppercase shadow-md active:scale-95 transition-all"
+              >
+                Property Price Predictor
+              </button>
+            </div>
 
             {/* 🌟 MOBILE AUTH / PROFILE INTERFACE */}
             {currentUser ? (
@@ -239,7 +238,7 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <Link 
+                <Link
                   to={dashboardPath}
                   onClick={closeMenu}
                   className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold tracking-wider rounded-xl shadow-sm text-center flex items-center justify-center gap-2"
@@ -248,7 +247,7 @@ export default function Navbar() {
                   <span>Go to Dashboard</span>
                 </Link>
 
-                <button 
+                <button
                   onClick={handleLogoutAction}
                   className="w-full py-2.5 bg-rose-50 hover:bg-rose-100/70 text-rose-600 text-xs font-bold tracking-wider rounded-xl transition flex items-center justify-center gap-2"
                 >
@@ -257,8 +256,8 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 onClick={closeMenu}
                 className="border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-full w-4/5 text-center text-xs font-bold tracking-widest uppercase hover:bg-blue-50 transition shadow-sm flex items-center justify-center gap-2"
               >
@@ -272,7 +271,7 @@ export default function Navbar() {
 
       {/* Backdrop Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40 md:hidden"
           onClick={closeMenu}
         />
