@@ -101,6 +101,7 @@ export default function Navbar() {
             <NavLink to={'/team'}>Team</NavLink>
             <NavLink to={'/about'}>About</NavLink>
             <NavLink to={'/blog'}>Blog</NavLink>
+            <NavLink to={'/contact'}>Contact</NavLink>
           </div>
 
           {/* Desktop Buttons Wrapper */}

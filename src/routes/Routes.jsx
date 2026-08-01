@@ -17,6 +17,7 @@ import FakePaymentLoader from "../views/FakePaymentLoader";
 import NotFound from "../views/NotFound";
 import Login from "../views/Login";
 import Dashboard from "../views/Dashboard";
+import ContactSection from "../views/ContactSection";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -96,6 +97,10 @@ const agentDemoRouter = createBrowserRouter([
       {
         path: '/blog',
         Component: Blog
+      },
+      {
+        path:'/contact',
+        Component:ContactSection
       },
       {
         path: '/login',
