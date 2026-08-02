@@ -112,9 +112,9 @@ export default function Projects() {
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[#007b57] tracking-[0.2em] text-xs font-extrabold uppercase block mb-2"
+            className="text-[#007b57] tracking-[0.2em]  pt-5 font-extrabold uppercase block mb-2"
           >
-            PROJECTS
+            ---PROJECTS---
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 15 }}

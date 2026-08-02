@@ -198,7 +198,7 @@ export default function HeroCarousel() {
                   isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}>
                   {title && title.split(' ').map((word, i) => (
-                    <span key={i} className={i === 1 ? "font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-blue-500 tracking-tighter" : ""}>
+                    <span key={i} className={i === 1 ? "font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-green-500 tracking-tighter" : ""}>
                       {word}{' '}
                     </span>
                   ))}
@@ -214,7 +214,7 @@ export default function HeroCarousel() {
                 <div className={`flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto transition-all duration-1000 delay-400 transform ${
                   isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}>
-                  <button className="group bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-8 py-4 rounded-xl font-sans text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_4px_25px_rgba(37,99,235,0.25)] flex items-center justify-center gap-2 active:scale-98">
+                  <button className="group bg-[#108700] text-white px-8 py-4 rounded-xl font-sans text-xs font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_4px_25px_rgba(37,99,235,0.25)] flex items-center justify-center gap-2 active:scale-98">
                     <span>Explore Properties</span>
                     <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </button>

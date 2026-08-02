@@ -86,7 +86,7 @@ export default function Team() {
             style={{ color: '#185F35' }}
             className="tracking-[0.3em] font-mono font-bold uppercase block mb-3"
           >
-            MEET OUR TEAM
+            ---MEET OUR TEAM---
           </motion.span>
           
           <motion.h2 
