@@ -26,6 +26,7 @@ export default function PropertyManagement() {
     bookingPrice:'',
     buildingType: 'Residential',
     frontRoad: '',
+    floors:'',
     unitPerFloor: '',
     passengerLift: '',
     cargoLift: '',
@@ -205,7 +206,7 @@ export default function PropertyManagement() {
 
                <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Total Land Area</label>
-              <input type="text" placeholder="e.g. Premium Deal / Luxury" value={newProp.land} onChange={e => setNewProp({ ...newProp, land: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" />
+              <input type="text" placeholder="e.g. 10 Katha.." value={newProp.land} onChange={e => setNewProp({ ...newProp, land: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all" />
             </div>
           </div>
         </div>
@@ -245,13 +246,18 @@ export default function PropertyManagement() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Front Road Access</label>
-              <input type="text" placeholder="e.g. 40 Feet Wide Road" value={newProp.frontRoad} onChange={e => setNewProp({ ...newProp, frontRoad: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Total Floors</label>
+              <input type="text" placeholder="e.g. B+G+6" value={newProp.floors} onChange={e => setNewProp({ ...newProp, floors: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Units Per Floor</label>
               <input type="number" placeholder="e.g. 4" value={newProp.unitPerFloor} onChange={e => setNewProp({ ...newProp, unitPerFloor: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
+            </div>
+
+              <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Front Road Access</label>
+              <input type="text" placeholder="e.g. 40 Feet Wide Road" value={newProp.frontRoad} onChange={e => setNewProp({ ...newProp, frontRoad: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-600 transition-all" />
             </div>
           </div>
 

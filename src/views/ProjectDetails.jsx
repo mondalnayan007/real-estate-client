@@ -216,11 +216,11 @@ const ProjectDetails = () => {
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-slate-300 font-medium">TOTAL LAND</span>
-                <span className="font-bold text-emerald-400">5 Katha</span>
+                <span className="font-bold text-emerald-400">{singleData.land || '5 katha'}</span>
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-slate-300 font-medium">UNITS PER FLOOR</span>
-                <span className="font-bold text-emerald-400">2</span>
+                <span className="font-bold text-emerald-400">{singleData.unitPerFloor || '2'}</span>
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-slate-300 font-medium">TOTAL APARTMENTS</span>
