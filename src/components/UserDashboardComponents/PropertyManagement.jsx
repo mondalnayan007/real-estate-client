@@ -198,7 +198,8 @@ export default function PropertyManagement() {
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">Status</label>
               <select value={newProp.status} onChange={e => setNewProp({ ...newProp, status: e.target.value })} className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:bg-white focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all">
-                <option value="completed">Completed</option>
+                <option value="onSale">On Sale</option>
+                <option value="soldout">Sold Out</option>
                 <option value="under-construction">Under Construction</option>
                 <option value="upcoming">Upcoming</option>
               </select>
