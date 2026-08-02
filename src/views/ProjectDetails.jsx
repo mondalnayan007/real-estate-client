@@ -8,6 +8,7 @@ import {
 
 import AgentContext from '../context/AgentContext';
 import BookNowModal from '../components/BookNowModal';
+import { div } from 'three/src/nodes/math/OperatorNode.js';
 
 const ProjectDetails = () => {
   const { user } = use(AgentContext);
@@ -223,12 +224,16 @@ const ProjectDetails = () => {
                 <span className="font-bold text-emerald-400">{singleData.unitPerFloor || '2'}</span>
               </div>
               <div className="flex justify-between items-center py-3">
-                <span className="text-slate-300 font-medium">TOTAL APARTMENTS</span>
-                <span className="font-bold text-emerald-400">10</span>
+                <span className="text-slate-300 font-medium">TOTAL FLOORS</span>
+                <span className="font-bold text-emerald-400">{singleData.floors}</span>
               </div>
               <div className="flex justify-between items-center py-3">
-                <span className="text-slate-300 font-medium">TOTAL STORIED</span>
-                <span className="font-bold text-emerald-400">G+9</span>
+                <span className="text-slate-300 font-medium">PASSENGER LIFT</span>
+                <span className="font-bold text-emerald-400">{singleData.passengerLift}</span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-slate-300 font-medium">CARGO LIFT</span>
+                <span className="font-bold text-emerald-400">{singleData.cargoLift}</span>
               </div>
               <div className="flex justify-between items-center py-3">
                 <span className="text-slate-300 font-medium">ELECTRICITY / GAS</span>
@@ -291,28 +296,53 @@ const ProjectDetails = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Unit A */}
-            <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
-              <h3 className="text-2xl font-bold text-white mb-1">Unit A</h3>
-              <p className="text-emerald-300 text-sm font-semibold mb-6">{singleData.sqft || "2120 SQFT"}</p>
 
-              <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
-                <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">{singleData.beds || 3} Beds</span></div>
-                <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">{singleData.baths || 3} Baths</span></div>
-                <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
-              </div>
-            </div>
+         {
+  user ? (
+    singleData?.availableUnits?.map((unit, index) => (
+      <div 
+        key={unit.id || index} 
+        className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all"
+      >
+        <h3 className="text-2xl font-bold text-white mb-1">{unit.unitName}</h3>
+        <p className="text-emerald-300 text-sm font-semibold mb-6">{unit.sqft || "2120 SQFT"}</p>
 
-            {/* Unit B */}
-            <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
-              <h3 className="text-2xl font-bold text-white mb-1">Unit B</h3>
-              <p className="text-emerald-300 text-sm font-semibold mb-6">2120 SQFT</p>
+        <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
+          <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">{unit.beds || 3} Beds</span></div>
+          <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">{unit.baths || 3} Baths</span></div>
+          <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">{unit.balconies} Balconies</span></div>
+        </div>
+      </div>
+    ))
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* প্রয়োজনে আপনার মতো Flex/Grid ক্লাস দিতে পারেন */}
+      <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
+        <h3 className="text-2xl font-bold text-white mb-1">Unit A</h3>
+        <p className="text-emerald-300 text-sm font-semibold mb-6">{singleData?.sqft || "2120 SQFT"}</p>
 
-              <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
-                <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">3 Beds</span></div>
-                <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">3 Baths</span></div>
-                <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
-              </div>
-            </div>
+        <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
+          <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">{singleData?.beds || 3} Beds</span></div>
+          <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">{singleData?.baths || 3} Baths</span></div>
+          <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
+        </div>
+      </div>
+
+      <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
+        <h3 className="text-2xl font-bold text-white mb-1">Unit B</h3>
+        <p className="text-emerald-300 text-sm font-semibold mb-6">2120 SQFT</p>
+
+        <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
+          <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">3 Beds</span></div>
+          <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">3 Baths</span></div>
+          <div className="flex justify-between"><span>Balcony:</span> <span className="font-bold text-white">3 Balconies</span></div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+          
+            
           </div>
         </div>
       </section>
