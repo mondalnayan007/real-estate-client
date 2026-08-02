@@ -1,119 +1,139 @@
 import React from 'react';
 import MarqueeComponent from 'react-fast-marquee';
 const Marquee = MarqueeComponent.default || MarqueeComponent;
-import { Star, Quote } from 'lucide-react';
+import { Play, Star, ArrowLeft, ArrowRight, MoreVertical } from 'lucide-react';
 
 const premiumReviews = [
   {
     id: 1,
-    name: 'Alexander Vance',
-    role: 'CEO, VentureCap',
+    name: 'Rj Kibria',
+    role: 'Business Owner',
     company: 'Malibu Villa Owner',
-    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    text: 'The absolute pinnacle of real estate acquisition. PrimeEstates didn’t just find us a house; they secured an architectural legacy. Their discretion and white-glove service are completely unmatched.'
+    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80',
+    text: 'The professionalism and transparency throughout the entire process was outstanding.'
   },
   {
     id: 2,
-    name: 'Elena Rostova',
-    role: 'International Ballerina',
+    name: 'Md. Chowdhury',
+    role: 'Property Investor',
     company: 'The Obsidian Penthouse',
-    img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    text: 'From the private viewing to the final bespoke closing details, the experience was flawless. They understand luxury, privacy, and design at a level that traditional brokers simply cannot comprehend.'
+    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80',
+    text: 'The Premium Homes exceeded all our expectations. The quality of construction is top notch.'
   },
   {
     id: 3,
-    name: 'Marcus Sterling',
-    role: 'Managing Director',
+    name: 'Client Residing Abroad',
+    role: 'Property Investor',
     company: 'Aspen Monolith Owner',
-    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
-    text: 'An exceptional investment experience. Their access to off-market premium assets provided us with opportunities we couldn’t find anywhere else. Truly the gold standard of high-end real estate.'
+    img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
+    text: 'I am a Foreign Residing abroad client who bought a flat without any hassle.'
   },
   {
     id: 4,
-    name: 'Dr. Sophia Loren',
-    role: 'Phonetics Philanthropist',
+    name: 'Elena & Sister',
+    role: 'Client From Premium Royal City',
     company: 'Beverly Hills Mansion',
-    img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-    text: 'Bespoke service from start to finish. The team handled our complex requirements with complete grace and professionalism. I cannot recommend their elite advisory team highly enough.'
+    img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=80',
+    text: 'Two honored clients, two sisters, have taken flats from our premium project.'
   }
 ];
 
 export default function ClientReviews() {
   return (
-    <section className="py-24 bg-slate-950 text-white overflow-hidden relative border-t border-slate-900 select-none">
-      {/* Visual Ambient Glow Accents */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-6 mb-16 relative z-10">
-        <div className="text-center">
-          <span className="text-blue-400 tracking-[0.25em] text-xs font-bold uppercase block mb-3">
-            Testimonials
-          </span>
-          <h2 className="text-4xl md:text-5xl font-light font-serif tracking-tight mb-4">
-            The Voice of <span className="font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-white">Excellence</span>
+    <section className="py-20 bg-white text-gray-800 relative overflow-hidden select-none">
+      
+      {/* Top Header Section Matching Image Design */}
+      <div className="max-w-7xl mx-auto px-6 mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-3">
+            Client Reviews
           </h2>
-          <div className="w-12 h-[1px] bg-blue-500/30 mx-auto"></div>
+          <div className="w-12 h-1 bg-[#007b57] rounded-full mb-4" />
+          <p className="text-gray-500 font-medium text-sm md:text-base max-w-xl">
+            Hear from our satisfied clients about their experiences with us. Your trust is our greatest achievement.
+          </p>
+        </div>
+
+        {/* View All & Navigation Control Accent Buttons */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <button className="px-6 py-2.5 border-2 border-gray-900 hover:bg-gray-900 hover:text-white font-bold text-xs uppercase tracking-wider rounded-lg transition-all">
+            VIEW ALL
+          </button>
+          <div className="flex items-center gap-2">
+            <button className="p-2.5 border border-gray-300 rounded-lg hover:border-gray-900 hover:bg-gray-100 transition-all">
+              <ArrowLeft size={18} className="text-gray-800" />
+            </button>
+            <button className="p-2.5 border border-gray-300 rounded-lg hover:border-gray-900 hover:bg-gray-100 transition-all">
+              <ArrowRight size={18} className="text-gray-800" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Endless Marquee Container */}
-      <div className="relative w-full flex overflow-hidden">
+      <div className="relative w-full overflow-hidden">
         
-        {/* Soft Premium Edge Blurs */}
-        <div className="absolute inset-y-0 left-0 w-24 md:w-48 bg-gradient-to-r from-slate-950 via-slate-950/70 to-transparent z-20 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-24 md:w-48 bg-gradient-to-l from-slate-950 via-slate-950/70 to-transparent z-20 pointer-events-none" />
+        {/* Subtle Edge Gradients for Smooth Infinite Scroll Effect */}
+        <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
 
-        {/* 🌟 react-fast-marquee integration */}
+        {/* react-fast-marquee Integration */}
         <Marquee
-          speed={60} // স্পিড কন্ট্রোল করার জন্য (পিক্সেল প্রতি সেকেন্ড)
-          pauseOnHover={true} // হোভার করলে পজ হবে
-          gradient={false} // আমরা কাস্টম গ্রাডিয়েন্ট মাস্ক উপরেই তৈরি করেছি, তাই এটি ফলস থাকবে
-          className="flex gap-8 py-4"
+          speed={45}
+          pauseOnHover={true}
+          gradient={false}
+          className="py-4"
         >
           {premiumReviews.map((review) => (
             <div 
               key={review.id} 
-              // এখানে mx-4 দেওয়া হয়েছে যাতে কার্ডগুলোর মাঝখানের গ্যাপ ঠিক থাকে
-              className="w-[420px] max-w-[85vw] mx-4 bg-gradient-to-b from-slate-900 via-slate-900/60 to-slate-950/40 border border-slate-900 hover:border-blue-500/30 rounded-[2rem] p-8 flex flex-col justify-between relative group transition-all duration-500 shadow-2xl shrink-0"
+              className="w-[280px] md:w-[320px] h-[460px] mx-4 relative rounded-2xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-500 shrink-0 border border-gray-100 cursor-pointer"
             >
-              {/* Premium Hover Glow Grid */}
-              <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-b from-blue-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              {/* Client Image Background */}
+              <img 
+                src={review.img} 
+                alt={review.name} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
 
-              <div>
-                {/* Header Inside Card */}
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex gap-1 text-amber-500/90">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} fill="currentColor" size={14} strokeWidth={0} />
-                    ))}
-                  </div>
-                  <Quote size={28} className="text-slate-800/60 group-hover:text-blue-500/10 transition-colors duration-500 transform group-hover:rotate-6" />
+              {/* Dark Gradient Overlay for Reading Text */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+
+              {/* Play Button Icon Accent (Center) */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center text-[#007b57] shadow-xl transform group-hover:scale-110 group-hover:bg-[#007b57] group-hover:text-white transition-all duration-300">
+                  <Play size={24} className="fill-current ml-1" />
                 </div>
-
-                {/* Review Content */}
-                <p className="text-slate-400 group-hover:text-slate-300 transition-colors duration-300 font-light leading-relaxed tracking-wide text-sm md:text-base mb-8">
-                  "{review.text}"
-                </p>
               </div>
 
-              {/* Client Profile Footer */}
-              <div className="flex items-center gap-4 mt-auto border-t border-slate-900/60 pt-5">
-                <div className="relative shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/50 to-indigo-500/30 rounded-full p-[1px] -z-10 group-hover:rotate-180 transition-transform duration-1000" />
-                  <img 
-                    src={review.img} 
-                    alt={review.name} 
-                    className="w-11 h-11 object-cover rounded-full filter grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                </div>
-                <div className="truncate">
-                  <h4 className="font-bold text-slate-200 text-sm tracking-wide group-hover:text-blue-400 transition-colors duration-300">
-                    {review.name}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5 truncate">
-                    {review.role} • <span className="text-slate-400 italic font-light">{review.company}</span>
-                  </p>
+              {/* Star Rating Tag Top Left */}
+              <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={11} className="text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+
+              {/* Content Overlay Bottom */}
+              <div className="absolute bottom-0 inset-x-0 p-5 text-white flex flex-col justify-end">
+                {/* Quote / Testimonial Excerpt */}
+                <p className="text-xs md:text-sm font-semibold text-gray-100 leading-snug mb-3 line-clamp-2">
+                  "{review.text}"
+                </p>
+
+                {/* Client Info Bar */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/20">
+                  <div className="truncate pr-2">
+                    <h4 className="font-bold text-sm text-[#38d39f] truncate">
+                      {review.name}
+                    </h4>
+                    <p className="text-[11px] text-gray-300 truncate">
+                      {review.role}
+                    </p>
+                  </div>
+
+                  <button className="text-gray-300 hover:text-white p-1 rounded-full transition-colors flex-shrink-0">
+                    <MoreVertical size={16} />
+                  </button>
                 </div>
               </div>
 
