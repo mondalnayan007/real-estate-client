@@ -23,7 +23,7 @@ export default function ContactFab() {
       <div className="fab fab-flower fixed bottom-16 right-8">
         
         {/* 🟢 Main Trigger Button (Real WhatsApp Styled) */}
-        <div className='aura aura-xl  text-blue-600 rounded-full duration-2000'>
+        <div className='aura aura-xl  text-[#b604da] rounded-full duration-2000'>
           <div 
           tabIndex={0} 
           role="button" 

@@ -34,8 +34,8 @@ const ProjectDetails = () => {
     return (
       <div className="min-h-screen bg-[#072419] text-white flex flex-col items-center justify-center font-sans">
         <p className="text-emerald-400 mb-4 text-xs tracking-widest uppercase">Loading Property Details...</p>
-        <button 
-          onClick={() => navigate(-1)} 
+        <button
+          onClick={() => navigate(-1)}
           className="text-white bg-emerald-600 px-4 py-2 rounded-lg flex items-center gap-2 text-xs uppercase tracking-wider font-bold hover:bg-emerald-500 transition-colors"
         >
           <ArrowLeft size={14} /> Return Back
@@ -90,7 +90,7 @@ const ProjectDetails = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans relative overflow-hidden">
-      
+
       {/* Booking Modal */}
       <BookNowModal
         isOpen={isBookModalOpen}
@@ -158,7 +158,7 @@ const ProjectDetails = () => {
       {/* ================= OVERVIEW & HIGHLIGHTS SECTION ================= */}
       <section className="py-20 px-6 md:px-12 bg-[#fffdf7]">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           <div className="lg:col-span-6 space-y-6">
             <span className="text-xs uppercase font-bold tracking-widest text-slate-400 border-b border-slate-300 pb-1 inline-block">
               Luxury Living Space
@@ -177,8 +177,8 @@ const ProjectDetails = () => {
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Apartments</span>
               </div>
               <div className="bg-slate-100 p-6 rounded-2xl border border-slate-200">
-                <span className="text-3xl font-black text-[#072419] block">{singleData.baths || '16'}</span>
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Units</span>
+                <span className="text-3xl font-black text-[#072419] block">{singleData.totalShares || '16'}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Shares</span>
               </div>
             </div>
           </div>
@@ -200,7 +200,7 @@ const ProjectDetails = () => {
       {/* ================= SPECIFICATIONS SECTION ================= */}
       <section className="py-20 px-6 md:px-12 bg-[#072419] text-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
+
           <div className="lg:col-span-6 space-y-6">
             <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">
               Details & Features
@@ -240,14 +240,16 @@ const ProjectDetails = () => {
               </div>
             </div>
 
-            <div className="pt-6">
+            <div className="pt-6 w-[50%]">
               <a
-              href={singleData.brochureLink}
-                target="_blank" rel="noopener noreferrer"
+                href={singleData.brochureLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={handleDownloadBrochure}
-                className="px-6 py-3.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center gap-2"
+                className="group px-6 py-3.5 bg-gray-700 hover:bg-[#FFB700] border border-emerald-700/50 hover:border-orange-500 text-white hover:text-black font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 flex items-center gap-2 shadow-md hover:shadow-orange-500/30"
               >
-                <Download size={16} /> Download Brochure
+                <Download size={16} className="transition-transform duration-300 group-hover:animate-bounce" />
+                Download Brochure
               </a>
             </div>
           </div>
@@ -292,7 +294,7 @@ const ProjectDetails = () => {
             <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
               <h3 className="text-2xl font-bold text-white mb-1">Unit A</h3>
               <p className="text-emerald-300 text-sm font-semibold mb-6">{singleData.sqft || "2120 SQFT"}</p>
-              
+
               <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
                 <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">{singleData.beds || 3} Beds</span></div>
                 <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">{singleData.baths || 3} Baths</span></div>
@@ -304,7 +306,7 @@ const ProjectDetails = () => {
             <div className="bg-[#0e402e] p-8 rounded-2xl border border-emerald-700/50 hover:border-emerald-500 transition-all">
               <h3 className="text-2xl font-bold text-white mb-1">Unit B</h3>
               <p className="text-emerald-300 text-sm font-semibold mb-6">2120 SQFT</p>
-              
+
               <div className="space-y-3 text-sm border-t border-emerald-800/60 pt-4 text-emerald-100">
                 <div className="flex justify-between"><span>Bedrooms:</span> <span className="font-bold text-white">3 Beds</span></div>
                 <div className="flex justify-between"><span>Bathrooms:</span> <span className="font-bold text-white">3 Baths</span></div>
@@ -341,7 +343,7 @@ const ProjectDetails = () => {
       {/* ================= CONTACT FORM SECTION ================= */}
       <section id="contact-section" className="py-20 px-6 md:px-12 bg-[#072419] text-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           <div className="lg:col-span-6 space-y-4">
             <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">Reach Out To Us</span>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
