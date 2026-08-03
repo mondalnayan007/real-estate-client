@@ -1,245 +1,271 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, User, ArrowUpRight, Search, Sparkles } from 'lucide-react';
+import { Calendar, Clock, User, ArrowRight, Search, Sparkles, Loader2 } from 'lucide-react';
 
-const categories = ['All Articles', 'Market Insights', 'Architecture', 'Wealth Strategy'];
-
-const blogPosts = [
-  {
-    id: 1,
-    title: 'The Sovereign Ascent: Why Global Ultra-HNWIs are Pivoting to Penthouses in 2026',
-    excerpt: 'An in-depth analysis of high-net-worth investment trends, focusing on off-market vertical estates and capital preservation.',
-    category: 'Market Insights',
-    date: 'May 24, 2026',
-    readTime: '6 min read',
-    author: 'Marcus Thorne',
-    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80',
-    featured: true
-  },
-  {
-    id: 2,
-    title: 'Minimalism Meets Brutalism: Curating the Modern Mansion',
-    excerpt: 'Exploring how raw concrete textures and organic glass architectural boundaries define this era’s luxury estates.',
-    category: 'Architecture',
-    date: 'May 18, 2026',
-    readTime: '4 min read',
-    author: 'Elena Rostova',
-    img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=80',
-    featured: false
-  },
-  {
-    id: 3,
-    title: 'Real Estate As a Shield: Navigating Modern Inflationary Pressures',
-    excerpt: 'How multi-family asset portfolios and premium land acquisitions act as the ultimate defense mechanism for family offices.',
-    category: 'Wealth Strategy',
-    date: 'May 12, 2026',
-    readTime: '8 min read',
-    author: 'Alexander Sterling',
-    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80',
-    featured: false
-  },
-  {
-    id: 4,
-    title: 'Coastal Engineering: The Cost of Absolute Oceanfront Isolation',
-    excerpt: 'Understanding the private infrastructure required to maintain and secure modern glass estates on remote coastal lines.',
-    category: 'Architecture',
-    date: 'May 05, 2026',
-    readTime: '5 min read',
-    author: 'Seraphina Vance',
-    img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=600&q=80',
-    featured: false
-  }
-];
+const categories = ['All', 'Market Insights', 'Architecture', 'Wealth Strategy', 'Investment'];
 
 export default function Blog() {
-  const [activeTab, setActiveTab] = useState('All Articles');
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // ফিল্টারিং লজিক (ক্যাটাগরি এবং সার্চ কুয়েরি একসাথে কাজ করবে)
-  const filteredPosts = blogPosts.filter(post => {
-    const matchesTab = activeTab === 'All Articles' || post.category === activeTab;
+  // 🚀 Fetch Blogs Data from API
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        // আপনার রিয়েল ব্যাকএন্ড এন্ডপয়েন্ট লিঙ্ক দিন (যেমন: '/api/blogs')
+        const response = await fetch('/api/blogs'); 
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        
+        const data = await response.json();
+        setBlogs(data);
+      } catch (err) {
+        console.error("Error fetching blogs:", err);
+        setError(err.message);
+        
+        // 🛑 API না থাকা পর্যন্ত ডেমো ডাটা দিয়ে টেস্ট করার জন্য
+        setBlogs(demoBlogs);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  // 🔍 Filter Logic (Category + Search Query)
+  const filteredPosts = blogs.filter(post => {
+    const matchesTab = activeTab === 'All' || post.category === activeTab;
     const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
-  // ফিচার্ড পোস্ট আলাদা করা (যদি ফিল্টার 'All Articles' থাকে এবং সার্চ খালি থাকে)
-  const featuredPost = activeTab === 'All Articles' && searchQuery === '' 
-    ? blogPosts.find(p => p.featured) 
-    : null;
-
-  // গ্রিডে দেখানোর জন্য বাকি পোস্টগুলো ফিল্টার করা
-  const gridPosts = featuredPost 
-    ? filteredPosts.filter(p => p.id !== featuredPost.id) 
-    : filteredPosts;
-
   return (
-    <section className="py-28 bg-slate-950 text-white px-6 overflow-hidden relative">
-      {/* ব্যাকগ্রাউন্ড ওলেড লাক্সারি গ্লো */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/10 rounded-full blur-[160px] pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section className="py-20 bg-[#f4f7f6] text-gray-900 min-h-screen relative overflow-hidden select-none">
+      
+      {/* Container */}
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         
-        {/* ================= HEADER SECTION ================= */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-          <div>
-            <span className="text-blue-400 tracking-[0.25em] text-xs font-mono font-bold uppercase block mb-3">
-              Prime Intelligence
-            </span>
-            <h2 className="text-4xl md:text-5xl font-light font-serif tracking-tight">
-              The Sovereign <span className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-blue-500">Journal</span>
-            </h2>
+        {/* ================= UNIQUE MODERN HEADER ================= */}
+        <div className="bg-slate-950 text-white rounded-[2.5rem] p-8 md:p-12 mb-16 relative overflow-hidden shadow-2xl border border-slate-900">
+          
+          {/* Ambient Background Glows */}
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#007b57]/30 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+            
+            {/* Title & Subtitle */}
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-[#38d39f] text-xs font-semibold uppercase tracking-widest mb-4 backdrop-blur-md">
+                <Sparkles size={14} /> Knowledge Hub
+              </span>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
+                Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38d39f] to-emerald-400">Blogs</span> & Insights
+              </h1>
+              <p className="text-gray-400 font-medium text-sm md:text-base leading-relaxed">
+                Stay updated with expert perspectives, real estate trends, architectural innovations, and practical property investment advice.
+              </p>
+            </div>
+
+            {/* Search Input Box */}
+            <div className="relative w-full lg:w-80">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/10 border border-white/15 focus:border-[#38d39f] pl-11 pr-4 py-3.5 rounded-2xl text-sm text-white placeholder-gray-400 outline-none backdrop-blur-md transition-all shadow-inner"
+              />
+            </div>
+
           </div>
 
-          {/* প্রিমিয়াম সার্চ বার */}
-          <div className="relative w-full md:w-80 group">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search intelligence reports..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/40 border border-slate-900 focus:border-blue-500/40 pl-11 pr-4 py-3 rounded-2xl text-xs font-mono text-slate-200 outline-none backdrop-blur-md transition-all placeholder:text-slate-600"
-            />
-          </div>
-        </div>
-
-        {/* ================= FILTER TABS ================= */}
-        <div className="flex flex-wrap gap-2.5 mb-16 border-b border-slate-900 pb-6">
-          {categories.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`relative px-5 py-2 rounded-full text-xs font-mono tracking-wide transition-all duration-300 ${
-                activeTab === tab 
-                  ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
-                  : 'bg-transparent text-slate-500 border border-transparent hover:text-slate-300'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* ================= FEATURED POST (LARGE HERO) ================= */}
-        <AnimatePresence mode="popLayout">
-          {featuredPost && (
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ type: 'spring', stiffness: 50, damping: 15 }}
-              className="group bg-slate-900/20 border border-slate-900/60 hover:border-slate-800/40 rounded-[3rem] overflow-hidden backdrop-blur-3xl p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-16 cursor-pointer"
-            >
-              <div className="lg:col-span-7 h-72 lg:h-[400px] rounded-[2.5rem] overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-60" />
-                <span className="absolute top-4 left-4 z-20 bg-blue-500 text-white text-[9px] font-mono font-bold tracking-widest px-3 py-1.5 rounded-xl uppercase flex items-center gap-1.5 shadow-lg shadow-blue-500/20">
-                  <Sparkles size={10} /> Featured Report
-                </span>
-                <img 
-                  src={featuredPost.img} 
-                  alt={featuredPost.title} 
-                  className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-103"
-                />
-              </div>
-
-              <div className="lg:col-span-5 flex flex-col justify-between py-2">
-                <div>
-                  <span className="text-[10px] font-mono text-blue-500 uppercase tracking-widest font-bold block mb-3">
-                    {featuredPost.category}
-                  </span>
-                  <h3 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-100 group-hover:text-blue-400 transition-colors duration-300 mb-4 leading-snug">
-                    {featuredPost.title}
-                  </h3>
-                  <p className="text-slate-400 text-xs md:text-sm font-light leading-relaxed mb-6">
-                    {featuredPost.excerpt}
-                  </p>
-                </div>
-
-                <div className="pt-6 border-t border-slate-900 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500">
-                    <span className="flex items-center gap-1.5"><User size={12}/> {featuredPost.author}</span>
-                    <span className="flex items-center gap-1.5"><Calendar size={12}/> {featuredPost.date}</span>
-                    <span className="flex items-center gap-1.5"><Clock size={12}/> {featuredPost.readTime}</span>
-                  </div>
-                  <div className="p-3.5 bg-slate-950 border border-slate-900 group-hover:border-blue-500/30 group-hover:bg-blue-500/10 text-slate-400 group-hover:text-blue-400 rounded-2xl transition-all duration-300">
-                    <ArrowUpRight size={16} />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ================= REGULAR POSTS GRID ================= */}
-        <motion.div 
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          <AnimatePresence mode="popLayout">
-            {gridPosts.map((post) => (
-              <motion.div
-                key={post.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                whileHover={{ y: -6 }}
-                transition={{ type: 'spring', stiffness: 80, damping: 16 }}
-                className="group bg-slate-900/30 border border-slate-900 hover:border-slate-800/60 rounded-[2.5rem] overflow-hidden flex flex-col justify-between backdrop-blur-3xl cursor-pointer"
+          {/* Filter Categories Pill Buttons */}
+          <div className="flex flex-wrap gap-2.5 mt-8 pt-8 border-t border-white/10">
+            {categories.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
+                  activeTab === tab 
+                    ? 'bg-[#007b57] text-white shadow-lg shadow-[#007b57]/30' 
+                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
+                }`}
               >
-                <div>
-                  {/* ইমেজ পার্ট */}
-                  <div className="h-56 overflow-hidden relative m-3 rounded-[2rem]">
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent z-10 opacity-70" />
-                    <span className="absolute top-3 left-3 z-20 bg-slate-950/80 backdrop-blur-md text-slate-400 border border-slate-900 text-[9px] font-mono tracking-wider px-2.5 py-1 rounded-xl uppercase">
-                      {post.category}
-                    </span>
-                    <img 
-                      src={post.img} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover transition-transform duration-[1.2s] group-hover:scale-105"
-                    />
-                  </div>
-
-                  {/* টেক্সট পার্ট */}
-                  <div className="px-6 pt-3 pb-6">
-                    <h4 className="text-lg font-bold text-slate-200 tracking-tight leading-snug mb-3 group-hover:text-blue-400 transition-colors duration-300">
-                      {post.title}
-                    </h4>
-                    <p className="text-slate-400 text-xs font-light leading-relaxed line-clamp-3">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                </div>
-
-                {/* মেটা কন্টেন্ট ফুটার */}
-                <div className="mx-6 pb-6 pt-4 border-t border-slate-950 flex items-center justify-between">
-                  <div className="flex flex-wrap gap-3 text-[10px] font-mono text-slate-500">
-                    <span className="flex items-center gap-1"><User size={10}/> {post.author.split(' ')[0]}</span>
-                    <span className="flex items-center gap-1"><Clock size={10}/> {post.readTime}</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-blue-500/70 group-hover:text-blue-400 flex items-center gap-0.5 transition-colors">
-                    Read Report <ArrowUpRight size={12} className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </span>
-                </div>
-              </motion.div>
+                {tab}
+              </button>
             ))}
-          </AnimatePresence>
-        </motion.div>
+          </div>
+
+        </div>
+
+        {/* ================= LOADING STATE ================= */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-28">
+            <Loader2 size={40} className="animate-spin text-[#007b57] mb-3" />
+            <p className="text-gray-500 font-medium text-sm">Loading intelligence articles...</p>
+          </div>
+        )}
+
+        {/* ================= BLOG CARDS GRID (Exact Image Style) ================= */}
+        {!loading && (
+          <motion.div 
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            <AnimatePresence mode="popLayout">
+              {filteredPosts.map((post) => (
+                <motion.div
+                  key={post._id || post.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col justify-between group cursor-pointer"
+                >
+                  <div>
+                    {/* Top Image Box with Floating Read Time Pill */}
+                    <div className="h-56 relative overflow-hidden bg-gray-100">
+                      <img 
+                        src={post.img} 
+                        alt={post.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Floating Read Time Pill (Top Right - Matches Image) */}
+                      <span className="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-gray-900 text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">
+                        {post.readTime || '5 min read'}
+                      </span>
+                    </div>
+
+                    {/* Card Body Content */}
+                    <div className="p-6">
+                      {/* Metadata Row: Date & Time */}
+                      <div className="flex items-center gap-4 text-xs text-gray-500 font-medium mb-3">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={14} className="text-gray-400" />
+                          {post.date}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Clock size={14} className="text-gray-400" />
+                          {post.readTime || '5 min read'}
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-xl font-bold text-gray-900 leading-snug mb-3 group-hover:text-[#007b57] transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+
+                      {/* Excerpt Text */}
+                      <p className="text-gray-600 text-sm font-normal leading-relaxed mb-4 line-clamp-3">
+                        {post.excerpt}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Footer: Author & Read More Link */}
+                  <div className="px-6 pb-6 pt-2 flex flex-col gap-4">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+                      <User size={14} className="text-gray-400" />
+                      <span>{post.author || 'Admin'}</span>
+                    </div>
+
+                    <div className="pt-2">
+                      <span className="inline-flex items-center gap-2 text-sm font-bold text-[#007b57] group-hover:translate-x-1 transition-transform duration-300">
+                        Read More <ArrowRight size={16} />
+                      </span>
+                    </div>
+                  </div>
+
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
         {/* ================= NO RESULTS FOUND ================= */}
-        {filteredPosts.length === 0 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-20 bg-slate-900/10 border border-dashed border-slate-900 rounded-[2rem]"
-          >
-            <p className="text-sm font-mono text-slate-500">No intelligence reports matching your criteria were found.</p>
-          </motion.div>
+        {!loading && filteredPosts.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-3xl border border-gray-200 shadow-sm">
+            <p className="text-base font-semibold text-gray-600 mb-1">No blog articles found</p>
+            <p className="text-sm text-gray-400">Try searching for a different keyword or category.</p>
+          </div>
         )}
 
       </div>
     </section>
   );
 }
+
+// 📌 Fallback / Demo Data Matching the Provided Image Design
+const demoBlogs = [
+  {
+    id: 1,
+    title: 'Top Real Estate Company in Bangladesh | The Premium...',
+    excerpt: 'Looking for the top real estate company in Bangladesh? The Premium Homes Ltd offers trusted property solutions, modern...',
+    category: 'Market Insights',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 2,
+    title: 'Best Real Estate Company in Bangladesh | The Premium...',
+    excerpt: 'Finding a home is a deal. It is not about spending money. You want a place where you feel safe and comfortable. You want a home...',
+    category: 'Investment',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 3,
+    title: 'Making the City Look New: A Property Developer in Dhak...',
+    excerpt: 'Finding a home is a personal thing. It is not about the size of the place it is about finding a quiet spot in a busy city. As a Top Property...',
+    category: 'Architecture',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 4,
+    title: 'Flat for Sale in Dhaka | Luxury Apartments by The...',
+    excerpt: 'Dhaka is a city that\'s always on the move and changing really fast. It is the city of Bangladesh. As the city is getting more...',
+    category: 'Wealth Strategy',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 5,
+    title: 'Trusted Real Estate Company in Bangladesh | T...',
+    excerpt: 'Finding a place to call home is more than buying a house it is a journey to feel safe and comfortable and to leave something for the...',
+    category: 'Investment',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 6,
+    title: 'Luxury Apartments in Bangladesh',
+    excerpt: 'Luxury is not about being expensive or in a good location anymore. Now it is about the experience of living. At The Premium Homes...',
+    category: 'Architecture',
+    date: '2025-10-19',
+    readTime: '5 min read',
+    author: 'Admin',
+    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80'
+  }
+];
