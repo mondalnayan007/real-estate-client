@@ -53,60 +53,60 @@ export default function Blog() {
       {/* Container */}
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
-        {/* ================= UNIQUE MODERN HEADER ================= */}
-        <div className="bg-slate-950 text-white rounded-[2.5rem] p-8 md:p-12 mb-16 relative overflow-hidden shadow-2xl border border-slate-900">
-          
-          {/* Ambient Background Glows */}
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#007b57]/30 rounded-full blur-[120px] pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
+{/* ================= UNIQUE MODERN HEADER (Updated Colors) ================= */}
+<div className="bg-gradient-to-r from-[#004d34] via-[#007b57] to-[#0f2d24] text-white rounded-[2.5rem] p-8 md:p-12 mb-16 relative overflow-hidden shadow-2xl border border-emerald-800/40">
+  
+  {/* Soft Ambient Background Glows */}
+  <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-400/20 rounded-full blur-[120px] pointer-events-none" />
+  <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-amber-400/10 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-            
-            {/* Title & Subtitle */}
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/10 text-[#38d39f] text-xs font-semibold uppercase tracking-widest mb-4 backdrop-blur-md">
-                <Sparkles size={14} /> Knowledge Hub
-              </span>
-              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
-                Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38d39f] to-emerald-400">Blogs</span> & Insights
-              </h1>
-              <p className="text-gray-400 font-medium text-sm md:text-base leading-relaxed">
-                Stay updated with expert perspectives, real estate trends, architectural innovations, and practical property investment advice.
-              </p>
-            </div>
+  <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+    
+    {/* Title & Subtitle */}
+    <div className="max-w-2xl">
+      <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-amber-300 text-xs font-semibold uppercase tracking-widest mb-4 backdrop-blur-md">
+        <Sparkles size={14} /> Knowledge Hub
+      </span>
+      <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
+        Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-400">Blogs</span> & Insights
+      </h1>
+      <p className="text-emerald-100/80 font-medium text-sm md:text-base leading-relaxed">
+        Stay updated with expert perspectives, real estate trends, architectural innovations, and practical property investment advice.
+      </p>
+    </div>
 
-            {/* Search Input Box */}
-            <div className="relative w-full lg:w-80">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/10 border border-white/15 focus:border-[#38d39f] pl-11 pr-4 py-3.5 rounded-2xl text-sm text-white placeholder-gray-400 outline-none backdrop-blur-md transition-all shadow-inner"
-              />
-            </div>
+    {/* Search Input Box */}
+    <div className="relative w-full lg:w-80">
+      <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-200/70" />
+      <input 
+        type="text" 
+        placeholder="Search articles..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full bg-black/20 border border-white/20 focus:border-amber-300 pl-11 pr-4 py-3.5 rounded-2xl text-sm text-white placeholder-emerald-200/50 outline-none backdrop-blur-md transition-all shadow-inner"
+      />
+    </div>
 
-          </div>
+  </div>
 
-          {/* Filter Categories Pill Buttons */}
-          <div className="flex flex-wrap gap-2.5 mt-8 pt-8 border-t border-white/10">
-            {categories.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
-                  activeTab === tab 
-                    ? 'bg-[#007b57] text-white shadow-lg shadow-[#007b57]/30' 
-                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 border border-white/5'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+  {/* Filter Categories Pill Buttons */}
+  <div className="flex flex-wrap gap-2.5 mt-8 pt-8 border-t border-white/15">
+    {categories.map((tab) => (
+      <button
+        key={tab}
+        onClick={() => setActiveTab(tab)}
+        className={`px-5 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
+          activeTab === tab 
+            ? 'bg-amber-400 text-gray-950 shadow-lg shadow-amber-400/25 font-extrabold' 
+            : 'bg-white/10 text-emerald-100 hover:text-white hover:bg-white/20 border border-white/10'
+        }`}
+      >
+        {tab}
+      </button>
+    ))}
+  </div>
 
-        </div>
+</div>
 
         {/* ================= LOADING STATE ================= */}
         {loading && (
