@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Newspaper, Plus, Trash2, Loader2, Sparkles, Send, UploadCloud, X, Tag, Share2 } from 'lucide-react';
+import AgentContext from '../../context/AgentContext';
 
 export default function BlogManager() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
-
+  const {user} = useContext(AgentContext);
+  
   // 🏷️ Tag Input State
   const [tagInput, setTagInput] = useState('');
 
@@ -20,11 +22,12 @@ export default function BlogManager() {
     author: 'Admin',
     image: null,
     tags: [], // Array for multiple tags
+    agentId:user.agentId,
     socials: {
       facebook: '',
       linkedin: '',
       pinterest: '',
-      twitter: ''
+      twitter: '',
     }
   });
   // 🚀 Fetch Existing Blogs
@@ -106,6 +109,7 @@ export default function BlogManager() {
       bodyData.append('content', formData.content);
       bodyData.append('readTime', formData.readTime);
       bodyData.append('author', formData.author);
+      bodyData.append('agentId', formData.agentId);
       bodyData.append('image', formData.image);
       
       // Send tags array & socials object as JSON strings in FormData
