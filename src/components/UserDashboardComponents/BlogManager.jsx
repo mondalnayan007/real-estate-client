@@ -13,7 +13,7 @@ export default function BlogManager() {
     category: 'Market Insights',
     excerpt: '',
     content: '',
-    readTime: '5 min read',
+    readTime: '',
     author: 'Admin',
     image: null
   });
@@ -67,7 +67,7 @@ export default function BlogManager() {
       bodyData.append('author', formData.author);
       bodyData.append('image', formData.image);
 
-      const res = await fetch('/api/blogs', {
+      const res = await fetch('http://localhost:4000/api/blogs', {
         method: 'POST',
         body: bodyData,
       });
@@ -81,7 +81,7 @@ export default function BlogManager() {
           category: 'Market Insights',
           excerpt: '',
           content: '',
-          readTime: '5 min read',
+          readTime: '',
           author: 'Admin',
           image: null
         });
