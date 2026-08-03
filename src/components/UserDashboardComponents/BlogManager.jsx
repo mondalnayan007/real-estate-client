@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Newspaper, Plus, Trash2, Loader2, Sparkles, Send, UploadCloud } from 'lucide-react';
+import { Newspaper, Plus, Trash2, Loader2, Sparkles, Send, UploadCloud, X, Tag, Share2 } from 'lucide-react';
 
 export default function BlogManager() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+
+  // 🏷️ Tag Input State
+  const [tagInput, setTagInput] = useState('');
 
   // 📝 Form State
   const [formData, setFormData] = useState({
@@ -15,9 +18,15 @@ export default function BlogManager() {
     content: '',
     readTime: '',
     author: 'Admin',
-    image: null
+    image: null,
+    tags: [], // Array for multiple tags
+    socials: {
+      facebook: '',
+      linkedin: '',
+      pinterest: '',
+      twitter: ''
+    }
   });
-
   // 🚀 Fetch Existing Blogs
   const fetchBlogs = async () => {
     try {
@@ -47,6 +56,38 @@ export default function BlogManager() {
     }
   };
 
+  // 🏷️ Handle Adding Tags
+  const handleAddTag = (e) => {
+    e.preventDefault();
+    const trimmed = tagInput.trim();
+    if (trimmed && !formData.tags.includes(trimmed)) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, trimmed]
+      });
+      setTagInput('');
+    }
+  };
+
+  // 🏷️ Handle Removing Tag
+  const handleRemoveTag = (tagToRemove) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter((t) => t !== tagToRemove)
+    });
+  };
+
+  // 🌐 Handle Social Media Inputs
+  const handleSocialChange = (platform, value) => {
+    setFormData({
+      ...formData,
+      socials: {
+        ...formData.socials,
+        [platform]: value
+      }
+    });
+  };
+
   // 📤 Handle Form Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,6 +107,10 @@ export default function BlogManager() {
       bodyData.append('readTime', formData.readTime);
       bodyData.append('author', formData.author);
       bodyData.append('image', formData.image);
+      
+      // Send tags array & socials object as JSON strings in FormData
+      bodyData.append('tags', JSON.stringify(formData.tags));
+      bodyData.append('socials', JSON.stringify(formData.socials));
 
       const res = await fetch('http://localhost:4000/api/blogs', {
         method: 'POST',
@@ -83,7 +128,9 @@ export default function BlogManager() {
           content: '',
           readTime: '',
           author: 'Admin',
-          image: null
+          image: null,
+          tags: [],
+          socials: { facebook: '', linkedin: '', pinterest: '', twitter: '' }
         });
         setImagePreview(null);
         fetchBlogs();
@@ -224,6 +271,105 @@ export default function BlogManager() {
             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
             className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 focus:bg-white focus:outline-none focus:border-emerald-500 transition-all placeholder:text-gray-400"
           />
+        </div>
+
+        {/* ================= TAGS SECTION ================= */}
+        <div className="bg-white/60 p-4 rounded-xl border border-gray-200/80 space-y-3">
+          <label className="block text-[11px] uppercase font-bold text-gray-700 flex items-center gap-1.5">
+            <Tag size={14} className="text-emerald-600" /> Article Tags
+          </label>
+          
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="e.g. RealEstate (Type & Click Add)"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag(e))}
+              className="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 focus:outline-none focus:border-emerald-500 transition-all placeholder:text-gray-400"
+            />
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm"
+            >
+              Add Tag
+            </button>
+          </div>
+
+          {/* Render Tag Badges */}
+          {formData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {formData.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300/60 rounded-lg text-xs font-semibold"
+                >
+                  #{tag}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ================= SOCIAL LINKS SECTION ================= */}
+        <div className="bg-white/60 p-4 rounded-xl border border-gray-200/80 space-y-3">
+          <label className="block text-[11px] uppercase font-bold text-gray-700 flex items-center gap-1.5">
+            <Share2 size={14} className="text-emerald-600" /> Social Links (Optional)
+          </label>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 mb-1">Facebook URL</label>
+              <input
+                type="url"
+                placeholder="https://facebook.com/..."
+                value={formData.socials.facebook}
+                onChange={(e) => handleSocialChange('facebook', e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 mb-1">LinkedIn URL</label>
+              <input
+                type="url"
+                placeholder="https://linkedin.com/in/..."
+                value={formData.socials.linkedin}
+                onChange={(e) => handleSocialChange('linkedin', e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 mb-1">Pinterest URL</label>
+              <input
+                type="url"
+                placeholder="https://pinterest.com/..."
+                value={formData.socials.pinterest}
+                onChange={(e) => handleSocialChange('pinterest', e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 mb-1">Twitter / X URL</label>
+              <input
+                type="url"
+                placeholder="https://x.com/..."
+                value={formData.socials.twitter}
+                onChange={(e) => handleSocialChange('twitter', e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs text-gray-900 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Image Upload Box */}
