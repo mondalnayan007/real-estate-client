@@ -4,7 +4,7 @@ import { ChevronRight, Plus, Search, RotateCcw, Filter } from 'lucide-react';
 import { Link } from 'react-router';
 import AgentContext from './context/AgentContext';
 
-const statusList = ['On Sale', 'Sold Out', 'Under Construction'];
+const statusList = ['On Sale', 'Sold Out', 'Under Construction','Up Coming'];
 const communityList = [
   'Bashundhara Residential Area',
   'Jolshiri Abashon',
