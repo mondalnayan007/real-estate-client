@@ -18,6 +18,7 @@ import NotFound from "../views/NotFound";
 import Login from "../views/Login";
 import Dashboard from "../views/Dashboard";
 import ContactSection from "../views/ContactSection";
+import BlogDetails from "../views/BlogDetails";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -85,6 +86,11 @@ const agentDemoRouter = createBrowserRouter([
         path: '/project-details/:id',
 
         Component: ProjectDetails,
+      },
+      {
+        path: '/blogs/:id',
+
+        Component: BlogDetails,
       },
       {
         path: '/team',
