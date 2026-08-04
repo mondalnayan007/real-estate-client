@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaFacebookF, FaLinkedinIn, FaTwitter } from 'react-icons/fa';
@@ -6,19 +6,22 @@ import {
   Calendar, Clock, User, ArrowLeft, Share2, Tag, 
    Sparkles, Loader2 
 } from 'lucide-react';
+import AgentContext from '../context/AgentContext';
 
 export default function BlogDetails() {
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const {user} = useContext(AgentContext);
+ console.log(id);
 
   // 🚀 Fetch Single Blog by ID
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/blogs/${id}`);
+        const response = await fetch(`http://localhost:4000/api/blogs?agentId=${user.agentId}&id=${id}`);
         
         if (!response.ok) {
           throw new Error('Blog not found');
