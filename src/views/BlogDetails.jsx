@@ -77,7 +77,7 @@ export default function BlogDetails() {
           className="mb-8"
         >
           <Link 
-            to="/blogs" 
+            to="/blog" 
             className="inline-flex items-center gap-2 text-xs font-extrabold text-[#007b57] hover:text-[#004d34] transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-gray-200"
           >
             <ArrowLeft size={16} /> Back to All Articles

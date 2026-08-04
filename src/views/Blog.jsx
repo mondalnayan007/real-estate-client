@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, ArrowRight, Search, Sparkles, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AgentContext from '../context/AgentContext';
 
 const categories = ['All', 'Market Insights', 'Architecture', 'Wealth Strategy', 'Investment'];
 
@@ -11,6 +12,7 @@ export default function Blog() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const {user} = useContext(AgentContext);
 
   // 🚀 Fetch Blogs Data from API
   useEffect(() => {
@@ -18,7 +20,7 @@ export default function Blog() {
       try {
         setLoading(true);
         // আপনার রিয়েল ব্যাকএন্ড এন্ডপয়েন্ট লিঙ্ক দিন (যেমন: '/api/blogs')
-        const response = await fetch('/api/blogs'); 
+        const response = await fetch(`http://localhost:4000/api/blogs?agentId=${user.agentId}`); 
         
         if (!response.ok) {
           throw new Error('Failed to fetch blog posts');
