@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, User, ArrowRight, Search, Sparkles, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const categories = ['All', 'Market Insights', 'Architecture', 'Wealth Strategy', 'Investment'];
 
@@ -16,7 +17,7 @@ export default function Blog() {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        // আপনার রিয়েল ব্যাকএন্ড এন্ডপয়েন্ট লিঙ্ক দিন (যেমন: '/api/blogs')
+        // আপনার রিয়েল ব্যাকএন্ড এন্ডপয়েন্ট লিঙ্ক দিন (যেমন: '/api/blogs')
         const response = await fetch('/api/blogs'); 
         
         if (!response.ok) {
@@ -29,9 +30,9 @@ export default function Blog() {
         console.error("Error fetching blogs:", err);
         setError(err.message);
         
-        // 🛑 API না থাকা পর্যন্ত ডেমো ডাটা দিয়ে টেস্ট করার জন্য
+        // 🛑 API না থাকা পর্যন্ত ডেমো ডাটা দিয়ে টেস্ট করার জন্য
         setBlogs(demoBlogs);
-      } finally {
+      }  finally {
         setLoading(false);
       }
     };
@@ -181,9 +182,12 @@ export default function Blog() {
                     </div>
 
                     <div className="pt-2">
-                      <span className="inline-flex items-center gap-2 text-sm font-bold text-[#007b57] group-hover:translate-x-1 transition-transform duration-300">
+                      <Link 
+                        to={`/blogs/${post._id || post.id}`}
+                        className="inline-flex items-center gap-2 text-sm font-bold text-[#007b57] group-hover:translate-x-1 transition-transform duration-300"
+                      >
                         Read More <ArrowRight size={16} />
-                      </span>
+                      </Link>
                     </div>
                   </div>
 
