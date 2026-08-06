@@ -1,14 +1,43 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  Building2, Award, Users, ShieldCheck, 
+import {
+  Building2, Award, Users, ShieldCheck,
   CheckCircle2, ArrowRight, Sparkles, HeartHandshake, Home,
   Star, Landmark
 } from 'lucide-react';
 import MarqueeComponent from 'react-fast-marquee';
 const Marquee = MarqueeComponent.default || MarqueeComponent;
 import AgentContext from '../context/AgentContext';
+
+
+const partners = [
+  {
+    id: 1,
+    name: "Partner 1",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBnX9MgMI2cJuvGXc5M7-fDkRjDPH9dpjr3RS9C15QTNmZAkpJzc_8RyI&s",
+  },
+  {
+    id: 2,
+    name: "Partner 2",
+    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt9qZHu5i-6MiwPtZtxKXWsaFAlvotGhJOKND6BV5vxTj2yEJezgJalyU&s=10",
+  },
+  {
+    id: 3,
+    name: "Bashundhara Cement",
+    logo: "https://images.seeklogo.com/logo-png/51/2/bashundhara-cement-ltd-logo-png_seeklogo-515521.png",
+  },
+  {
+    id: 4,
+    name: "Partner 4",
+    logo: "https://media.licdn.com/dms/image/v2/D5622AQHZ2Ul987rTbw/feedshare-shrink_800/feedshare-shrink_800/0/1698045754109?e=2147483647&v=beta&t=EjGB6QCcQ8F0rUumlrf73xxiNMXVg6RLtoTDFLPqmJ4",
+  },
+  {
+    id: 5,
+    name: "Crown Cement",
+    logo: "https://images.seeklogo.com/logo-png/28/1/crown-cement-logo-png_seeklogo-282523.png",
+  },
+];
 
 export default function About() {
   // Safe Access to Context User / Agent Data
@@ -93,22 +122,22 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-[#f4f7f6] text-gray-900 select-none">
-      
+
       {/* 🚀 1. Hero Section */}
       <section className="relative bg-[#007b57] text-white py-16 md:py-24 overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-emerald-800/60 text-emerald-200 text-xs font-bold uppercase tracking-wider mb-4 border border-emerald-600/30"
           >
             <Sparkles size={14} /> Who We Are
           </motion.span>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -117,14 +146,14 @@ export default function About() {
             Building Trust & Creating Modern Living Spaces in Dhaka
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="text-emerald-100/90 text-sm sm:text-base max-w-2xl mx-auto mt-4 leading-relaxed font-normal"
           >
-            {user?.agentName 
-              ? `Welcome to ${user.agentName}'s official portal. Dedicated to providing premium real estate solutions and luxury properties.` 
+            {user?.agentName
+              ? `Welcome to ${user.agentName}'s official portal. Dedicated to providing premium real estate solutions and luxury properties.`
               : 'The Premium Homes Ltd. is a premier property solution provider in Bangladesh, dedicated to constructing sustainable, secure, and modern spaces for your family.'}
           </motion.p>
         </div>
@@ -169,22 +198,22 @@ export default function About() {
       {/* 🏙️ 3. Mission & Vision Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
+
           {/* Left Image Collage */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="lg:col-span-6 relative"
           >
             <div className="relative rounded-3xl overflow-hidden shadow-lg border border-gray-100 bg-gray-200 h-80 sm:h-96">
-              <img 
-                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80" 
-                alt="Modern Real Estate Architecture" 
+              <img
+                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80"
+                alt="Modern Real Estate Architecture"
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             {/* Floating Experience Badge */}
             <div className="absolute -bottom-6 -right-2 sm:right-6 bg-[#007b57] text-white p-5 rounded-2xl shadow-xl flex items-center gap-4 max-w-xs border-2 border-white">
               <span className="text-3xl font-black text-amber-300">12+</span>
@@ -193,7 +222,7 @@ export default function About() {
           </motion.div>
 
           {/* Right Content */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -223,8 +252,8 @@ export default function About() {
             </ul>
 
             <div className="pt-4">
-              <Link 
-                to="/contact" 
+              <Link
+                to="/contact"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#007b57] hover:bg-[#004d34] text-white font-bold text-xs rounded-xl shadow-md transition-all"
               >
                 Contact Our Advisors <ArrowRight size={15} />
@@ -254,7 +283,7 @@ export default function About() {
             {values.map((item, idx) => {
               const Icon = item.icon;
               return (
-                <div 
+                <div
                   key={idx}
                   className="bg-[#f4f7f6] p-6 rounded-2xl border border-gray-200/50 hover:border-[#007b57]/40 transition-all hover:bg-white hover:shadow-md group"
                 >
@@ -272,21 +301,52 @@ export default function About() {
 
 
 
-<section>
-  <div>
-    <h1>Our Partners </h1>
-  </div>
-  <Marquee>
-<div className='flex gap-6 items-center'>
-  <div ><img className='h-20 w-40' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBnX9MgMI2cJuvGXc5M7-fDkRjDPH9dpjr3RS9C15QTNmZAkpJzc_8RyI&s" alt="" /></div>
-<div><img className='h-20 w-40' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt9qZHu5i-6MiwPtZtxKXWsaFAlvotGhJOKND6BV5vxTj2yEJezgJalyU&s=10" alt="" /></div>
-<div><img className='h-20 w-40' src="https://images.seeklogo.com/logo-png/51/2/bashundhara-cement-ltd-logo-png_seeklogo-515521.png" alt="" /></div>
-<div><img className='h-20 w-40' src="https://media.licdn.com/dms/image/v2/D5622AQHZ2Ul987rTbw/feedshare-shrink_800/feedshare-shrink_800/0/1698045754109?e=2147483647&v=beta&t=EjGB6QCcQ8F0rUumlrf73xxiNMXVg6RLtoTDFLPqmJ4" alt="" /></div>
-<div><img className='h-20 w-40' src="https://images.seeklogo.com/logo-png/28/1/crown-cement-logo-png_seeklogo-282523.png" alt="" /></div>
-</div>
+      <section className="py-16 bg-[#f4f7f6] relative overflow-hidden select-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-  </Marquee>
-</section>
+          {/* Header Section */}
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <span className="text-xs font-bold text-[#007b57] uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-100">
+              Trusted Alliances
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-3 tracking-tight">
+              Our Partners
+            </h1>
+            <p className="text-gray-500 text-xs sm:text-sm mt-2">
+              We collaborate with industry leaders to deliver construction excellence.
+            </p>
+          </div>
+
+          {/* Marquee with Side Blurs & Card Layout */}
+          <div className="relative w-full overflow-hidden">
+            {/* Left Blur Overlay */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-r from-[#f4f7f6] to-transparent z-10 pointer-events-none" />
+
+            {/* Right Blur Overlay */}
+            <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-[#f4f7f6] to-transparent z-10 pointer-events-none" />
+
+            <Marquee pauseOnHover={true} speed={40} gradient={false}>
+              <div className="flex items-center gap-6 py-4 pr-6">
+                {partners.map((partner) => (
+                  <div
+                    key={partner.id}
+                    className="w-44 h-24 sm:w-52 sm:h-28 bg-white rounded-2xl p-4 flex items-center justify-center 
+                shadow-sm hover:shadow-md border border-gray-200/60 hover:border-[#007b57]/40 
+                transition-all duration-300 transform hover:-translate-y-1 group cursor-pointer"
+                  >
+                    <img
+                      className="max-h-16 w-auto max-w-[85%] object-contain filter  opacity-80 group-hover:opacity-100 transition-all duration-300"
+                      src={partner.logo}
+                      alt={partner.name}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Marquee>
+          </div>
+
+        </div>
+      </section>
 
 
 
@@ -301,10 +361,10 @@ export default function About() {
               Book a free real estate consultation with our expert team today and explore verified listings in Dhaka.
             </p>
           </div>
-          
+
           <div className="z-10 shrink-0">
-            <Link 
-              to="/contact" 
+            <Link
+              to="/contact"
               className="px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-gray-950 font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center gap-2"
             >
               Get Free Consultation <ArrowRight size={16} />
