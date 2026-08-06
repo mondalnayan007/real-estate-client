@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Building2, Award, Users, ShieldCheck, 
-  CheckCircle2, ArrowRight, Sparkles, HeartHandshake, Home
+  CheckCircle2, ArrowRight, Sparkles, HeartHandshake, Home,
+  Star, Landmark
 } from 'lucide-react';
 import AgentContext from '../context/AgentContext';
 
@@ -12,12 +13,56 @@ export default function About() {
   const contextValue = useContext(AgentContext);
   const user = contextValue?.user;
 
-  // Key Statistics
+  // 📊 Your Custom Stats Data Structure
   const stats = [
-    { id: 1, label: 'Completed Projects', value: '120+', icon: Building2 },
-    { id: 2, label: 'Happy Families', value: '1,500+', icon: Users },
-    { id: 3, label: 'Years Experience', value: '12+', icon: Award },
-    { id: 4, label: 'Verified Properties', value: '100%', icon: ShieldCheck },
+    {
+      id: 1,
+      value: "1200",
+      suffix: "+",
+      label: "Happy Clients",
+      icon: Users,
+      bgColor: "bg-blue-50/60 hover:bg-[#E9F0FE]",
+      iconBg: "bg-blue-600",
+      textColor: "text-slate-800",
+      plusColor: "text-emerald-500",
+      shadowColor: "shadow-blue-100",
+    },
+    {
+      id: 2,
+      value: "4.9",
+      suffix: "/5",
+      label: "Average Rating",
+      icon: Star,
+      bgColor: "bg-amber-50/60 hover:bg-[#FBF4E3]",
+      iconBg: "bg-amber-500",
+      textColor: "text-slate-800",
+      plusColor: "text-emerald-600",
+      shadowColor: "shadow-amber-100",
+    },
+    {
+      id: 3,
+      value: "98",
+      suffix: "%",
+      label: "Satisfaction Rate",
+      icon: CheckCircle2,
+      bgColor: "bg-emerald-50/60 hover:bg-[#E5F5EC]",
+      iconBg: "bg-emerald-600",
+      textColor: "text-slate-800",
+      plusColor: "text-emerald-600",
+      shadowColor: "shadow-emerald-100",
+    },
+    {
+      id: 4,
+      value: "52",
+      suffix: "+",
+      label: "Ongoing Projects",
+      icon: Landmark,
+      bgColor: "bg-purple-50/60 hover:bg-[#F7E9FF]",
+      iconBg: "bg-purple-600",
+      textColor: "text-slate-800",
+      plusColor: "text-emerald-500",
+      shadowColor: "shadow-purple-100",
+    },
   ];
 
   // Core Values Data
@@ -83,32 +128,44 @@ export default function About() {
         </div>
       </section>
 
-      {/* 📊 2. Stats Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 -mt-10 relative z-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((stat, idx) => {
-            const Icon = stat.icon;
+      {/* 📊 2. Your Custom Stats Section */}
+      <section className="py-12 px-4 sm:px-6 -mt-8 relative z-20">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((item) => {
+            const IconComponent = item.icon;
             return (
-              <motion.div 
-                key={stat.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200/60 flex flex-col items-center text-center group hover:shadow-md transition-shadow"
+              <div
+                key={item.id}
+                className={`group relative p-8 rounded-2xl transition-all duration-300 ease-out 
+                  transform hover:scale-105 shadow-xl hover:${item.shadowColor} ${item.bgColor} 
+                  flex flex-col items-center justify-center text-center cursor-pointer border border-white/80`}
               >
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-[#007b57] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                  <Icon size={22} />
+                {/* 🟢 Icon Square Container (Hover Effect: Rotates & Scales) */}
+                <div
+                  className={`w-14 h-14 rounded-2xl ${item.iconBg} text-white flex items-center justify-center 
+                    shadow-md transition-transform duration-300 ease-out group-hover:rotate-6 group-hover:scale-110 mb-5`}
+                >
+                  <IconComponent className="w-7 h-7" />
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900">{stat.value}</h3>
-                <p className="text-xs font-semibold text-gray-500 mt-1">{stat.label}</p>
-              </motion.div>
+
+                {/* 📊 Counter Value */}
+                <h3 className={`text-3xl font-extrabold ${item.textColor} tracking-tight mb-2 flex items-center justify-center gap-1`}>
+                  <span>{item.value}</span>
+                  <span className={item.plusColor}>{item.suffix}</span>
+                </h3>
+
+                {/* 🏷️ Label */}
+                <p className="text-sm font-semibold text-slate-500 tracking-wide">
+                  {item.label}
+                </p>
+              </div>
             );
           })}
         </div>
       </section>
 
       {/* 🏙️ 3. Mission & Vision Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Image Collage */}
