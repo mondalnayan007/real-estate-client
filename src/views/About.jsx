@@ -6,6 +6,8 @@ import {
   CheckCircle2, ArrowRight, Sparkles, HeartHandshake, Home,
   Star, Landmark
 } from 'lucide-react';
+import MarqueeComponent from 'react-fast-marquee';
+const Marquee = MarqueeComponent.default || MarqueeComponent;
 import AgentContext from '../context/AgentContext';
 
 export default function About() {
@@ -21,7 +23,7 @@ export default function About() {
       suffix: "+",
       label: "Happy Clients",
       icon: Users,
-      bgColor: "bg-blue-50/60 hover:bg-[#E9F0FE]",
+      bgColor: "bg-white hover:bg-[#E9F0FE]",
       iconBg: "bg-blue-600",
       textColor: "text-slate-800",
       plusColor: "text-emerald-500",
@@ -33,7 +35,7 @@ export default function About() {
       suffix: "/5",
       label: "Average Rating",
       icon: Star,
-      bgColor: "bg-amber-50/60 hover:bg-[#FBF4E3]",
+      bgColor: "bg-white hover:bg-[#FBF4E3]",
       iconBg: "bg-amber-500",
       textColor: "text-slate-800",
       plusColor: "text-emerald-600",
@@ -45,7 +47,7 @@ export default function About() {
       suffix: "%",
       label: "Satisfaction Rate",
       icon: CheckCircle2,
-      bgColor: "bg-emerald-50/60 hover:bg-[#E5F5EC]",
+      bgColor: "bg-white hover:bg-[#E5F5EC]",
       iconBg: "bg-emerald-600",
       textColor: "text-slate-800",
       plusColor: "text-emerald-600",
@@ -57,7 +59,7 @@ export default function About() {
       suffix: "+",
       label: "Ongoing Projects",
       icon: Landmark,
-      bgColor: "bg-purple-50/60 hover:bg-[#F7E9FF]",
+      bgColor: "bg-white hover:bg-[#F7E9FF]",
       iconBg: "bg-purple-600",
       textColor: "text-slate-800",
       plusColor: "text-emerald-500",
@@ -129,7 +131,7 @@ export default function About() {
       </section>
 
       {/* 📊 2. Your Custom Stats Section */}
-      <section className="py-12 px-4 sm:px-6 -mt-8 relative z-20">
+      <section className="py-12 px-4 sm:px-6 -mt-28 relative z-20">
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((item) => {
             const IconComponent = item.icon;
@@ -267,6 +269,28 @@ export default function About() {
           </div>
         </div>
       </section>
+
+
+
+<section>
+  <div>
+    <h1>Our Partners </h1>
+  </div>
+  <Marquee>
+<div className='flex gap-6 items-center'>
+  <div ><img className='h-20 w-40' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBnX9MgMI2cJuvGXc5M7-fDkRjDPH9dpjr3RS9C15QTNmZAkpJzc_8RyI&s" alt="" /></div>
+<div><img className='h-20 w-40' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt9qZHu5i-6MiwPtZtxKXWsaFAlvotGhJOKND6BV5vxTj2yEJezgJalyU&s=10" alt="" /></div>
+<div><img className='h-20 w-40' src="https://images.seeklogo.com/logo-png/51/2/bashundhara-cement-ltd-logo-png_seeklogo-515521.png" alt="" /></div>
+<div><img className='h-20 w-40' src="https://media.licdn.com/dms/image/v2/D5622AQHZ2Ul987rTbw/feedshare-shrink_800/feedshare-shrink_800/0/1698045754109?e=2147483647&v=beta&t=EjGB6QCcQ8F0rUumlrf73xxiNMXVg6RLtoTDFLPqmJ4" alt="" /></div>
+<div><img className='h-20 w-40' src="https://images.seeklogo.com/logo-png/28/1/crown-cement-logo-png_seeklogo-282523.png" alt="" /></div>
+</div>
+
+  </Marquee>
+</section>
+
+
+
+
 
       {/* 🎁 5. CTA Consultation Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16">
