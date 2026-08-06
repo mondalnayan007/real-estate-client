@@ -39,6 +39,33 @@ const partners = [
   },
 ];
 
+const timelineData = [
+  {
+    year: "2023",
+    title: "Foundation",
+    description: "Started with a vision to transform urban living",
+    badgeColor: "bg-amber-400 text-gray-900",
+  },
+  {
+    year: "2024",
+    title: "Smart City Initiative",
+    description: "Introduced The Premium Smart City IN Ashulia Model Town",
+    badgeColor: "bg-emerald-500 text-white",
+  },
+  {
+    year: "2025",
+    title: "40+ Ongoing Projects",
+    description: "Reached milestone of 40+ ongoing projects",
+    badgeColor: "bg-blue-500 text-white",
+  },
+  {
+    year: "2026",
+    title: "52+ Ongoing Projects",
+    description: "Reached milestone of 52+ ongoing projects",
+    badgeColor: "bg-purple-600 text-white",
+  },
+];
+
 export default function About() {
   // Safe Access to Context User / Agent Data
   const contextValue = useContext(AgentContext);
@@ -196,71 +223,75 @@ export default function About() {
       </section>
 
       {/* 🏙️ 3. Mission & Vision Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="py-20 bg-[#072418] text-white relative overflow-hidden select-none">
 
-          {/* Left Image Collage */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-6 relative"
-          >
-            <div className="relative rounded-3xl overflow-hidden shadow-lg border border-gray-100 bg-gray-200 h-80 sm:h-96">
-              <img
-                src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1000&q=80"
-                alt="Modern Real Estate Architecture"
-                className="w-full h-full object-cover"
-              />
+        {/* ব্যাকগ্রাউন্ড ব্লোর ইফেক্ট */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#007b57]/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+            {/* 👈 বাম পাশ: সেকশন টাইটেল ও টেক্সট */}
+            <div className="lg:col-span-5 space-y-6 text-left">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-900/60 text-emerald-300 text-xs font-bold uppercase tracking-widest border border-emerald-700/50">
+                Our Evolution
+              </span>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
+                Our Journey Through Time
+              </h2>
+
+              <p className="text-emerald-100/70 text-sm sm:text-base leading-relaxed font-normal">
+                From a visionary beginning to delivering premium township solutions, explore how we continuously break boundaries and expand our legacy across Bangladesh.
+              </p>
+
+              {/* কাস্টম হাইলাইট বক্স */}
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                <h4 className="text-amber-400 font-bold text-lg">52+ Active Projects</h4>
+                <p className="text-xs text-gray-300 mt-1">Driving innovation in smart city urban developments with complete legal authenticity.</p>
+              </div>
             </div>
 
-            {/* Floating Experience Badge */}
-            <div className="absolute -bottom-6 -right-2 sm:right-6 bg-[#007b57] text-white p-5 rounded-2xl shadow-xl flex items-center gap-4 max-w-xs border-2 border-white">
-              <span className="text-3xl font-black text-amber-300">12+</span>
-              <p className="text-xs font-medium leading-snug">Years of Excellence in Real Estate & Development</p>
+            {/* 👉 ডান পাশ: রোডম্যাপ ব্যাকগ্রাউন্ড ব্যাকড্রপ ও ভেসে থাকা (Floating) কার্ডসমূহ */}
+            <div className="lg:col-span-7 relative">
+
+              {/* রোডম্যাপ / সিটি ব্যাকগ্রাউন্ড কার্ড */}
+              <div className="relative rounded-3xl overflow-hidden border border-emerald-800/40 shadow-2xl bg-gradient-to-br from-emerald-950 to-[#041a11] p-6 sm:p-8 min-h-[520px] flex flex-col justify-between">
+
+                {/* কানেক্টিং রোডম্যাপ ডটেড বা সলিড লাইন */}
+                <div className="absolute left-8 sm:left-10 top-10 bottom-10 w-1 bg-gradient-to-b from-amber-400 via-emerald-400 to-purple-500 rounded-full opacity-40 z-0" />
+
+                {/* বছর এবং ইভেন্টগুলোর Floating Cards */}
+                <div className="space-y-6 relative z-10">
+                  {timelineData.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-4 sm:gap-6 group"
+                    >
+                      {/* ভাসমান ইয়ার ব্যাজ (Year Badge) */}
+                      <div className={`shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl font-extrabold text-xs sm:text-sm shadow-lg transform group-hover:scale-110 transition-transform ${item.badgeColor}`}>
+                        {item.year}
+                      </div>
+
+                      {/* ভেসে থাকা গ্লাস কার্ড (Floating Info Box) */}
+                      <div className="flex-1 bg-white/10 backdrop-blur-md border border-white/10 p-4 sm:p-5 rounded-2xl shadow-lg hover:bg-white/15 hover:border-emerald-400/40 transition-all duration-300 transform group-hover:-translate-y-1">
+                        <h3 className="text-base sm:text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 font-normal leading-relaxed">
+                          {item.description}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
             </div>
-          </motion.div>
 
-          {/* Right Content */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="lg:col-span-6 space-y-5"
-          >
-            <span className="text-xs font-bold text-[#007b57] uppercase tracking-wider bg-emerald-50 px-3 py-1.5 rounded-lg">
-              Our Legacy
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-snug">
-              We Craft Spaces Where Innovation Meets Comfortable Living
-            </h2>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed font-normal">
-              Over the last decade, living standards in Dhaka have evolved rapidly. We are proud to be at the forefront of this transformation, providing safe, eco-friendly, and architectural masterclass properties in prime locations like Gulshan, Banani, and Uttara.
-            </p>
-
-            <ul className="space-y-3 pt-2">
-              {[
-                'Legal authenticity and 100% verified documentation',
-                'Modern rooftop gardens & eco-friendly architecture',
-                'Prime connectivity near top hospitals, schools & hubs'
-              ].map((item, idx) => (
-                <li key={idx} className="flex items-center gap-3 text-xs sm:text-sm font-semibold text-gray-800">
-                  <CheckCircle2 size={18} className="text-[#007b57] shrink-0" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="pt-4">
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#007b57] hover:bg-[#004d34] text-white font-bold text-xs rounded-xl shadow-md transition-all"
-              >
-                Contact Our Advisors <ArrowRight size={15} />
-              </Link>
-            </div>
-          </motion.div>
-
+          </div>
         </div>
       </section>
 
