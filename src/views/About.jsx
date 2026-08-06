@@ -11,6 +11,8 @@ const Marquee = MarqueeComponent.default || MarqueeComponent;
 import AgentContext from '../context/AgentContext';
 
 
+
+
 const partners = [
   {
     id: 1,
@@ -66,10 +68,38 @@ const timelineData = [
   },
 ];
 
+const values = [
+  {
+    number: "01",
+    title: "Uncompromised Quality",
+    desc: "We construct and deal in properties that meet international architectural and safety standards.",
+    icon: Sparkles
+  },
+  {
+    number: "02",
+    title: "Complete Transparency",
+    desc: "No hidden legal hassle or charges. Every paper is legal and verified by real estate legal experts.",
+    icon: ShieldCheck
+  },
+  {
+    number: "03",
+    title: "Client-Centric Approach",
+    desc: "Your dream home is our priority. We tailor solutions that match your budget and lifestyle.",
+    icon: HeartHandshake
+  },
+  {
+    number: "04",
+    title: "Prime Locations",
+    desc: "All our residential and commercial projects are located in top prime hubs across Dhaka.",
+    icon: Home
+  }
+];
+
 export default function About() {
   // Safe Access to Context User / Agent Data
-  const contextValue = useContext(AgentContext);
-  const user = contextValue?.user;
+const {user} = useContext(AgentContext);
+console.log(user);
+
 
   // 📊 Your Custom Stats Data Structure
   const stats = [
@@ -179,9 +209,9 @@ export default function About() {
             transition={{ delay: 0.2 }}
             className="text-emerald-100/90 text-sm sm:text-base max-w-2xl mx-auto mt-4 leading-relaxed font-normal"
           >
-            {user?.agentName
-              ? `Welcome to ${user.agentName}'s official portal. Dedicated to providing premium real estate solutions and luxury properties.`
-              : 'The Premium Homes Ltd. is a premier property solution provider in Bangladesh, dedicated to constructing sustainable, secure, and modern spaces for your family.'}
+            {user
+              ? `Welcome to ${user.agencyName}'s official portal. Dedicated to providing premium real estate solutions and luxury properties.`
+              : 'The PrimeEstate is a premier property solution provider in Bangladesh, dedicated to constructing sustainable, secure, and modern spaces for your family.'}
           </motion.p>
         </div>
       </section>
@@ -219,6 +249,79 @@ export default function About() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+
+      {/* // 🎨 ওয়ার্ম লাইট ও এমারেল্ড গ্রীন থিমের Core Values Section: */}
+      <section className="bg-[#f8faf9] py-20 relative overflow-hidden select-none border-y border-emerald-900/10">
+
+        {/* ব্যাকগ্রাউন্ড সফ্ট গ্রাডিয়েন্ট মেকআপ */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-100/60 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-amber-100/50 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+
+          {/* 🏷️ Header Section */}
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/80 text-[#007b57] text-xs font-extrabold uppercase tracking-widest border border-emerald-200/60 shadow-sm">
+              Why Choose Us
+            </span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mt-4 tracking-tight">
+              Our Core Guiding Principles
+            </h2>
+            <p className="text-gray-600 text-xs sm:text-sm mt-3 font-normal leading-relaxed">
+              We operate on trust, safety, and providing high investment returns for our valued buyers.
+            </p>
+          </div>
+
+          {/* 💡 Core Values Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {values.map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={idx}
+                  className="group relative bg-white p-8 rounded-3xl border border-emerald-100/80 
+              shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_30px_rgba(0,123,87,0.12)] 
+              hover:border-[#007b57]/40 transition-all duration-300 transform hover:-translate-y-2 
+              flex flex-col justify-between overflow-hidden cursor-pointer"
+                >
+                  {/* ব্যাকগ্রাউন্ডে ফিকে ওয়াটারমার্ক নাম্বার (01, 02...) */}
+                  <span className="absolute -top-3 -right-1 text-6xl font-black text-emerald-900/5 group-hover:text-emerald-900/10 transition-colors pointer-events-none">
+                    {item.number || `0${idx + 1}`}
+                  </span>
+
+                  <div className="relative z-10">
+                    {/* 🟢 Icon Box */}
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#007b57] flex items-center justify-center mb-6 
+                border border-emerald-100 group-hover:bg-[#007b57] group-hover:text-white group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm">
+                      <Icon size={26} />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-extrabold text-gray-900 mb-3 group-hover:text-[#007b57] transition-colors">
+                      {item.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed font-normal">
+                      {item.desc}
+                    </p>
+                  </div>
+
+                  {/* হোভার করলে নিচের গ্রীন একসেন্ট লাইন বড় হবে */}
+                  <div className="mt-8 pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">
+                      Value {item.number}
+                    </span>
+                    <div className="h-1.5 w-6 bg-emerald-200 rounded-full group-hover:w-16 group-hover:bg-[#007b57] transition-all duration-300" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       </section>
 
@@ -295,40 +398,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* 💡 4. Core Values Grid */}
-      <section className="bg-white py-16 border-y border-gray-200/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold text-[#007b57] uppercase tracking-wider bg-emerald-50 px-3 py-1.5 rounded-lg">
-              Why Choose Us
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-3">
-              Our Core Guiding Principles
-            </h2>
-            <p className="text-gray-500 text-xs sm:text-sm mt-2">
-              We operate on trust, safety, and providing high investment returns for our buyers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={idx}
-                  className="bg-[#f4f7f6] p-6 rounded-2xl border border-gray-200/50 hover:border-[#007b57]/40 transition-all hover:bg-white hover:shadow-md group"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white text-[#007b57] flex items-center justify-center mb-4 shadow-sm group-hover:bg-[#007b57] group-hover:text-white transition-colors">
-                    <Icon size={20} />
-                  </div>
-                  <h3 className="text-base font-bold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-xs leading-relaxed font-normal">{item.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      
 
 
 
