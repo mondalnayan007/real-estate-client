@@ -34,7 +34,7 @@ export default function BlogManager() {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/blogs');
+      const res = await fetch(`http://localhost:4000/api/blogs?agentId=${user.agentId}`);
       if (res.ok) {
         const data = await res.json();
         setBlogs(data);
