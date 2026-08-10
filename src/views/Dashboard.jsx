@@ -1,99 +1,170 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-
-// React Icons
-import { 
-  FiCreditCard, 
-  FiCheckCircle, 
-  FiClock, 
-  FiXCircle, 
-  FiChevronRight, 
-  FiAlertCircle, 
-  FiUser, 
-  FiMapPin, 
-  FiHome,
+import {
   FiArrowLeft,
-  FiInfo,
+  FiAlertCircle,
   FiCalendar,
+  FiCheckCircle,
+  FiCheckSquare,
+  FiChevronRight,
+  FiClock,
+  FiCreditCard,
   FiGrid,
+  FiHome,
+  FiInfo,
   FiLayers,
+  FiMapPin,
   FiTag,
-  FiCheckSquare
+  FiUser,
+  FiXCircle,
+  FiShield,
+  FiRefreshCw,
+  FiSend,
 } from 'react-icons/fi';
-
-import { 
-  HiOutlineBuildingOffice2, 
-  HiOutlineShieldCheck,
-  HiOutlineSparkles 
-} from 'react-icons/hi2';
-
+import { HiOutlineBuildingOffice2, HiOutlineShieldCheck } from 'react-icons/hi2';
 import { FaBuilding } from 'react-icons/fa6';
 import { TbMoneybag } from 'react-icons/tb';
+
+const API_BASE_URL = 'http://localhost:4000';
+
+const money = (value = 0) =>
+  `৳${Number(value || 0).toLocaleString('en-BD', {
+    maximumFractionDigits: 0,
+  })}`;
+
+const getBookingId = (booking) => booking?._id || booking?.id;
+
+const getTotalPrice = (booking) =>
+  Number(booking?.landSharePrice ?? booking?.totalPrice ?? booking?.price ?? 0);
+
+const getBookingMoney = (booking) => Number(booking?.bookingMoney ?? 0);
+
+const getSharePrice = (booking) => {
+  const total = getTotalPrice(booking);
+  const bookingMoney = getBookingMoney(booking);
+  return Math.max(total - bookingMoney, 0);
+};
+
+const getApprovedAmount = (transactions = []) =>
+  Array.isArray(transactions)
+    ? transactions
+        .filter((txn) => String(txn?.status || '').toLowerCase() === 'approved')
+        .reduce((sum, txn) => sum + Number(txn?.amount || 0), 0)
+    : 0;
+
+const getApprovedByType = (transactions = [], type) =>
+  Array.isArray(transactions)
+    ? transactions
+        .filter(
+          (txn) =>
+            String(txn?.status || '').toLowerCase() === 'approved' &&
+            String(txn?.paymentType || '').toLowerCase() === type
+        )
+        .reduce((sum, txn) => sum + Number(txn?.amount || 0), 0)
+    : 0;
+
+const getPaymentTypeLabel = (type) =>
+  type === 'booking_money' ? 'Booking Money' : 'Share Installment';
+
+const statusClass = (status) => {
+  const value = String(status || 'pending').toLowerCase();
+
+  if (value === 'approved') {
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  }
+
+  if (value === 'rejected') {
+    return 'bg-rose-50 text-rose-700 border-rose-200';
+  }
+
+  return 'bg-amber-50 text-amber-700 border-amber-200';
+};
+
+const projectStatusClass = (status) => {
+  const value = String(status || '').toLowerCase();
+
+  if (value.includes('complete')) {
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+  }
+
+  if (value.includes('upcoming')) {
+    return 'bg-blue-50 text-blue-700 border-blue-200';
+  }
+
+  if (value.includes('sale')) {
+    return 'bg-[#007b57]/10 text-[#007b57] border-[#007b57]/20';
+  }
+
+  return 'bg-amber-50 text-amber-700 border-amber-200';
+};
+
+const inputClass =
+  'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#007b57] focus:bg-white focus:ring-4 focus:ring-[#007b57]/10 disabled:cursor-not-allowed disabled:opacity-60';
+
+const labelClass =
+  'mb-1.5 block text-[10px] font-black uppercase tracking-wider text-slate-400';
 
 export default function Dashboard() {
   const { clientUser } = useContext(AuthContext);
   const navigate = useNavigate();
- 
+
   const [bookings, setBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Transactions State
   const [transactions, setTransactions] = useState([]);
-  const [loadingTxns, setLoadingTxns] = useState(false);
 
-  // Payment Form States
+  const [loading, setLoading] = useState(true);
+  const [loadingTxns, setLoadingTxns] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState(null);
+
+  // One payment form handles both payment categories.
+  const [paymentType, setPaymentType] = useState('booking_money');
   const [paymentMethod, setPaymentMethod] = useState('bank');
   const [amount, setAmount] = useState('');
   const [bankName, setBankName] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState(null);
-
-  // 1. Fetch User Bookings
-  useEffect(() => {
-    if (clientUser?._id) {
-      fetchBookings();
-    } else {
-      setLoading(false);
-    }
-  }, [clientUser]);
-
-  // 2. Fetch Transactions when selectedBooking changes
-  useEffect(() => {
-    if (selectedBooking) {
-      const bId = selectedBooking._id || selectedBooking.id;
-      fetchTransactions(bId);
-    } else {
-      setTransactions([]);
-    }
-  }, [selectedBooking]);
+  const [senderName, setSenderName] = useState('');
+  const [senderAccountNumber, setSenderAccountNumber] = useState('');
 
   const fetchBookings = async () => {
+    if (!clientUser?._id) return;
+
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:4000/api/my-bookings?userId=${clientUser._id}`);
-      const data = await res.json();
-      
-      if (data.success && Array.isArray(data.bookings)) {
-        const fetchedBookings = data.bookings;
-        setBookings(fetchedBookings);
 
-        if (fetchedBookings.length > 0) {
-          setSelectedBooking((prevSelected) => {
-            if (prevSelected) {
-              const matched = fetchedBookings.find(b => b._id === prevSelected._id);
-              return matched || fetchedBookings[0];
-            }
-            return fetchedBookings[0];
-          });
-        } else {
-          setSelectedBooking(null);
-        }
+      const res = await fetch(
+        `${API_BASE_URL}/api/my-bookings?userId=${encodeURIComponent(
+          clientUser._id
+        )}`
+      );
+
+      if (!res.ok) {
+        throw new Error(`Bookings request failed: ${res.status}`);
       }
-    } catch (err) {
-      console.error("Error fetching bookings:", err);
+
+      const data = await res.json();
+      const fetchedBookings = data?.success && Array.isArray(data.bookings)
+        ? data.bookings
+        : [];
+
+      setBookings(fetchedBookings);
+
+      setSelectedBooking((current) => {
+        if (!fetchedBookings.length) return null;
+
+        const currentId = getBookingId(current);
+        return (
+          fetchedBookings.find((booking) => getBookingId(booking) === currentId) ||
+          fetchedBookings[0]
+        );
+      });
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      setMessage({
+        type: 'error',
+        text: 'Could not load your bookings. Please try again.',
+      });
     } finally {
       setLoading(false);
     }
@@ -107,571 +178,1096 @@ export default function Dashboard() {
 
     try {
       setLoadingTxns(true);
-      const res = await fetch(`http://localhost:4000/admin/transactions?bookingId=${bookingId}`);
+
+      const res = await fetch(
+        `${API_BASE_URL}/admin/transactions?bookingId=${encodeURIComponent(
+          bookingId
+        )}`
+      );
+
+      if (!res.ok) {
+        throw new Error(`Transactions request failed: ${res.status}`);
+      }
+
       const data = await res.json();
 
-      if (data.success && Array.isArray(data.transactions)) {
+      if (data?.success && Array.isArray(data.transactions)) {
         setTransactions(data.transactions);
       } else if (Array.isArray(data)) {
         setTransactions(data);
       } else {
         setTransactions([]);
       }
-    } catch (err) {
-      console.error("Error fetching transactions:", err);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
       setTransactions([]);
+      setMessage({
+        type: 'error',
+        text: 'Could not load payment history.',
+      });
     } finally {
       setLoadingTxns(false);
     }
   };
 
-  // 3. Handle Payment Submission
-  const handlePaymentSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedBooking) return;
+  useEffect(() => {
+    if (clientUser?._id) {
+      fetchBookings();
+    } else {
+      setLoading(false);
+    }
+  }, [clientUser?._id]);
+
+  useEffect(() => {
+    fetchTransactions(getBookingId(selectedBooking));
+  }, [selectedBooking]);
+
+  const summary = useMemo(() => {
+    const totalPrice = getTotalPrice(selectedBooking);
+    const bookingMoney = getBookingMoney(selectedBooking);
+    const sharePrice = getSharePrice(selectedBooking);
+
+    const paidTotal = getApprovedAmount(transactions);
+    const paidBookingMoney = getApprovedByType(
+      transactions,
+      'booking_money'
+    );
+    const paidShare = getApprovedByType(transactions, 'share_price');
+
+    // Backward compatibility: old transactions may not contain paymentType.
+    const typedTransactionsExist = transactions.some((txn) => txn?.paymentType);
+
+    const fallbackPaidBooking =
+      typedTransactionsExist || !selectedBooking
+        ? paidBookingMoney
+        : Math.min(paidTotal, bookingMoney);
+
+    const fallbackPaidShare =
+      typedTransactionsExist || !selectedBooking
+        ? paidShare
+        : Math.max(paidTotal - fallbackPaidBooking, 0);
+
+    return {
+      totalPrice,
+      bookingMoney,
+      sharePrice,
+      paidTotal,
+      paidBookingMoney: fallbackPaidBooking,
+      paidShare: fallbackPaidShare,
+      bookingDue: Math.max(bookingMoney - fallbackPaidBooking, 0),
+      shareDue: Math.max(sharePrice - fallbackPaidShare, 0),
+      totalDue: Math.max(totalPrice - paidTotal, 0),
+    };
+  }, [selectedBooking, transactions]);
+
+  const resetPaymentForm = () => {
+    setAmount('');
+    setBankName('');
+    setTransactionId('');
+    setSenderName('');
+    setSenderAccountNumber('');
+    setPaymentMethod('bank');
+  };
+
+  const handlePaymentSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!selectedBooking || !clientUser?._id) return;
+
+    const numericAmount = Number(amount);
+    const bookingId = getBookingId(selectedBooking);
+
+    const maxPayable =
+      paymentType === 'booking_money'
+        ? summary.bookingDue
+        : summary.shareDue;
+
+    if (!numericAmount || numericAmount <= 0) {
+      setMessage({
+        type: 'error',
+        text: 'Please enter a valid payment amount.',
+      });
+      return;
+    }
+
+    if (maxPayable > 0 && numericAmount > maxPayable) {
+      setMessage({
+        type: 'error',
+        text: `Maximum payable amount for this installment is ${money(
+          maxPayable
+        )}.`,
+      });
+      return;
+    }
+
+    if (!transactionId.trim()) {
+      setMessage({
+        type: 'error',
+        text: 'Transaction ID / UTR Number is required.',
+      });
+      return;
+    }
+
+    if (!senderName.trim()) {
+      setMessage({
+        type: 'error',
+        text: 'Sender name is required.',
+      });
+      return;
+    }
+
+    if (paymentMethod === 'bank' && !senderAccountNumber.trim()) {
+      setMessage({
+        type: 'error',
+        text: 'Sender account number is required for bank transfer.',
+      });
+      return;
+    }
+
+    if (paymentMethod === 'bank' && !bankName.trim()) {
+      setMessage({
+        type: 'error',
+        text: 'Please select/enter the sending bank name.',
+      });
+      return;
+    }
 
     setSubmitting(true);
     setMessage(null);
 
+    // Single API contract for both payment types.
+    // Backend should store paymentType as "booking_money" or "share_price".
     const paymentPayload = {
-      bookingId: selectedBooking._id,
+      bookingId,
       userId: clientUser._id,
+      paymentType,
       paymentMethod,
-      amount: Number(amount),
-      bankName: paymentMethod === 'bank' ? bankName : 'N/A',
-      transactionId
+      amount: numericAmount,
+      bankName: paymentMethod === 'bank' ? bankName.trim() : 'N/A',
+      transactionId: transactionId.trim(),
+      utrNumber: transactionId.trim(),
+      senderName: senderName.trim(),
+      senderAccountNumber:
+        paymentMethod === 'bank' ? senderAccountNumber.trim() : 'N/A',
     };
 
     try {
-      const res = await fetch('http://localhost:4000/api/submit-payment', {
+      const res = await fetch(`${API_BASE_URL}/api/submit-payment`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(paymentPayload)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentPayload),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
-      if (data.success) {
-        setMessage({ type: 'success', text: 'Payment details submitted successfully! Awaiting Admin verification.' });
-        setAmount('');
-        setTransactionId('');
-        setBankName('');
-        
-        // Refresh Transactions and Bookings List
-        const bId = selectedBooking._id || selectedBooking.id;
-        await fetchTransactions(bId);
-        await fetchBookings();
-      } else {
-        setMessage({ type: 'error', text: data.message || 'Payment submission failed.' });
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.message || 'Payment submission failed.');
       }
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Network error. Could not connect to backend server.' });
+
+      setMessage({
+        type: 'success',
+        text: `${getPaymentTypeLabel(
+          paymentType
+        )} payment submitted successfully. It is now awaiting verification.`,
+      });
+
+      resetPaymentForm();
+
+      await fetchTransactions(bookingId);
+      await fetchBookings();
+    } catch (error) {
+      console.error('Payment submission error:', error);
+      setMessage({
+        type: 'error',
+        text:
+          error?.message ||
+          'Network error. Could not connect to the backend server.',
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Helper function to calculate approved paid amount
-  const calculatePaidAmount = (txnList = transactions) => {
-    if (!Array.isArray(txnList)) return 0;
-    return txnList
-      .filter(t => t.status === 'approved')
-      .reduce((sum, t) => sum + (t.amount || 0), 0);
-  };
-
-  // Helper function for Project Status Badge Styling
-  const getStatusBadge = (status) => {
-    const s = (status || 'Under Construction').toLowerCase();
-    if (s.includes('complete')) {
-      return 'bg-emerald-500/10 text-emerald-700 border-emerald-300';
-    } else if (s.includes('under') || s.includes('construction')) {
-      return 'bg-amber-500/10 text-amber-700 border-amber-300';
-    } else if (s.includes('upcoming')) {
-      return 'bg-blue-500/10 text-blue-700 border-blue-300';
-    } else if (s.includes('sale')) {
-      return 'bg-[#007b57]/10 text-[#007b57] border-[#007b57]/30';
-    }
-    return 'bg-slate-100 text-slate-800 border-slate-300';
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 pt-12 flex justify-center items-center">
-        <div className="relative flex items-center justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#007b57]/20 border-t-[#007b57]"></div>
-          <FaBuilding size={22} className="absolute text-[#007b57] animate-pulse" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="h-14 w-14 animate-spin rounded-full border-4 border-[#007b57]/15 border-t-[#007b57]" />
+            <FaBuilding className="absolute inset-0 m-auto text-[#007b57]" />
+          </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+            Loading dashboard
+          </p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50/30 text-slate-800 pt-10 pb-20 px-4 sm:px-6 lg:px-8 font-['Inter',sans-serif]">
-      
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Navigation & Header Area */}
-        <div className="mb-8 border-b border-slate-200/80 pb-6">
-          <button 
-            onClick={() => navigate('/')} 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-[#007b57] hover:text-white text-slate-700 text-xs font-bold transition-all duration-300 mb-4 border border-slate-200/80 shadow-sm hover:shadow-md active:scale-95 group"
-          >
-            <FiArrowLeft size={16} className="text-[#007b57] group-hover:text-white transition-colors duration-300" />
-            <span>Back </span>
-          </button>
+  const selectedProject = selectedBooking?.projectDetails || {};
+  const projectImage =
+    selectedProject.img ||
+    selectedProject.image ||
+    selectedProject.images?.[0] ||
+    'https://images.unsplash.com/photo-1560518883-ce09059eeffa';
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  return (
+    <div className="min-h-screen bg-[#f5f7f9] text-slate-800">
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto max-w-[1500px] px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-1 rounded-full bg-[#007b57]/10 border border-[#007b57]/20 text-[#007b57] text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
-                  <HiOutlineSparkles size={14} className="text-[#007b57]" /> Premium Client Portal
-                </span>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="mb-3 inline-flex items-center gap-2 text-xs font-bold text-slate-500 transition hover:text-[#007b57]"
+              >
+                <FiArrowLeft size={15} />
+                Back to Home
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007b57] text-white shadow-lg shadow-[#007b57]/20">
+                  <HiOutlineBuildingOffice2 size={22} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#007b57]">
+                    Client Portal
+                  </p>
+                  <h1 className="text-2xl font-black tracking-tight text-slate-950">
+                    Investment Dashboard
+                  </h1>
+                </div>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                Dashboard Overview
-              </h1>
-              <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-                Welcome back, <span className="text-[#007b57] font-bold">{clientUser?.name || clientUser?.displayName || 'Valued Client'}</span>! Manage your project bookings and financial details with ease.
-              </p>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#007b57]/10 text-[#007b57]">
+                <FiUser size={16} />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Welcome
+                </p>
+                <p className="text-sm font-extrabold text-slate-900">
+                  {clientUser?.name ||
+                    clientUser?.displayName ||
+                    'Valued Client'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* LEFT COLUMN: Booked Projects List */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <HiOutlineBuildingOffice2 size={18} className="text-[#007b57]" />
-                Booked Projects ({bookings.length})
-              </h2>
-            </div>
-            
-            {bookings.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 border border-slate-200/80 text-center text-slate-500 text-xs font-medium shadow-sm">
-                No active project bookings found.
-              </div>
-            ) : (
-              bookings.map((booking) => {
-                const totalPrice = booking.landSharePrice || booking.totalPrice || booking.price || 0;
-                const paidAmount = calculatePaidAmount(booking.transactions);
-                const dues = totalPrice - paidAmount;
-                const isSelected = selectedBooking?._id === booking._id;
-                
-                const proj = booking.projectDetails || {};
-
-                return (
-                  <div 
-                    key={booking._id}
-                    onClick={() => setSelectedBooking(booking)}
-                    className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer relative overflow-hidden group transform hover:-translate-y-1 ${
-                      isSelected 
-                        ? 'bg-gradient-to-r from-[#007b57]/10 to-transparent border-[#007b57] shadow-lg ring-1 ring-[#007b57]/40' 
-                        : 'bg-white border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 hover:shadow-md'
-                    }`}
-                  >
-                    <div className="flex gap-3.5 items-center">
-                      <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm shrink-0">
-                        <img 
-                          src={proj.img || proj.image || proj.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'} 
-                          alt={proj.title || booking.projectName || "Project"} 
-                          className="w-16 h-16 object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-
-                      <div className="overflow-hidden flex-1">
-                        <div className="flex items-center justify-between gap-1">
-                          <h3 className="text-xs font-bold text-slate-900 truncate group-hover:text-[#007b57] transition-colors duration-200">
-                            {proj.title || booking.projectName || 'Booked Project'}
-                          </h3>
-                          <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                            booking.status === 'pending' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                          }`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                        
-                        <p className="text-[11px] font-semibold text-slate-600 mt-1">Total: ৳{totalPrice.toLocaleString()}</p>
-                        
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${
-                            dues <= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}>
-                            {dues <= 0 ? 'Fully Paid' : `Dues: ৳${dues.toLocaleString()}`}
-                          </span>
-                        </div>
-                      </div>
-                      <FiChevronRight size={18} className={`text-slate-400 transition-all duration-300 group-hover:translate-x-1.5 ${isSelected ? 'text-[#007b57] translate-x-1' : ''}`} />
-                    </div>
-                  </div>
-                );
-              })
-            )}
+      <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+        {!bookings.length ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-16 text-center shadow-sm">
+            <HiOutlineBuildingOffice2 className="mx-auto mb-4 text-slate-300" size={44} />
+            <h2 className="text-lg font-black text-slate-800">
+              No bookings found
+            </h2>
+            <p className="mt-1 text-sm text-slate-400">
+              Your booked projects will appear here.
+            </p>
           </div>
-
-          {/* RIGHT COLUMN: Detailed Project & Payment Portal */}
-          <div className="lg:col-span-8">
-            {selectedBooking ? (
-              <div className="space-y-6">
-                
-                {/* 1. Main Project Overview Banner */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-6">
-                  
-                  {/* Property Main Image Banner */}
-                  <div className="relative h-64 sm:h-80 w-full rounded-2xl overflow-hidden border border-slate-200/80 shadow-inner group cursor-pointer">
-                    <img 
-                      src={selectedBooking.projectDetails?.img || selectedBooking.projectDetails?.image || selectedBooking.projectDetails?.images?.[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa'} 
-                      alt="Property Banner" 
-                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                    />
-                    
-                    {/* Top Badges overlay */}
-                    <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-lg border backdrop-blur-md shadow-lg ${getStatusBadge(selectedBooking.projectDetails?.status || selectedBooking.projectDetails?.projectStatus)}`}>
-                        ● {selectedBooking.projectDetails?.status || selectedBooking.projectDetails?.projectStatus || 'Under Construction'}
-                      </span>
-                    </div>
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent flex flex-col justify-end p-6 text-white">
-                      <span className="text-[10px] font-black text-emerald-200 uppercase tracking-widest bg-[#007b57]/80 backdrop-blur-md px-3 py-1 rounded-md w-fit mb-1 border border-emerald-400/30 shadow-md">
-                        Booking ID: #{selectedBooking._id?.slice(-8)}
-                      </span>
-                      <h2 className="text-2xl sm:text-3xl font-black drop-shadow-md text-white group-hover:text-emerald-100 transition-colors duration-300">
-                        {selectedBooking.projectDetails?.title || selectedBooking.projectName}
-                      </h2>
-                      <p className="text-xs font-semibold text-slate-200 flex items-center gap-1.5 mt-1">
-                        <FiMapPin size={14} className="text-rose-400" />
-                        {selectedBooking.projectAddress || selectedBooking.projectDetails?.location || 'Location Not Specified'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Financial Summary Cards */}
-                  {(() => {
-                    const totalPrice = selectedBooking.landSharePrice || selectedBooking.totalPrice || selectedBooking.price || 0;
-                    const paidAmount = calculatePaidAmount(transactions);
-                    const dues = totalPrice - paidAmount;
-
-                    return (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-gradient-to-br from-[#007b57]/5 to-slate-50 p-4 rounded-2xl border border-[#007b57]/20 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-[#007b57]/10 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-300"></div>
-                          <p className="text-[10px] font-black text-[#007b57] uppercase tracking-wider">Total Project Price</p>
-                          <p className="text-xl font-black text-slate-900 mt-1">৳{totalPrice.toLocaleString()}</p>
-                        </div>
-
-                        <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-100/60 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-300"></div>
-                          <p className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">Approved Paid</p>
-                          <p className="text-xl font-black text-emerald-700 mt-1">৳{paidAmount.toLocaleString()}</p>
-                        </div>
-
-                        <div className="bg-rose-50/60 p-4 rounded-2xl border border-rose-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-16 h-16 bg-rose-100/60 rounded-bl-full pointer-events-none group-hover:scale-125 transition-transform duration-300"></div>
-                          <p className="text-[10px] font-black text-rose-700 uppercase tracking-wider">Remaining Dues</p>
-                          <p className="text-xl font-black text-rose-700 mt-1">৳{(dues > 0 ? dues : 0).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
+        ) : (
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[330px_minmax(0,1fr)]">
+            {/* BOOKING SIDEBAR */}
+            <aside className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    Portfolio
+                  </p>
+                  <h2 className="text-lg font-black text-slate-950">
+                    My Projects
+                  </h2>
                 </div>
+                <span className="rounded-full bg-slate-900 px-2.5 py-1 text-[10px] font-black text-white">
+                  {bookings.length}
+                </span>
+              </div>
 
-                {/* 2. Property Specifications Grid */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-5">
-                  <div className="flex items-center gap-2 border-b border-slate-100 pb-3 text-[#007b57] font-black text-xs uppercase tracking-wider">
-                    <FiInfo size={16} />
-                    <h3>Property Specifications & Details</h3>
-                  </div>
+              <div className="space-y-3">
+                {bookings.map((booking) => {
+                  const project = booking.projectDetails || {};
+                  const image =
+                    project.img ||
+                    project.image ||
+                    project.images?.[0] ||
+                    'https://images.unsplash.com/photo-1560518883-ce09059eeffa';
+                  const isSelected =
+                    getBookingId(selectedBooking) === getBookingId(booking);
 
-                  {/* Image Gallery */}
-                  {selectedBooking.projectDetails?.images && selectedBooking.projectDetails.images.length > 1 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
-                        <FiGrid size={14} className="text-[#007b57]" /> Project Gallery:
-                      </p>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                        {selectedBooking.projectDetails.images.map((imgUrl, i) => (
-                          <div key={i} className="overflow-hidden rounded-xl border border-slate-200/80 shadow-sm group">
-                            <img 
-                              src={imgUrl} 
-                              alt={`Gallery ${i}`} 
-                              className="h-20 w-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                  return (
+                    <button
+                      key={getBookingId(booking)}
+                      type="button"
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setMessage(null);
+                      }}
+                      className={`group w-full rounded-2xl border p-3 text-left transition ${
+                        isSelected
+                          ? 'border-[#007b57] bg-white shadow-lg shadow-[#007b57]/10 ring-1 ring-[#007b57]/10'
+                          : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex gap-3">
+                        <img
+                          src={image}
+                          alt={project.title || booking.projectName || 'Project'}
+                          className="h-16 w-16 shrink-0 rounded-xl object-cover"
+                        />
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="truncate text-xs font-black text-slate-900">
+                              {project.title ||
+                                booking.projectName ||
+                                'Booked Project'}
+                            </p>
+                            <FiChevronRight
+                              className={`shrink-0 ${
+                                isSelected
+                                  ? 'text-[#007b57]'
+                                  : 'text-slate-300'
+                              }`}
                             />
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Spec Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                    {[
-                      { icon: <FiLayers size={12} className="text-[#007b57]" />, label: 'Building Type', val: selectedBooking.projectDetails?.buildingType || 'Residential' },
-                      { icon: <FiHome size={12} className="text-[#007b57]" />, label: 'Apartment Type', val: selectedBooking.apartmentType || 'N/A' },
-                      { icon: <FiGrid size={12} className="text-[#007b57]" />, label: 'Total Floors', val: selectedBooking.projectDetails?.totalFloors || selectedBooking.projectDetails?.floors || 'G + 9' },
-                      { icon: <FiCalendar size={12} className="text-[#007b57]" />, label: 'Est. Handover', val: selectedBooking.projectDetails?.handoverDate || 'December 2026' },
-                      { icon: <FiTag size={12} className="text-[#007b57]" />, label: 'Land Share Price', val: `৳${selectedBooking.landSharePrice?.toLocaleString() || 'N/A'}` },
-                      { icon: <FiCheckSquare size={12} className="text-emerald-600" />, label: 'Booking Money', val: `৳${selectedBooking.bookingMoney?.toLocaleString() || 'N/A'}`, color: 'text-emerald-700' },
-                      { icon: <FiInfo size={12} className="text-[#007b57]" />, label: 'Facing', val: selectedBooking.projectDetails?.facing || 'South Facing' },
-                      { icon: <FiGrid size={12} className="text-[#007b57]" />, label: 'Size / Share', val: selectedBooking.projectDetails?.flatSize || '1450 Sq Ft' }
-                    ].map((item, idx) => (
-                      <div key={idx} className="bg-slate-50/60 p-3 rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-md hover:border-[#007b57]/40 hover:bg-white transition-all duration-300 hover:-translate-y-0.5">
-                        <span className="text-slate-400 block text-[10px] uppercase font-bold flex items-center gap-1">
-                          {item.icon} {item.label}
-                        </span>
-                        <span className={`font-bold mt-1 block ${item.color || 'text-slate-800'}`}>{item.val}</span>
+                          <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                            {booking.status || 'Pending'}
+                          </p>
+
+                          <div className="mt-2 flex items-center justify-between">
+                            <span className="text-[10px] font-black text-slate-700">
+                              {money(getTotalPrice(booking))}
+                            </span>
+                            <span
+                              className={`rounded-md border px-1.5 py-0.5 text-[8px] font-black uppercase ${statusClass(
+                                booking.status
+                              )}`}
+                            >
+                              {booking.status || 'Pending'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </aside>
+
+            {/* MAIN CONTENT */}
+            <section className="min-w-0 space-y-6">
+              {/* HERO */}
+              <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div className="relative h-[280px] sm:h-[340px]">
+                  <img
+                    src={projectImage}
+                    alt={selectedProject.title || 'Project'}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+
+                  <div className="absolute left-5 top-5 flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-full border px-3 py-1.5 text-[9px] font-black uppercase tracking-wider backdrop-blur-md ${projectStatusClass(
+                        selectedProject.status ||
+                          selectedProject.projectStatus
+                      )}`}
+                    >
+                      {selectedProject.status ||
+                        selectedProject.projectStatus ||
+                        'Under Construction'}
+                    </span>
+                    <span className="rounded-full bg-white/10 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-white backdrop-blur-md">
+                      ID #{getBookingId(selectedBooking)?.slice?.(-8)}
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-5 left-5 right-5 text-white">
+                    <p className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-emerald-200">
+                      Active Investment
+                    </p>
+                    <h2 className="text-2xl font-black sm:text-3xl">
+                      {selectedProject.title ||
+                        selectedBooking.projectName ||
+                        'Booked Project'}
+                    </h2>
+                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-slate-200">
+                      <FiMapPin className="text-rose-300" size={14} />
+                      {selectedBooking.projectAddress ||
+                        selectedProject.location ||
+                        'Location not specified'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* FINANCIAL KPI BAR */}
+                <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+                  {[
+                    {
+                      label: 'Total Price',
+                      value: summary.totalPrice,
+                      icon: FiTag,
+                      cls: 'text-slate-900',
+                    },
+                    {
+                      label: 'Booking Money',
+                      value: summary.bookingMoney,
+                      icon: FiCheckSquare,
+                      cls: 'text-[#007b57]',
+                    },
+                    {
+                      label: 'Share Paid',
+                      value: summary.paidShare,
+                      icon: TbMoneybag,
+                      cls: 'text-blue-600',
+                    },
+                    {
+                      label: 'Total Due',
+                      value: summary.totalDue,
+                      icon: FiClock,
+                      cls: summary.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600',
+                    },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div key={item.label} className="p-5">
+                        <div className="flex items-center gap-2">
+                          <Icon className={item.cls} size={15} />
+                          <p className="text-[9px] font-black uppercase tracking-wider text-slate-400">
+                            {item.label}
+                          </p>
+                        </div>
+                        <p className={`mt-1 text-lg font-black ${item.cls}`}>
+                          {money(item.value)}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PAYMENT BREAKDOWN */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-wider text-emerald-700">
+                        Booking Money
+                      </p>
+                      <p className="mt-1 text-xl font-black text-emerald-900">
+                        {money(summary.paidBookingMoney)}
+                        <span className="text-xs font-bold text-emerald-600">
+                          {' '}
+                          / {money(summary.bookingMoney)}
+                        </span>
+                      </p>
+                    </div>
+                    <FiCheckSquare className="text-emerald-600" size={24} />
+                  </div>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-emerald-100">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all"
+                      style={{
+                        width: `${
+                          summary.bookingMoney
+                            ? Math.min(
+                                (summary.paidBookingMoney /
+                                  summary.bookingMoney) *
+                                  100,
+                                100
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  <p className="mt-2 text-[10px] font-bold text-emerald-700">
+                    Due: {money(summary.bookingDue)}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] font-black uppercase tracking-wider text-blue-700">
+                        Share / Installment
+                      </p>
+                      <p className="mt-1 text-xl font-black text-blue-900">
+                        {money(summary.paidShare)}
+                        <span className="text-xs font-bold text-blue-600">
+                          {' '}
+                          / {money(summary.sharePrice)}
+                        </span>
+                      </p>
+                    </div>
+                    <TbMoneybag className="text-blue-600" size={26} />
+                  </div>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-blue-100">
+                    <div
+                      className="h-full rounded-full bg-blue-500 transition-all"
+                      style={{
+                        width: `${
+                          summary.sharePrice
+                            ? Math.min(
+                                (summary.paidShare / summary.sharePrice) * 100,
+                                100
+                              )
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                  <p className="mt-2 text-[10px] font-bold text-blue-700">
+                    Due: {money(summary.shareDue)}
+                  </p>
+                </div>
+              </div>
+
+              {/* PROJECT DETAILS */}
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-4">
+                  <FiInfo className="text-[#007b57]" size={17} />
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                    Project Information
+                  </h3>
+                </div>
+
+                {selectedProject.images?.length > 1 && (
+                  <div className="mb-5 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                    {selectedProject.images.slice(0, 5).map((img, index) => (
+                      <img
+                        key={`${img}-${index}`}
+                        src={img}
+                        alt={`Project ${index + 1}`}
+                        className="h-20 w-full rounded-xl object-cover"
+                      />
                     ))}
                   </div>
+                )}
 
-                  {/* Description */}
-                  {selectedBooking.projectDetails?.description && (
-                    <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-200/60 text-xs text-slate-600 space-y-1 hover:border-[#007b57]/30 transition-all duration-200">
-                      <span className="font-bold text-slate-800 block">Project Description:</span>
-                      <p className="leading-relaxed">{selectedBooking.projectDetails.description}</p>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    ['Building Type', selectedProject.buildingType || 'Residential', FiLayers],
+                    ['Apartment Type', selectedBooking.apartmentType || 'N/A', FiHome],
+                    ['Total Floors', selectedProject.totalFloors || selectedProject.floors || 'N/A', FiGrid],
+                    ['Handover', selectedProject.handoverDate || 'N/A', FiCalendar],
+                    ['Land Share', money(selectedBooking.landSharePrice), FiTag],
+                    ['Booking Money', money(selectedBooking.bookingMoney), FiCheckSquare],
+                    ['Facing', selectedProject.facing || 'N/A', FiInfo],
+                    ['Size / Share', selectedProject.flatSize || 'N/A', FiGrid],
+                  ].map(([label, value, Icon]) => (
+                    <div
+                      key={label}
+                      className="rounded-xl border border-slate-100 bg-slate-50/70 p-3"
+                    >
+                      <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-slate-400">
+                        <Icon className="text-[#007b57]" size={11} />
+                        {label}
+                      </div>
+                      <p className="mt-1 text-xs font-black text-slate-800">
+                        {value}
+                      </p>
                     </div>
-                  )}
+                  ))}
                 </div>
 
-                {/* 3. Applicant & Nominee Personal Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* Applicant Details */}
-                  <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4 hover:shadow-2xl transition-shadow duration-300">
-                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3 text-[#007b57] font-black text-xs uppercase tracking-wider">
-                      <FiUser size={16} />
-                      <h3>Applicant Information</h3>
-                    </div>
-                    <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Name:</span> <span className="font-bold text-slate-900">{selectedBooking.applicantName}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Father/Husband:</span> <span className="text-slate-800 font-medium">{selectedBooking.fatherHusbandName}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Mother Name:</span> <span className="text-slate-800 font-medium">{selectedBooking.motherName}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Contact No:</span> <span className="text-slate-800 font-bold">{selectedBooking.contactNo}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Alt Contact:</span> <span className="text-slate-800">{selectedBooking.altContactNo}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Email:</span> <span className="text-slate-800 font-medium truncate max-w-[180px]">{selectedBooking.email}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Date of Birth:</span> <span className="text-slate-800 font-medium">{selectedBooking.dateOfBirth}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Profession:</span> <span className="text-slate-800 font-medium">{selectedBooking.profession}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">National ID:</span> <span className="text-slate-800 font-mono font-bold">{selectedBooking.nationalId}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Passport No:</span> <span className="text-slate-800 font-mono">{selectedBooking.passportNo || 'N/A'}</span></div>
+                {selectedProject.description && (
+                  <div className="mt-4 rounded-xl bg-slate-50 p-4">
+                    <p className="mb-1 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                      Description
+                    </p>
+                    <p className="text-xs leading-6 text-slate-600">
+                      {selectedProject.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* PERSONAL INFORMATION */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <InfoCard
+                  title="Applicant Information"
+                  icon={<FiUser size={16} />}
+                  rows={[
+                    ['Name', selectedBooking.applicantName],
+                    ['Father / Husband', selectedBooking.fatherHusbandName],
+                    ['Mother', selectedBooking.motherName],
+                    ['Contact', selectedBooking.contactNo],
+                    ['Alternative Contact', selectedBooking.altContactNo],
+                    ['Email', selectedBooking.email],
+                    ['Date of Birth', selectedBooking.dateOfBirth],
+                    ['Profession', selectedBooking.profession],
+                    ['National ID', selectedBooking.nationalId],
+                    ['Passport', selectedBooking.passportNo || 'N/A'],
+                  ]}
+                />
+
+                <InfoCard
+                  title="Nominee Information"
+                  icon={<HiOutlineShieldCheck size={18} />}
+                  rows={[
+                    ['Name', selectedBooking.nomineeName],
+                    ['Relation', selectedBooking.nomineeRelation],
+                    ['Mobile', selectedBooking.nomineeMobileNo],
+                    ['National ID', selectedBooking.nomineeNationalId],
+                    ['Address', selectedBooking.nomineeAddress],
+                  ]}
+                />
+              </div>
+
+              {/* PAYMENT SUBMISSION */}
+              {(summary.bookingDue > 0 || summary.shareDue > 0) && (
+                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="border-b border-slate-100 bg-slate-950 px-5 py-5 text-white sm:px-6">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-300">
+                          Secure Payment Submission
+                        </p>
+                        <h3 className="mt-1 text-lg font-black">
+                          Submit an Installment
+                        </h3>
+                        <p className="mt-1 text-xs text-slate-400">
+                          You can pay Booking Money or Share Money in multiple installments.
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-white/10 px-3 py-2 text-right">
+                        <p className="text-[9px] font-bold uppercase text-slate-400">
+                          Total Outstanding
+                        </p>
+                        <p className="text-sm font-black text-white">
+                          {money(summary.totalDue)}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Nominee Details */}
-                  <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4 hover:shadow-2xl transition-shadow duration-300">
-                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3 text-[#007b57] font-black text-xs uppercase tracking-wider">
-                      <HiOutlineShieldCheck size={18} />
-                      <h3>Nominee Information</h3>
-                    </div>
-                    <div className="space-y-2.5 text-xs">
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Nominee Name:</span> <span className="font-bold text-slate-900">{selectedBooking.nomineeName}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Relation:</span> <span className="text-slate-800 font-medium">{selectedBooking.nomineeRelation}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Mobile No:</span> <span className="text-slate-800 font-bold">{selectedBooking.nomineeMobileNo}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">National ID:</span> <span className="text-slate-800 font-mono font-bold">{selectedBooking.nomineeNationalId}</span></div>
-                      <div className="flex justify-between"><span className="text-slate-400 font-medium">Address:</span> <span className="text-slate-800 font-medium truncate max-w-[180px]">{selectedBooking.nomineeAddress}</span></div>
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* 4. Payment Submission Form */}
-                {((selectedBooking.landSharePrice || selectedBooking.totalPrice || selectedBooking.price || 0) - calculatePaidAmount(transactions)) > 0 && (
-                  <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-6">
-                    <div className="flex items-center gap-2 text-slate-900">
-                      <FiCreditCard className="text-[#007b57]" size={20} />
-                      <h3 className="text-xs font-black uppercase tracking-wider">Submit Payment Details</h3>
-                    </div>
-
+                  <div className="p-5 sm:p-6">
                     {message && (
-                      <div className={`p-4 rounded-2xl text-xs font-bold flex items-center gap-2.5 ${
-                        message.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
-                      }`}>
-                        <FiAlertCircle size={16} />
+                      <div
+                        className={`mb-5 flex items-start gap-3 rounded-xl border p-4 text-xs font-bold ${
+                          message.type === 'success'
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                            : 'border-rose-200 bg-rose-50 text-rose-800'
+                        }`}
+                      >
+                        {message.type === 'success' ? (
+                          <FiCheckCircle size={17} className="mt-0.5 shrink-0" />
+                        ) : (
+                          <FiAlertCircle size={17} className="mt-0.5 shrink-0" />
+                        )}
                         <span>{message.text}</span>
                       </div>
                     )}
 
-                    <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                          Select Payment Method
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod('bank')}
-                            className={`py-3.5 px-4 rounded-2xl text-xs font-bold border flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-md ${
-                              paymentMethod === 'bank' 
-                                ? 'bg-[#007b57] text-white border-[#007b57] shadow-lg shadow-[#007b57]/20' 
-                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                            }`}
-                          >
-                            <FaBuilding size={16} />
-                            <span>Bank Transfer</span>
-                          </button>
+                    {/* Payment type selector */}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <PaymentTypeCard
+                        active={paymentType === 'booking_money'}
+                        disabled={summary.bookingDue <= 0}
+                        title="Booking Money"
+                        subtitle={`Remaining ${money(summary.bookingDue)}`}
+                        icon={<FiCheckSquare size={19} />}
+                        onClick={() => {
+                          setPaymentType('booking_money');
+                          setAmount('');
+                          setMessage(null);
+                        }}
+                      />
 
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod('cash')}
-                            className={`py-3.5 px-4 rounded-2xl text-xs font-bold border flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-md ${
-                              paymentMethod === 'cash' 
-                                ? 'bg-[#007b57] text-white border-[#007b57] shadow-lg shadow-[#007b57]/20' 
-                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                            }`}
-                          >
-                            <TbMoneybag size={18} />
-                            <span>Cash Deposit</span>
-                          </button>
+                      <PaymentTypeCard
+                        active={paymentType === 'share_price'}
+                        disabled={summary.shareDue <= 0}
+                        title="Share Money / Installment"
+                        subtitle={`Remaining ${money(summary.shareDue)}`}
+                        icon={<TbMoneybag size={21} />}
+                        onClick={() => {
+                          setPaymentType('share_price');
+                          setAmount('');
+                          setMessage(null);
+                        }}
+                      />
+                    </div>
+
+                    <form
+                      onSubmit={handlePaymentSubmit}
+                      className="mt-6 space-y-5"
+                    >
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <label className={labelClass}>
+                            Payment Amount (BDT)
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max={
+                              paymentType === 'booking_money'
+                                ? summary.bookingDue
+                                : summary.shareDue
+                            }
+                            required
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder={
+                              paymentType === 'booking_money'
+                                ? `Up to ${money(summary.bookingDue)}`
+                                : `Up to ${money(summary.shareDue)}`
+                            }
+                            className={inputClass}
+                            disabled={submitting}
+                          />
+                          <p className="mt-1.5 text-[10px] font-semibold text-slate-400">
+                            You may submit this amount as a partial installment.
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>
+                            Payment Method
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              ['bank', 'Bank Transfer', FaBuilding],
+                              ['cash', 'Cash Deposit', TbMoneybag],
+                            ].map(([value, label, Icon]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                onClick={() => setPaymentMethod(value)}
+                                disabled={submitting}
+                                className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-3 text-xs font-black transition ${
+                                  paymentMethod === value
+                                    ? 'border-[#007b57] bg-[#007b57] text-white shadow-md shadow-[#007b57]/20'
+                                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white'
+                                }`}
+                              >
+                                <Icon size={15} />
+                                {label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
 
                       {paymentMethod === 'bank' && (
                         <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                            Bank Name
-                          </label>
+                          <label className={labelClass}>Bank Name</label>
                           <input
                             type="text"
                             required
-                            placeholder="e.g., Dutch-Bangla Bank, City Bank"
                             value={bankName}
                             onChange={(e) => setBankName(e.target.value)}
-                            className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-4 py-3.5 text-xs text-slate-800 font-semibold focus:outline-none focus:bg-white focus:border-[#007b57] focus:ring-2 focus:ring-[#007b57]/20 transition-all duration-200"
+                            placeholder="e.g. Dutch-Bangla Bank, City Bank"
+                            className={inputClass}
+                            disabled={submitting}
                           />
                         </div>
                       )}
 
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                          Amount Paid (BDT)
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          placeholder="Enter payment amount"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-4 py-3.5 text-xs text-slate-800 font-semibold focus:outline-none focus:bg-white focus:border-[#007b57] focus:ring-2 focus:ring-[#007b57]/20 transition-all duration-200"
-                        />
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                          <label className={labelClass}>
+                            Transaction ID / UTR Number
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={transactionId}
+                            onChange={(e) => setTransactionId(e.target.value)}
+                            placeholder="Enter transaction ID / UTR"
+                            className={`${inputClass} font-mono`}
+                            disabled={submitting}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={labelClass}>Sender Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={senderName}
+                            onChange={(e) => setSenderName(e.target.value)}
+                            placeholder="Name used to send the payment"
+                            className={inputClass}
+                            disabled={submitting}
+                          />
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                          Transaction ID / Deposit Receipt No.
+                        <label className={labelClass}>
+                          Sender's Account Number
                         </label>
                         <input
                           type="text"
-                          required
-                          placeholder="e.g., TXN-89023471"
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                          className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-4 py-3.5 text-xs text-slate-800 font-semibold focus:outline-none focus:bg-white focus:border-[#007b57] focus:ring-2 focus:ring-[#007b57]/20 transition-all duration-200"
+                          required={paymentMethod === 'bank'}
+                          value={senderAccountNumber}
+                          onChange={(e) =>
+                            setSenderAccountNumber(e.target.value)
+                          }
+                          placeholder={
+                            paymentMethod === 'bank'
+                              ? 'Enter sender account number'
+                              : 'N/A for cash deposit'
+                          }
+                          className={`${inputClass} font-mono`}
+                          disabled={submitting}
                         />
+                      </div>
+
+                      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
+                        <div className="flex items-start gap-3">
+                          <FiShield className="mt-0.5 shrink-0 text-blue-600" size={17} />
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-wider text-blue-800">
+                              Submission summary
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-blue-700">
+                              {getPaymentTypeLabel(paymentType)} ·{' '}
+                              {money(amount || 0)} · {paymentMethod}
+                              {bankName ? ` · ${bankName}` : ''}
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="w-full py-4 bg-[#007b57] hover:bg-[#006346] text-white text-xs font-black uppercase tracking-widest rounded-2xl transition-all duration-300 shadow-lg shadow-[#007b57]/25 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#007b57] px-5 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-[#007b57]/20 transition hover:bg-[#006346] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {submitting ? 'Submitting...' : 'Submit Payment to Admin'}
+                        {submitting ? (
+                          <>
+                            <FiRefreshCw className="animate-spin" size={15} />
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <FiSend size={15} />
+                            Submit {getPaymentTypeLabel(paymentType)}
+                          </>
+                        )}
                       </button>
                     </form>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* 5. Payment History Section */}
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xl shadow-slate-200/50 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2 text-slate-900">
-                      <FiClock className="text-[#007b57]" size={18} />
-                      <h3 className="text-xs font-black uppercase tracking-wider">Payment History & Status</h3>
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
-                      {transactions.length} Records
-                    </span>
+              {/* PAYMENT HISTORY */}
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                <div className="mb-5 flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <FiClock className="text-[#007b57]" size={17} />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                      Payment History
+                    </h3>
                   </div>
-
-                  {loadingTxns ? (
-                    <div className="py-8 text-center text-xs font-semibold text-slate-400 flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-[#007b57] border-t-transparent rounded-full animate-spin"></div>
-                      <span>Loading transactions...</span>
-                    </div>
-                  ) : transactions.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-400 font-medium bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-                      No payment submissions recorded for this booking yet.
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="border-b border-slate-200/80 text-[10px] font-black uppercase tracking-wider text-slate-400">
-                            <th className="py-3 px-3">Date</th>
-                            <th className="py-3 px-3">Method / Bank</th>
-                            <th className="py-3 px-3">Txn / Receipt ID</th>
-                            <th className="py-3 px-3">Amount</th>
-                            <th className="py-3 px-3 text-right">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                          {transactions.map((txn) => {
-                            const statusLower = (txn.status || 'pending').toLowerCase();
-                            return (
-                              <tr key={txn._id} className="hover:bg-slate-50/80 transition-colors">
-                                <td className="py-3.5 px-3 text-slate-500 whitespace-nowrap">
-                                  {txn.createdAt ? new Date(txn.createdAt).toLocaleDateString() : 'N/A'}
-                                </td>
-                                <td className="py-3.5 px-3">
-                                  <span className="font-bold text-slate-800 capitalize block">{txn.paymentMethod}</span>
-                                  {txn.bankName && txn.bankName !== 'N/A' && (
-                                    <span className="text-[10px] text-slate-400 block">{txn.bankName}</span>
-                                  )}
-                                </td>
-                                <td className="py-3.5 px-3 font-mono font-semibold text-slate-800">
-                                  {txn.transactionId || 'N/A'}
-                                </td>
-                                <td className="py-3.5 px-3 font-black text-slate-900">
-                                  ৳{(txn.amount || 0).toLocaleString()}
-                                </td>
-                                <td className="py-3.5 px-3 text-right">
-                                  {statusLower === 'approved' && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                                      <FiCheckCircle size={12} /> Approved
-                                    </span>
-                                  )}
-                                  {statusLower === 'pending' && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                                      <FiClock size={12} /> Pending
-                                    </span>
-                                  )}
-                                  {statusLower === 'rejected' && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full">
-                                      <FiXCircle size={12} /> Rejected
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black text-slate-500">
+                    {transactions.length} Records
+                  </span>
                 </div>
 
+                {loadingTxns ? (
+                  <div className="flex items-center justify-center gap-2 py-10 text-xs font-bold text-slate-400">
+                    <FiRefreshCw className="animate-spin" />
+                    Loading payment history...
+                  </div>
+                ) : !transactions.length ? (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 py-10 text-center text-xs font-semibold text-slate-400">
+                    No payment submissions recorded for this booking yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[850px] border-collapse text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200 text-[9px] font-black uppercase tracking-wider text-slate-400">
+                          <th className="px-3 py-3">Date</th>
+                          <th className="px-3 py-3">Payment Type</th>
+                          <th className="px-3 py-3">Method / Bank</th>
+                          <th className="px-3 py-3">Transaction / UTR</th>
+                          <th className="px-3 py-3">Sender</th>
+                          <th className="px-3 py-3">Amount</th>
+                          <th className="px-3 py-3 text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {transactions.map((txn) => {
+                          const txnType =
+                            txn.paymentType ||
+                            txn.type ||
+                            (txn.paymentCategory === 'booking'
+                              ? 'booking_money'
+                              : 'share_price');
+
+                          const txnStatus = String(
+                            txn.status || 'pending'
+                          ).toLowerCase();
+
+                          return (
+                            <tr
+                              key={txn._id || txn.transactionId}
+                              className="transition hover:bg-slate-50/70"
+                            >
+                              <td className="whitespace-nowrap px-3 py-3.5 text-slate-500">
+                                {txn.createdAt
+                                  ? new Date(txn.createdAt).toLocaleDateString(
+                                      'en-GB'
+                                    )
+                                  : 'N/A'}
+                              </td>
+
+                              <td className="px-3 py-3.5">
+                                <span className="font-black text-slate-800">
+                                  {getPaymentTypeLabel(txnType)}
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-3.5">
+                                <span className="block font-bold capitalize text-slate-800">
+                                  {txn.paymentMethod || 'N/A'}
+                                </span>
+                                {txn.bankName && txn.bankName !== 'N/A' && (
+                                  <span className="block text-[10px] text-slate-400">
+                                    {txn.bankName}
+                                  </span>
+                                )}
+                              </td>
+
+                              <td className="px-3 py-3.5 font-mono font-bold text-slate-700">
+                                {txn.transactionId || txn.utrNumber || 'N/A'}
+                              </td>
+
+                              <td className="px-3 py-3.5">
+                                <span className="block font-bold text-slate-800">
+                                  {txn.senderName || 'N/A'}
+                                </span>
+                                {txn.senderAccountNumber &&
+                                  txn.senderAccountNumber !== 'N/A' && (
+                                    <span className="block font-mono text-[10px] text-slate-400">
+                                      {txn.senderAccountNumber}
+                                    </span>
+                                  )}
+                              </td>
+
+                              <td className="px-3 py-3.5 font-black text-slate-900">
+                                {money(txn.amount)}
+                              </td>
+
+                              <td className="px-3 py-3.5 text-right">
+                                <span
+                                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[9px] font-black capitalize ${statusClass(
+                                    txnStatus
+                                  )}`}
+                                >
+                                  {txnStatus === 'approved' && (
+                                    <FiCheckCircle size={11} />
+                                  )}
+                                  {txnStatus === 'pending' && (
+                                    <FiClock size={11} />
+                                  )}
+                                  {txnStatus === 'rejected' && (
+                                    <FiXCircle size={11} />
+                                  )}
+                                  {txnStatus}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xl shadow-slate-200/50">
-                <FiInfo size={32} className="mx-auto text-slate-300 mb-3" />
-                <p className="text-slate-500 font-semibold text-xs">Please select a booking from the left list to view details.</p>
-              </div>
-            )}
+            </section>
           </div>
+        )}
+      </main>
+    </div>
+  );
+}
 
+function PaymentTypeCard({
+  active,
+  disabled,
+  title,
+  subtitle,
+  icon,
+  onClick,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex items-center justify-between rounded-2xl border p-4 text-left transition ${
+        disabled
+          ? 'cursor-not-allowed border-slate-100 bg-slate-50 opacity-45'
+          : active
+          ? 'border-[#007b57] bg-[#007b57]/5 ring-2 ring-[#007b57]/10'
+          : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+            active
+              ? 'bg-[#007b57] text-white'
+              : 'bg-slate-100 text-slate-500'
+          }`}
+        >
+          {icon}
         </div>
-
+        <div>
+          <p className="text-xs font-black text-slate-900">{title}</p>
+          <p className="mt-0.5 text-[10px] font-semibold text-slate-400">
+            {subtitle}
+          </p>
+        </div>
       </div>
 
+      {active && !disabled && (
+        <FiCheckCircle className="text-[#007b57]" size={18} />
+      )}
+    </button>
+  );
+}
+
+function InfoCard({ title, icon, rows }) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-4 text-[#007b57]">
+        {icon}
+        <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+          {title}
+        </h3>
+      </div>
+
+      <div className="space-y-3">
+        {rows.map(([label, value]) => (
+          <div
+            key={label}
+            className="flex items-start justify-between gap-4 text-xs"
+          >
+            <span className="shrink-0 font-semibold text-slate-400">
+              {label}
+            </span>
+            <span className="max-w-[65%] break-words text-right font-bold text-slate-800">
+              {value || 'N/A'}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
