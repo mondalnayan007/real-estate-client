@@ -6,41 +6,13 @@ import {
   CheckCircle2, ArrowRight, Sparkles, HeartHandshake, Home,
   Star, Landmark
 } from 'lucide-react';
-import MarqueeComponent from 'react-fast-marquee';
-const Marquee = MarqueeComponent.default || MarqueeComponent;
 import AgentContext from '../context/AgentContext';
 import OurPartner from '../components/OurPartner';
 
 
 
 
-const partners = [
-  {
-    id: 1,
-    name: "Partner 1",
-    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBnX9MgMI2cJuvGXc5M7-fDkRjDPH9dpjr3RS9C15QTNmZAkpJzc_8RyI&s",
-  },
-  {
-    id: 2,
-    name: "Partner 2",
-    logo: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRt9qZHu5i-6MiwPtZtxKXWsaFAlvotGhJOKND6BV5vxTj2yEJezgJalyU&s=10",
-  },
-  {
-    id: 3,
-    name: "Bashundhara Cement",
-    logo: "https://images.seeklogo.com/logo-png/51/2/bashundhara-cement-ltd-logo-png_seeklogo-515521.png",
-  },
-  {
-    id: 4,
-    name: "Partner 4",
-    logo: "https://media.licdn.com/dms/image/v2/D5622AQHZ2Ul987rTbw/feedshare-shrink_800/feedshare-shrink_800/0/1698045754109?e=2147483647&v=beta&t=EjGB6QCcQ8F0rUumlrf73xxiNMXVg6RLtoTDFLPqmJ4",
-  },
-  {
-    id: 5,
-    name: "Crown Cement",
-    logo: "https://images.seeklogo.com/logo-png/28/1/crown-cement-logo-png_seeklogo-282523.png",
-  },
-];
+
 
 const timelineData = [
   {
@@ -399,14 +371,8 @@ console.log(user);
         </div>
       </section>
 
-      
-
-
 
       <OurPartner></OurPartner>
-
-
-
 
 
       {/* 🎁 5. CTA Consultation Banner */}
