@@ -11,309 +11,238 @@ import {
   RefreshCw,
   CreditCard,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Tag,
+  Send
 } from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:4000';
 
-// ==========================================
-// API Fetcher & Mutation Functions
-// ==========================================
 const fetchPendingPayments = async () => {
   const response = await fetch(`${API_BASE_URL}/api/admin/pending-payments`);
-  if (!response.ok) {
-    throw new Error('Could not connect to the backend server.');
-  }
+  if (!response.ok) throw new Error('Could not connect to the backend server.');
   const data = await response.json();
-  if (!data.success) {
-    throw new Error(data.message || 'Failed to load pending payments.');
-  }
+  console.log(data);
+  if (!data.success) throw new Error(data.message || 'Failed to load pending payments.');
   return data.data || [];
 };
+
 
 const updatePaymentStatus = async ({ txnId, status }) => {
   const response = await fetch(`${API_BASE_URL}/api/admin/update-payment-status/${txnId}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
   });
-  
   const data = await response.json();
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Operation failed.');
-  }
+  if (!response.ok || !data.success) throw new Error(data.message || 'Operation failed.');
   return { txnId, status, data };
 };
 
 export default function LeadManagement() {
   const queryClient = useQueryClient();
 
-  // 1. TanStack Query: Data Fetching
-  const {
-    data: pendingPayments = [],
-    isLoading,
-    isRefetching,
-    error,
-    refetch,
-  } = useQuery({
+  const { data: pendingPayments = [], isLoading, isRefetching, error, refetch } = useQuery({
     queryKey: ['adminPendingPayments'],
     queryFn: fetchPendingPayments,
-    refetchInterval: 10000, // অটোমেশন: ১০ সেকেন্ড পর পর সিঙ্ক হবে
+    refetchInterval: 10000,
   });
 
-  // 2. TanStack Mutation: Status Update (Approve / Reject)
   const statusMutation = useMutation({
     mutationFn: updatePaymentStatus,
     onSuccess: ({ txnId, status }) => {
-      // ক্যাশ ডাটা লোকালি আপডেট করা ( UIInstant Update )
       queryClient.setQueryData(['adminPendingPayments'], (oldData) => {
         if (!Array.isArray(oldData)) return [];
-        return oldData.map((item) =>
-          item._id === txnId ? { ...item, status } : item
-        );
+        return oldData.map((item) => item._id === txnId ? { ...item, status } : item);
       });
-      // সার্ভারের সাথে ক্যাশ ইনভ্যালিডেট করে ডাটা পুনরায় ফেচ করা
       queryClient.invalidateQueries({ queryKey: ['adminPendingPayments'] });
     },
-    onError: (err) => {
-      console.error('Update Error:', err);
-      alert(err.message || 'Network error while updating status.');
-    },
+    onError: (err) => alert(err.message || 'Network error updating status.'),
   });
-
-  const handleStatusUpdate = (txnId, status) => {
-    statusMutation.mutate({ txnId, status });
-  };
 
   const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
-            <CheckCircle2 size={13} className="text-emerald-600" /> Approved
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 size={13} /> Approved
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-rose-50 text-rose-700 border border-rose-200/80 shadow-xs">
-            <XCircle size={13} className="text-rose-600" /> Rejected
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <XCircle size={13} /> Rejected
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-50 text-amber-700 border border-amber-200/80 shadow-xs animate-pulse">
-            <Clock size={13} className="text-amber-600" /> Pending Review
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 animate-pulse">
+            <Clock size={13} /> Pending Review
           </span>
         );
     }
   };
 
   return (
-    <div className="space-y-6 p-4 sm:p-8 bg-slate-50/50 min-h-screen text-slate-800 font-sans">
-      
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/70 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-[#007b57]/10 rounded-xl text-[#007b57]">
-              <ShieldCheck size={22} />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Payment Verification Center</h2>
-          </div>
-          <p className="text-xs text-slate-500 mt-1 font-medium">
-            Review buyer booking deposits, verify bank references, and manage approvals
-          </p>
-        </div>
+    <div className="p-4 sm:p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+      <div className="max-w-6xl mx-auto space-y-6">
         
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => refetch()}
-            className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl transition-all duration-200 active:scale-95 shadow-xs"
-            title="Refresh List"
-          >
-            <RefreshCw size={18} className={isLoading || isRefetching ? 'animate-spin' : ''} />
-          </button>
-          
-          <div className="flex items-center gap-2.5 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xs">
-            <Clock className="w-4 h-4 text-[#007b57]" />
-            <span className="text-xs font-semibold">
-              Total Requests: <span className="text-white font-black text-sm ml-1">{pendingPayments.length}</span>
-            </span>
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-[#007b57]/10 text-[#007b57] rounded-xl">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900">Payment Verification Center</h1>
+              <p className="text-xs text-slate-500 mt-0.5">Verify and manage buyer transactions</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => refetch()}
+              className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all"
+            >
+              <RefreshCw size={16} className={isLoading || isRefetching ? 'animate-spin' : ''} />
+            </button>
+            <div className="bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-semibold">
+              Pending Requests: <span className="text-[#007b57] font-bold text-sm ml-1">{pendingPayments.length}</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Stream Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-            <span>Transaction Logs</span>
-          </p>
-        </div>
-
-        {/* Loading State */}
+        {/* List Stream */}
         {isLoading ? (
-          <div className="bg-white border border-slate-200/80 rounded-3xl p-16 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
-            <Loader2 size={36} className="animate-spin text-[#007b57]" />
-            <p className="text-xs font-bold text-slate-500">Fetching transactions details...</p>
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+            <Loader2 size={32} className="animate-spin mx-auto text-[#007b57]" />
+            <p className="text-xs text-slate-500 mt-2 font-medium">Loading transactions...</p>
           </div>
         ) : error ? (
-          /* Error State */
-          <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-3xl p-6 text-center text-xs font-bold shadow-xs flex items-center justify-center gap-2">
-            <AlertCircle size={16} />
-            {error.message || 'Could not connect to the backend server.'}
+          <div className="bg-rose-50 text-rose-700 p-4 rounded-xl text-xs font-bold border border-rose-200 text-center">
+            {error.message}
           </div>
         ) : pendingPayments.length === 0 ? (
-          /* Empty State */
-          <div className="bg-white border border-dashed border-slate-300 rounded-3xl p-16 text-center space-y-3">
-            <div className="w-14 h-14 bg-emerald-50 text-[#007b57] rounded-2xl flex items-center justify-center mx-auto shadow-xs">
-              <CheckCircle2 size={28} />
-            </div>
-            <h3 className="text-base font-black text-slate-800">All Requests Cleared!</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              There are no payment requests pending in the database right now.
-            </p>
+          <div className="bg-white rounded-2xl p-12 text-center border border-slate-200">
+            <CheckCircle2 size={36} className="mx-auto text-emerald-500 mb-2" />
+            <h3 className="text-sm font-bold text-slate-800">No Pending Payments</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Everything is up to date.</p>
           </div>
         ) : (
-          /* Transaction Cards Stream */
-          pendingPayments.map((item) => {
-            const isProcessing =
-              statusMutation.isPending &&
-              statusMutation.variables?.txnId === item._id;
+          <div className="space-y-4">
+            {pendingPayments.map((item) => {
+              const isProcessing = statusMutation.isPending && statusMutation.variables?.txnId === item._id;
+              const isBookingMoney = item.paymentType === 'booking_money';
+             
 
-            return (
-              <div 
-                key={item._id} 
-                className="group bg-white border border-slate-200/80 hover:border-[#007b57]/30 rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-300 space-y-5 relative overflow-hidden"
-              >
-                {/* Visual Accent Top Bar */}
-                <div className={`absolute top-0 left-0 right-0 h-1.5 ${
-                  item.status === 'approved' ? 'bg-emerald-500' : 
-                  item.status === 'rejected' ? 'bg-rose-500' : 'bg-amber-400'
-                }`} />
-
-                {/* Card Header: Buyer Info & Status Badge */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100/80">
-                  {/* Buyer Profile */}
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold shrink-0 shadow-xs">
-                      <User size={20} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-black text-slate-900 group-hover:text-[#007b57] transition-colors">
-                          {item.user?.name || 'Unknown Buyer'}
-                        </h3>
+              return (
+                <div 
+                  key={item._id} 
+                  className="bg-white border border-slate-200 hover:border-slate-300 rounded-2xl shadow-sm transition-all overflow-hidden"
+                >
+                  {/* Top Header: Buyer & Property Info */}
+                  <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {/* Buyer Identity */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-sm">
+                        <User size={18} />
                       </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-medium mt-0.5">
-                        <span>{item.user?.email || 'N/A'}</span>
-                        <span className="text-slate-300">•</span>
-                        <span className="font-mono text-slate-600">{item.user?.phone || 'N/A'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status Badge & Property Tag */}
-                  <div className="flex flex-wrap items-center gap-3">
-                    {getStatusBadge(item.status)}
-
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200/60 px-3.5 py-1.5 rounded-2xl">
-                      <Building2 size={15} className="text-[#007b57]" />
-                      <div className="text-left">
-                        <p className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Property</p>
-                        <p className="text-xs font-bold text-slate-800 truncate max-w-[150px]">
-                          {item.booking?.projectName || 'N/A'}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-slate-900">{item.user?.name || item.senderName || 'Unknown Buyer'}</h3>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                            isBookingMoney ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {isBookingMoney ? 'Booking Money' : 'Share / Installment'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {item.user?.email} • {item.user?.phone || 'No Phone'}
                         </p>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Card Body: Financial Overview Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* Claimed Amount Box */}
-                  <div className="bg-emerald-50/50 border border-emerald-200/60 p-4 rounded-2xl relative overflow-hidden">
-                    <p className="text-[10px] font-black uppercase text-[#007b57] tracking-wider">Submitted Amount</p>
-                    <p className="text-2xl font-black text-[#007b57] mt-1">
-                      ৳{item.amount?.toLocaleString() || 0}
-                    </p>
-                  </div>
-
-                  {/* Booking Total Financials */}
-                  <div className="bg-slate-50/80 border border-slate-200/60 p-4 rounded-2xl">
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Total Booking Value</p>
-                    <p className="text-sm font-bold text-slate-800 mt-2">
-                      ৳{item.booking?.totalPaid?.toLocaleString() || 0} 
-                      <span className="text-xs text-slate-400 font-normal"> / ৳{item.booking?.totalAmount?.toLocaleString() || 0}</span>
-                    </p>
-                  </div>
-
-                  {/* Gateway Details */}
-                  <div className="bg-slate-50/80 border border-slate-200/60 p-4 rounded-2xl">
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Payment Method</p>
-                      <CreditCard size={14} className="text-slate-400" />
+                    {/* Property & Status */}
+                    <div className="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-slate-200">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg">
+                        <Building2 size={14} className="text-[#007b57]" />
+                        <span className="font-semibold">{item.booking?.projectName || 'N/A'}</span>
+                      </div>
+                      {getStatusBadge(item.status)}
                     </div>
-                    <p className="text-xs font-extrabold text-slate-800 mt-1 uppercase">
-                      {item.paymentMethod} {item.bankName && item.bankName !== 'N/A' ? `(${item.bankName})` : ''}
-                    </p>
-                    <p className="text-[11px] font-mono font-medium text-slate-500 mt-0.5 truncate">
-                      Txn: <span className="text-slate-700 select-all">{item.transactionId}</span>
-                    </p>
                   </div>
+
+                  {/* Body: Clean Data Grid */}
+                  <div className="p-5 grid grid-cols-2 md:grid-cols-4 gap-4 bg-white text-xs">
+                    
+                    {/* Depositor / Sender Name */}
+                    <div>
+                      <span className="text-slate-400 font-semibold block text-[10px] uppercase tracking-wider">Depositor Name</span>
+                      <span className="font-bold text-slate-800 mt-1 block truncate">
+                        {item.senderName || item.user?.name || 'N/A'}
+                      </span>
+                    </div>
+
+                    {/* Paid Amount */}
+                    <div>
+                      <span className="text-slate-400 font-semibold block text-[10px] uppercase tracking-wider">Submitted Amount</span>
+                      <span className="font-extrabold text-[#007b57] text-base mt-0.5 block">
+                        ৳{item.amount?.toLocaleString() || 0}
+                      </span>
+                    </div>
+
+                    {/* Payment Method & Bank */}
+                    <div>
+                      <span className="text-slate-400 font-semibold block text-[10px] uppercase tracking-wider">Payment Gateway</span>
+                      <span className="font-bold text-slate-800 mt-1 uppercase block">
+                        {item.paymentMethod} {item.bankName && item.bankName !== 'N/A' ? `(${item.bankName})` : ''}
+                      </span>
+                    </div>
+
+                    {/* Transaction Reference ID */}
+                    <div>
+                      <span className="text-slate-400 font-semibold block text-[10px] uppercase tracking-wider">Transaction ID</span>
+                      <span className="font-mono font-bold text-slate-700 mt-1 block select-all truncate">
+                        {item.transactionId || 'N/A'}
+                      </span>
+                    </div>
+
+                  </div>
+
+                  {/* Footer: Date & Actions */}
+                  <div className="px-5 py-3 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                      <Calendar size={13} />
+                      <span>Date: {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB') : 'N/A'}</span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => statusMutation.mutate({ txnId: item._id, status: 'rejected' })}
+                        disabled={isProcessing || item.status === 'rejected'}
+                        className="flex-1 sm:flex-none px-4 py-2 rounded-xl font-bold border border-rose-200 text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
+                      >
+                        Reject
+                      </button>
+
+                      <button
+                        onClick={() => statusMutation.mutate({ txnId: item._id, status: 'approved' })}
+                        disabled={isProcessing || item.status === 'approved'}
+                        className="flex-1 sm:flex-none px-5 py-2 rounded-xl font-bold bg-[#007b57] hover:bg-[#006346] text-white transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
+                      >
+                        {isProcessing ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                        Approve Payment
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
-
-                {/* Card Footer: Timestamp & Action Controls */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                    <Calendar size={14} />
-                    <span>
-                      Submitted on {item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A'}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      onClick={() => handleStatusUpdate(item._id, 'rejected')}
-                      disabled={isProcessing || item.status === 'rejected'}
-                      className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-                        item.status === 'rejected'
-                          ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                          : 'text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/60'
-                      }`}
-                    >
-                      <XCircle size={15} />
-                      {item.status === 'rejected' ? 'Rejected' : 'Reject'}
-                    </button>
-
-                    <button
-                      onClick={() => handleStatusUpdate(item._id, 'approved')}
-                      disabled={isProcessing || item.status === 'approved'}
-                      className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${
-                        item.status === 'approved'
-                          ? 'bg-emerald-600 text-white shadow-xs'
-                          : 'text-white bg-[#007b57] hover:bg-[#006346] shadow-sm hover:shadow-md'
-                      }`}
-                    >
-                      {isProcessing ? (
-                        <Loader2 size={15} className="animate-spin" />
-                      ) : (
-                        <>
-                          <CheckCircle2 size={15} />
-                          {item.status === 'approved' ? 'Approved' : 'Approve Payment'}
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
+
       </div>
     </div>
   );
