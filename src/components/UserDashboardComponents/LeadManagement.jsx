@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -13,74 +14,79 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+const API_BASE_URL = 'http://localhost:4000';
+
+// ==========================================
+// API Fetcher & Mutation Functions
+// ==========================================
+const fetchPendingPayments = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/admin/pending-payments`);
+  if (!response.ok) {
+    throw new Error('Could not connect to the backend server.');
+  }
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || 'Failed to load pending payments.');
+  }
+  return data.data || [];
+};
+
+const updatePaymentStatus = async ({ txnId, status }) => {
+  const response = await fetch(`${API_BASE_URL}/api/admin/update-payment-status/${txnId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ status }),
+  });
+  
+  const data = await response.json();
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || 'Operation failed.');
+  }
+  return { txnId, status, data };
+};
+
 export default function LeadManagement() {
-  const [pendingPayments, setPendingPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [processingId, setProcessingId] = useState(null);
-  const [errorMsg, setErrorMsg] = useState('');
+  const queryClient = useQueryClient();
 
-  // ==========================================
-  // ১. ডাইরেক্ট ব্যাকএন্ড থেকে ডাটা ফেচ করা
-  // ==========================================
-  const fetchPendingPayments = async () => {
-    setLoading(true);
-    setErrorMsg('');
-    try {
-      const response = await fetch('http://localhost:4000/api/admin/pending-payments');
-      const data = await response.json();
+  // 1. TanStack Query: Data Fetching
+  const {
+    data: pendingPayments = [],
+    isLoading,
+    isRefetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['adminPendingPayments'],
+    queryFn: fetchPendingPayments,
+    refetchInterval: 10000, // অটোমেশন: ১০ সেকেন্ড পর পর সিঙ্ক হবে
+  });
 
-      if (data.success) {
-        setPendingPayments(data.data);
-      } else {
-        setErrorMsg('Failed to load pending payments.');
-      }
-    } catch (error) {
-      console.error('API Error:', error);
-      setErrorMsg('Could not connect to the backend server.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPendingPayments();
-  }, []);
-
-  // ==========================================
-  // ২. স্ট্যাটাস আপডেট (কার্ড সরানো হবে না, শুধু স্ট্যাটাস চেঞ্জ হবে)
-  // ==========================================
-  const handleStatusUpdate = async (txnId, status) => {
-    setProcessingId(txnId);
-    try {
-      const response = await fetch(`http://localhost:4000/api/admin/update-payment-status/${txnId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // 🔥 কার্ড রিমুভ না করে স্টেট আপডেট করে স্ট্যাটাস চেঞ্জ করা হলো
-        setPendingPayments((prev) => 
-          prev.map((item) => 
-            item._id === txnId ? { ...item, status: status } : item
-          )
+  // 2. TanStack Mutation: Status Update (Approve / Reject)
+  const statusMutation = useMutation({
+    mutationFn: updatePaymentStatus,
+    onSuccess: ({ txnId, status }) => {
+      // ক্যাশ ডাটা লোকালি আপডেট করা ( UIInstant Update )
+      queryClient.setQueryData(['adminPendingPayments'], (oldData) => {
+        if (!Array.isArray(oldData)) return [];
+        return oldData.map((item) =>
+          item._id === txnId ? { ...item, status } : item
         );
-      } else {
-        alert(data.message || 'Operation failed.');
-      }
-    } catch (error) {
-      console.error('Update Error:', error);
-      alert('Network error while updating status.');
-    } finally {
-      setProcessingId(null);
-    }
+      });
+      // সার্ভারের সাথে ক্যাশ ইনভ্যালিডেট করে ডাটা পুনরায় ফেচ করা
+      queryClient.invalidateQueries({ queryKey: ['adminPendingPayments'] });
+    },
+    onError: (err) => {
+      console.error('Update Error:', err);
+      alert(err.message || 'Network error while updating status.');
+    },
+  });
+
+  const handleStatusUpdate = (txnId, status) => {
+    statusMutation.mutate({ txnId, status });
   };
 
-  // স্ট্যাটাসের ওপর ভিত্তি করে ব্যাজ কালার
   const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'approved':
@@ -123,11 +129,11 @@ export default function LeadManagement() {
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={fetchPendingPayments}
+            onClick={() => refetch()}
             className="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl transition-all duration-200 active:scale-95 shadow-xs"
             title="Refresh List"
           >
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={18} className={isLoading || isRefetching ? 'animate-spin' : ''} />
           </button>
           
           <div className="flex items-center gap-2.5 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-xs">
@@ -148,16 +154,16 @@ export default function LeadManagement() {
         </div>
 
         {/* Loading State */}
-        {loading ? (
+        {isLoading ? (
           <div className="bg-white border border-slate-200/80 rounded-3xl p-16 text-center flex flex-col items-center justify-center gap-3 shadow-xs">
             <Loader2 size={36} className="animate-spin text-[#007b57]" />
             <p className="text-xs font-bold text-slate-500">Fetching transactions details...</p>
           </div>
-        ) : errorMsg ? (
+        ) : error ? (
           /* Error State */
           <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-3xl p-6 text-center text-xs font-bold shadow-xs flex items-center justify-center gap-2">
             <AlertCircle size={16} />
-            {errorMsg}
+            {error.message || 'Could not connect to the backend server.'}
           </div>
         ) : pendingPayments.length === 0 ? (
           /* Empty State */
@@ -173,8 +179,9 @@ export default function LeadManagement() {
         ) : (
           /* Transaction Cards Stream */
           pendingPayments.map((item) => {
-            const isProcessing = processingId === item._id;
-            const isPending = !item.status || item.status === 'pending';
+            const isProcessing =
+              statusMutation.isPending &&
+              statusMutation.variables?.txnId === item._id;
 
             return (
               <div 
@@ -267,7 +274,7 @@ export default function LeadManagement() {
                     </span>
                   </div>
 
-                  {/* Actions (Only editable or re-editable as needed) */}
+                  {/* Actions */}
                   <div className="flex items-center gap-2.5">
                     <button
                       onClick={() => handleStatusUpdate(item._id, 'rejected')}

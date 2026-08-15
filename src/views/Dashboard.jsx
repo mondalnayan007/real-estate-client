@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AuthContext } from '../context/AuthContext';
 import {
   FiArrowLeft,
@@ -105,17 +106,49 @@ const inputClass =
 const labelClass =
   'mb-1.5 block text-[10px] font-black uppercase tracking-wider text-slate-400';
 
+// API Fetchers for TanStack Query
+const fetchUserBookings = async (userId) => {
+  if (!userId) return [];
+  const res = await fetch(
+    `${API_BASE_URL}/api/my-bookings?userId=${encodeURIComponent(userId)}`
+  );
+  if (!res.ok) throw new Error(`Bookings request failed: ${res.status}`);
+  const data = await res.json();
+  return data?.success && Array.isArray(data.bookings) ? data.bookings : [];
+};
+
+const fetchBookingTransactions = async (bookingId) => {
+  if (!bookingId) return [];
+  const res = await fetch(
+    `${API_BASE_URL}/admin/transactions?bookingId=${encodeURIComponent(bookingId)}`
+  );
+  if (!res.ok) throw new Error(`Transactions request failed: ${res.status}`);
+  const data = await res.json();
+  if (data?.success && Array.isArray(data.transactions)) {
+    return data.transactions;
+  }
+  return Array.isArray(data) ? data : [];
+};
+
+const submitPaymentApi = async (paymentPayload) => {
+  const res = await fetch(`${API_BASE_URL}/api/submit-payment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(paymentPayload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data?.success) {
+    throw new Error(data?.message || 'Payment submission failed.');
+  }
+  return data;
+};
+
 export default function Dashboard() {
   const { clientUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const [bookings, setBookings] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [transactions, setTransactions] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [loadingTxns, setLoadingTxns] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [message, setMessage] = useState(null);
 
   // One payment form handles both payment categories.
@@ -127,100 +160,67 @@ export default function Dashboard() {
   const [senderName, setSenderName] = useState('');
   const [senderAccountNumber, setSenderAccountNumber] = useState('');
 
-  const fetchBookings = async () => {
-    if (!clientUser?._id) return;
+  // 1. TanStack Query: Fetch Bookings
+  const {
+    data: bookings = [],
+    isLoading: loadingBookings,
+  } = useQuery({
+    queryKey: ['myBookings', clientUser?._id],
+    queryFn: () => fetchUserBookings(clientUser?._id),
+    enabled: !!clientUser?._id,
+    refetchInterval: 10000, // 10s auto refetch
+  });
 
-    try {
-      setLoading(true);
+  // Derived active selected booking
+  const selectedBooking = useMemo(() => {
+    if (!bookings.length) return null;
+    if (!selectedBookingId) return bookings[0];
+    return (
+      bookings.find((b) => getBookingId(b) === selectedBookingId) || bookings[0]
+    );
+  }, [bookings, selectedBookingId]);
 
-      const res = await fetch(
-        `${API_BASE_URL}/api/my-bookings?userId=${encodeURIComponent(
-          clientUser._id
-        )}`
-      );
+  const activeBookingId = getBookingId(selectedBooking);
 
-      if (!res.ok) {
-        throw new Error(`Bookings request failed: ${res.status}`);
-      }
+  // 2. TanStack Query: Fetch Transactions for selected booking
+  const {
+    data: transactions = [],
+    isLoading: loadingTxns,
+  } = useQuery({
+    queryKey: ['transactions', activeBookingId],
+    queryFn: () => fetchBookingTransactions(activeBookingId),
+    enabled: !!activeBookingId,
+    refetchInterval: 5000, // 5s auto refetch for fast updates
+  });
 
-      const data = await res.json();
-      const fetchedBookings = data?.success && Array.isArray(data.bookings)
-        ? data.bookings
-        : [];
-
-      setBookings(fetchedBookings);
-
-      setSelectedBooking((current) => {
-        if (!fetchedBookings.length) return null;
-
-        const currentId = getBookingId(current);
-        return (
-          fetchedBookings.find((booking) => getBookingId(booking) === currentId) ||
-          fetchedBookings[0]
-        );
+  // 3. TanStack Mutation: Submit Payment
+  const paymentMutation = useMutation({
+    mutationFn: submitPaymentApi,
+    onSuccess: () => {
+      setMessage({
+        type: 'success',
+        text: `${getPaymentTypeLabel(
+          paymentType
+        )} payment submitted successfully. It is now awaiting verification.`,
       });
-    } catch (error) {
-      console.error('Error fetching bookings:', error);
+      resetPaymentForm();
+
+      // Refresh cache automatically without full page refresh
+      queryClient.invalidateQueries({ queryKey: ['transactions', activeBookingId] });
+      queryClient.invalidateQueries({ queryKey: ['myBookings', clientUser?._id] });
+    },
+    onError: (error) => {
+      console.error('Payment submission error:', error);
       setMessage({
         type: 'error',
-        text: 'Could not load your bookings. Please try again.',
+        text:
+          error?.message ||
+          'Network error. Could not connect to the backend server.',
       });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
-  const fetchTransactions = async (bookingId) => {
-    if (!bookingId) {
-      setTransactions([]);
-      return;
-    }
-
-    try {
-      setLoadingTxns(true);
-
-      const res = await fetch(
-        `${API_BASE_URL}/admin/transactions?bookingId=${encodeURIComponent(
-          bookingId
-        )}`
-      );
-
-      if (!res.ok) {
-        throw new Error(`Transactions request failed: ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      if (data?.success && Array.isArray(data.transactions)) {
-        setTransactions(data.transactions);
-      } else if (Array.isArray(data)) {
-        setTransactions(data);
-      } else {
-        setTransactions([]);
-      }
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      setTransactions([]);
-      setMessage({
-        type: 'error',
-        text: 'Could not load payment history.',
-      });
-    } finally {
-      setLoadingTxns(false);
-    }
-  };
-
-  useEffect(() => {
-    if (clientUser?._id) {
-      fetchBookings();
-    } else {
-      setLoading(false);
-    }
-  }, [clientUser?._id]);
-
-  useEffect(() => {
-    fetchTransactions(getBookingId(selectedBooking));
-  }, [selectedBooking]);
+  const submitting = paymentMutation.isPending;
 
   const summary = useMemo(() => {
     const totalPrice = getTotalPrice(selectedBooking);
@@ -269,7 +269,7 @@ export default function Dashboard() {
     setPaymentMethod('bank');
   };
 
-  const handlePaymentSubmit = async (event) => {
+  const handlePaymentSubmit = (event) => {
     event.preventDefault();
 
     if (!selectedBooking || !clientUser?._id) return;
@@ -332,11 +332,8 @@ export default function Dashboard() {
       return;
     }
 
-    setSubmitting(true);
     setMessage(null);
 
-    // Single API contract for both payment types.
-    // Backend should store paymentType as "booking_money" or "share_price".
     const paymentPayload = {
       bookingId,
       userId: clientUser._id,
@@ -351,46 +348,11 @@ export default function Dashboard() {
         paymentMethod === 'bank' ? senderAccountNumber.trim() : 'N/A',
     };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/submit-payment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentPayload),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data?.success) {
-        throw new Error(data?.message || 'Payment submission failed.');
-      }
-
-      setMessage({
-        type: 'success',
-        text: `${getPaymentTypeLabel(
-          paymentType
-        )} payment submitted successfully. It is now awaiting verification.`,
-      });
-
-      resetPaymentForm();
-
-      await fetchTransactions(bookingId);
-      await fetchBookings();
-    } catch (error) {
-      console.error('Payment submission error:', error);
-      setMessage({
-        type: 'error',
-        text:
-          error?.message ||
-          'Network error. Could not connect to the backend server.',
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    // Execute mutation
+    paymentMutation.mutate(paymentPayload);
   };
 
-  if (loading) {
+  if (loadingBookings) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -507,7 +469,7 @@ export default function Dashboard() {
                       key={getBookingId(booking)}
                       type="button"
                       onClick={() => {
-                        setSelectedBooking(booking);
+                        setSelectedBookingId(getBookingId(booking));
                         setMessage(null);
                       }}
                       className={`group w-full rounded-2xl border p-3 text-left transition ${
