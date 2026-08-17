@@ -7,7 +7,7 @@ import { Eye, Edit2, Trash2, MapPin } from 'lucide-react';
 
 export default function DashboardAnalytics() {
   const [data, setData] = useState(null);
-  const  [projects,setProjects]= useState([]);
+  const [projects, setProjects] = useState([]);
   console.log(projects);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +24,7 @@ export default function DashboardAnalytics() {
       } catch (err) {
         console.warn('API Offline/Error, using pixel-perfect local payload');
         setData(fallbackData);
-      }  finally {
+      } finally {
         setLoading(false);
       }
     };
@@ -32,7 +32,7 @@ export default function DashboardAnalytics() {
     fetchAnalytics();
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     const fetchProjects = async () => {
       try {
         const res = await fetch(`${baseURL}/projects`);
@@ -42,13 +42,13 @@ export default function DashboardAnalytics() {
       } catch (err) {
         console.warn('API Offline/Error, using pixel-perfect local payload');
         setData(fallbackData.activeProperties);
-      }  finally {
+      } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  },[])
+  }, [])
 
   if (loading) {
     return (
@@ -62,7 +62,7 @@ export default function DashboardAnalytics() {
 
   return (
     <div className="bg-[#f8fafb] p-4 sm:p-6 space-y-5 text-gray-800 font-sans max-w-[1600px] mx-auto select-none">
-      
+
       {/* 🔴 SECTION 1: Top Main Wave Chart + Best/Lowest Cards + Yellow Banner */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <div className="lg:col-span-8 bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
@@ -77,8 +77,8 @@ export default function DashboardAnalytics() {
               <AreaChart data={d.weeklyStatus}>
                 <defs>
                   <linearGradient id="topWaveGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.25}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <Area type="natural" dataKey="value" stroke="#10b981" strokeWidth={2} fill="url(#topWaveGrad)" />
@@ -159,11 +159,11 @@ export default function DashboardAnalytics() {
           </div>
         </div>
 
-        <div className="lg:col-span-4 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <div className="lg:col-span-4 bg-white p-4 h-60 overflow-scroll rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-xs font-bold text-gray-800 mb-3">Total Active Properties</h3>
-          <div className="space-y-2.5">
-            {d.activeProperties.map((p, i) => (
-              <div key={i} className="flex items-center justify-between text-xs">
+          <div className="space-y-2.5 ">
+            {((projects && projects.length > 0) ? projects : d?.activeProperties || [])?.map((p, i) => (
+              <div key={p.id || i} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2.5">
                   <img src={p.img} alt={p.name} className="w-8 h-8 rounded-lg object-cover" />
                   <div>
@@ -171,9 +171,8 @@ export default function DashboardAnalytics() {
                     <p className="text-[9px] text-gray-400 font-semibold">{p.location}</p>
                   </div>
                 </div>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                  p.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-[#007b57]'
-                }`}>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${p.status === 'Pending' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-[#007b57]'
+                  }`}>
                   {p.status}
                 </span>
               </div>
@@ -290,9 +289,8 @@ export default function DashboardAnalytics() {
                   <img src={u.avatar} alt={u.name} className="w-6 h-6 rounded-full object-cover" />
                   <span className="font-extrabold text-gray-800 text-[11px]">{u.name}</span>
                 </div>
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                  u.status === 'Active' ? 'bg-emerald-50 text-[#007b57]' : 'bg-red-50 text-red-500'
-                }`}>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${u.status === 'Active' ? 'bg-emerald-50 text-[#007b57]' : 'bg-red-50 text-red-500'
+                  }`}>
                   {u.status}
                 </span>
               </div>
@@ -450,8 +448,8 @@ export default function DashboardAnalytics() {
           <h3 className="text-xs font-bold text-gray-800">Generation Funnel</h3>
           <div className="space-y-1 my-2">
             {[800, 650, 480, 320, 150].map((val, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className="bg-[#10b981] text-white text-[9px] font-black py-1 rounded text-center mx-auto"
                 style={{ width: `${100 - idx * 16}%`, opacity: 1 - idx * 0.15 }}
               >
