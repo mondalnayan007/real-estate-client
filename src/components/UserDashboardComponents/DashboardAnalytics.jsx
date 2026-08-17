@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   RadialBarChart, RadialBar, ResponsiveContainer, XAxis, YAxis, Tooltip
 } from 'recharts';
 import { Eye, Edit2, Trash2, MapPin } from 'lucide-react';
+import AgentContext from '../../context/AgentContext';
 
 export default function DashboardAnalytics() {
   const [data, setData] = useState(null);
   const [projects, setProjects] = useState([]);
   console.log(projects);
   const [loading, setLoading] = useState(true);
+  const { user } = use(AgentContext);
 
   const baseURL = "http://localhost:4000";
 
@@ -35,7 +37,7 @@ export default function DashboardAnalytics() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch(`${baseURL}/projects`);
+        const res = await fetch(`${baseURL}/projects?agentId=${user.agentId}`);
         if (!res.ok) throw new Error('API fetch failed');
         const json = await res.json();
         setProjects(json);
@@ -141,7 +143,7 @@ export default function DashboardAnalytics() {
 
       {/* 🔴 SECTION 3: Purchase Overview Bar + Total Active Properties List */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <div className="lg:col-span-8 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+        <div className="lg:col-span-6 bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-bold text-gray-800">Purchase Overview</h3>
             <select className="text-[10px] bg-gray-50 border border-gray-200 rounded px-2 py-0.5 text-gray-500">
@@ -159,7 +161,7 @@ export default function DashboardAnalytics() {
           </div>
         </div>
 
-        <div className="lg:col-span-4 bg-white p-4 h-60 overflow-scroll rounded-xl border border-gray-100 shadow-sm">
+        <div className="lg:col-span-6 bg-white p-4 h-60 overflow-scroll rounded-xl border border-gray-100 shadow-sm">
           <h3 className="text-xs font-bold text-gray-800 mb-3">Total Active Properties</h3>
           <div className="space-y-2.5 ">
             {((projects && projects.length > 0) ? projects : d?.activeProperties || [])?.map((p, i) => (
@@ -167,7 +169,7 @@ export default function DashboardAnalytics() {
                 <div className="flex items-center gap-2.5">
                   <img src={p.img} alt={p.name} className="w-8 h-8 rounded-lg object-cover" />
                   <div>
-                    <h4 className="font-bold text-gray-900 text-[11px]">{p.name}</h4>
+                    <h4 className="font-bold text-gray-900 text-[11px]">{p.title || name }</h4>
                     <p className="text-[9px] text-gray-400 font-semibold">{p.location}</p>
                   </div>
                 </div>
