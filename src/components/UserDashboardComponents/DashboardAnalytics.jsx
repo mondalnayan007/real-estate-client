@@ -7,13 +7,17 @@ import { Eye, Edit2, Trash2, MapPin } from 'lucide-react';
 
 export default function DashboardAnalytics() {
   const [data, setData] = useState(null);
+  const  [projects,setProjects]= useState([]);
+  console.log(projects);
   const [loading, setLoading] = useState(true);
+
+  const baseURL = "http://localhost:4000";
 
   // 🌐 Dynamic API Fetching with Full Fallback Mechanism
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/dashboard');
+        const res = await fetch(`${baseURL}/api/dashboard`);
         if (!res.ok) throw new Error('API fetch failed');
         const json = await res.json();
         setData(json);
@@ -27,6 +31,24 @@ export default function DashboardAnalytics() {
 
     fetchAnalytics();
   }, []);
+
+  useEffect(()=>{
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch(`${baseURL}/projects`);
+        if (!res.ok) throw new Error('API fetch failed');
+        const json = await res.json();
+        setProjects(json);
+      } catch (err) {
+        console.warn('API Offline/Error, using pixel-perfect local payload');
+        setData(fallbackData.activeProperties);
+      }  finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  },[])
 
   if (loading) {
     return (

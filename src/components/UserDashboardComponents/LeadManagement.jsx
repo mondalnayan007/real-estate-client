@@ -22,7 +22,7 @@ const fetchPendingPayments = async () => {
   const response = await fetch(`${API_BASE_URL}/api/admin/pending-payments`);
   if (!response.ok) throw new Error('Could not connect to the backend server.');
   const data = await response.json();
-  console.log(data);
+
   if (!data.success) throw new Error(data.message || 'Failed to load pending payments.');
   return data.data || [];
 };
