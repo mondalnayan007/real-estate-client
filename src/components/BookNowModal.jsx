@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { X, CheckCircle2, Building2, User, Mail, DollarSign, Users, ShieldCheck, Sparkles } from 'lucide-react';
+import AgentContext from '../context/AgentContext';
 
 export default function BookNowModal({ isOpen, onClose, propertyTitle, bookingPrice, sharePrice, _id }) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {user} = use(AgentContext);
+ 
 
   // Form State initialized with structure matching the document
   const [formData, setFormData] = useState({
@@ -33,7 +36,8 @@ export default function BookNowModal({ isOpen, onClose, propertyTitle, bookingPr
     nomineeRelation: '',
     nomineeMobileNo: '',
     nomineeNationalId: '',
-    projectId:_id
+    projectId:_id,
+    agentId:user.agentId,
   });
 
   // Keep props in sync with formData if props change
