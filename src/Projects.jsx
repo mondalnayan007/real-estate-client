@@ -4,7 +4,7 @@ import { ChevronRight, Plus, Search, RotateCcw, Filter } from 'lucide-react';
 import { Link } from 'react-router';
 import AgentContext from './context/AgentContext';
 
-const statusList = ['On Sale', 'Sold Out', 'Under Construction','Up Coming'];
+const statusList = ['Completed', 'Sold Out', 'Under Construction', 'Up Coming'];
 const communityList = [
   'Bashundhara Residential Area',
   'Jolshiri Abashon',
@@ -35,10 +35,16 @@ const cardVariants = {
   }
 };
 
+// Helper: Extra Space, Hyphen & Special Characters রিমুভ করার ফাংশন
+const normalizeText = (str) => {
+  if (!str) return '';
+  return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+};
+
 export default function Projects() {
   const [premiumProjects, setPremiumProjects] = useState([]);
   
-  // Multiple Selection States (Array Store for multi-check)
+  // Multiple Selection States
   const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [selectedCommunities, setSelectedCommunities] = useState([]);
   
@@ -50,11 +56,13 @@ export default function Projects() {
   const [visibleLimit, setVisibleLimit] = useState(6);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
-      .then(res => res.json())
-      .then(data => setPremiumProjects(data))
-      .catch(err => console.error("Error fetching data:", err));
-  }, [user.agentId]);
+    if (user?.agentId) {
+      fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
+        .then(res => res.json())
+        .then(data => setPremiumProjects(data))
+        .catch(err => console.error("Error fetching data:", err));
+    }
+  }, [user?.agentId]);
 
   // Multiple Status Toggle Function
   const handleStatusToggle = (status) => {
@@ -83,13 +91,20 @@ export default function Projects() {
     setVisibleLimit(6);
   };
 
-  // Multiple Filter Logic Engine
+  // Robust Multiple Filter Logic Engine
   const filteredProjects = premiumProjects.filter(project => {
-    // Status Filter Matching
-    const matchStatus = selectedStatuses.length === 0 || selectedStatuses.includes(project.status);
+    // 1. Double word status matching handle
+    const projectStatusNormalized = normalizeText(project.status) || 'onsale';
+
+    const matchStatus = selectedStatuses.length === 0 || selectedStatuses.some(selected => {
+      const selectedStatusNormalized = normalizeText(selected);
+      return projectStatusNormalized === selectedStatusNormalized;
+    });
     
-    // Community Filter Matching
-    const matchCommunity = selectedCommunities.length === 0 || selectedCommunities.some(c => project.location?.includes(c));
+    // 2. Community Filter Matching
+    const matchCommunity = selectedCommunities.length === 0 || selectedCommunities.some(c => 
+      normalizeText(project.location).includes(normalizeText(c))
+    );
 
     return matchStatus && matchCommunity;
   });
@@ -112,7 +127,7 @@ export default function Projects() {
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[#007b57] tracking-[0.2em]  pt-5 font-extrabold uppercase block mb-2"
+            className="text-[#007b57] tracking-[0.2em] pt-5 font-extrabold uppercase block mb-2"
           >
             ---PROJECTS---
           </motion.span>
@@ -131,7 +146,7 @@ export default function Projects() {
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3">
             <p className="text-xs sm:text-sm text-gray-500 font-medium">
-              Showing <span className="font-bold text-gray-800">1–{displayedProjects.length}</span> of <span className="font-bold text-gray-800">{filteredProjects.length}</span> projects
+              Showing <span className="font-bold text-gray-800">{displayedProjects.length > 0 ? 1 : 0}–{displayedProjects.length}</span> of <span className="font-bold text-gray-800">{filteredProjects.length}</span> projects
             </p>
 
             {/* Top Clear Filter Button */}
@@ -244,7 +259,7 @@ export default function Projects() {
               >
                 <AnimatePresence mode="popLayout">
                   {displayedProjects.map((item) => {
-                    const isSoldOut = item.status === 'Sold Out';
+                    const isSoldOut = normalizeText(item.status) === 'soldout';
 
                     return (
                       <Link key={item._id || item.id} to={`/project-details/${item._id}`} className="flex h-full">
@@ -257,7 +272,7 @@ export default function Projects() {
                           whileHover={{ y: -5 }}
                           className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col justify-between w-full h-full"
                         >
-                          {/* Image Container with Fixed Height to Prevent Stretching */}
+                          {/* Image Container */}
                           <div className="relative h-56 w-full overflow-hidden bg-gray-100 flex-shrink-0">
                             <img
                               src={item.img}
@@ -271,7 +286,7 @@ export default function Projects() {
                                 isSoldOut ? 'bg-red-600' : 'bg-[#007b57]'
                               }`}
                             >
-                              {item.status || (isSoldOut ? 'Sold Out' : 'On Sale')}
+                              {item.status || 'On Sale'}
                             </span>
                           </div>
 
