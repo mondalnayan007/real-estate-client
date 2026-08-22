@@ -19,6 +19,7 @@ import Login from "../views/Login";
 import Dashboard from "../views/Dashboard";
 import ContactSection from "../views/ContactSection";
 import BlogDetails from "../views/BlogDetails";
+import PaymentSuccess from "../views/PaymentSuccess";
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -57,6 +58,10 @@ const mainCompanyRouter = createBrowserRouter([
   {
     path: '/admin/super-dashboard',
     Component: SuperAdminDashboard
+  },
+  {
+    path: '/payment-success',
+    Component: PaymentSuccess
   },
   {
     path: '*',
