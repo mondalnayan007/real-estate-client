@@ -18,6 +18,9 @@ const PaymentSuccess = ({
   websiteUrl = "https://primeestates.com"
 }) => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const handleWebsite =()=>{
+    window.location.href = websiteUrl;;
+  }
 
   const handleNativePrint = () => {
     window.print();
@@ -102,17 +105,16 @@ const PaymentSuccess = ({
           </div>
 
           <div className="pt-2">
-            <a
-              href={websiteUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              
+              onClick={handleWebsite}
               className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition-all text-base"
             >
               <span>Go to Your Website</span>
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
-            </a>
+            </button>
           </div>
 
         </div>
