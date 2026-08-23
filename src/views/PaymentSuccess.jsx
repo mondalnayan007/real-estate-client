@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom'; // URL Parameter পড়ার জন্য
 
 const PaymentSuccess = ({
   paymentData = {
@@ -6,7 +7,7 @@ const PaymentSuccess = ({
     planName: "Agency Pro Plan",
     amount: "$49.00",
     agencyName: "Prime Estates Ltd",
-    domain: "primeestates.com",
+    domain: "mark", // Default Subdomain
     customerEmail: "user@example.com",
     customerPhone: "+880 1700-000000",
     date: new Date().toLocaleDateString('en-US', {
@@ -14,13 +15,33 @@ const PaymentSuccess = ({
       month: 'long',
       day: 'numeric'
     })
-  },
-  websiteUrl = "https://primeestates.com"
+  }
 }) => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const handleWebsite =()=>{
-    window.location.href = websiteUrl;;
-  }
+  const [searchParams] = useSearchParams();
+
+  // 🟢 ১. URL Param থেকে domain/subdomain নেওয়া (যেমন: ?domain=mark)
+  const subdomain = searchParams.get('domain') || paymentData.domain;
+
+  // 🟢 ২. Localhost & Production এর জন্য ডাইনামিক URL তৈরি
+  const handleWebsite = () => {
+    const isLocalhost = window.location.hostname.includes('localhost');
+    let finalTargetUrl = '';
+
+    if (isLocalhost) {
+      // Localhost এর ক্ষেত্রে (e.g., http://mark.localhost:3000)
+      const port = window.location.port ? `:${window.location.port}` : '';
+      const cleanSubdomain = subdomain.replace('.primeestates.com', ''); // শুধুই 'mark' রাখা
+      finalTargetUrl = `http://${cleanSubdomain}.localhost${port}`;
+    } else {
+      // Production এর ক্ষেত্রে (e.g., https://mark.primeestates.com)
+      const fullDomain = subdomain.includes('.') ? subdomain : `${subdomain}.primeestates.com`;
+      finalTargetUrl = `https://${fullDomain}`;
+    }
+
+    // রিডায়রেক্ট
+    window.location.href = finalTargetUrl;
+  };
 
   const handleNativePrint = () => {
     window.print();
@@ -29,7 +50,7 @@ const PaymentSuccess = ({
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      {/* 🔴 PRINT ENGINE CSS - প্রিন্ট করার সময় আসল ইনভয়েসটি অন করবে এবং বাকি স্ক্রিন হাইড করবে */}
+      {/* 🔴 PRINT ENGINE CSS */}
       <style>{`
         @media print {
           body * {
@@ -89,7 +110,7 @@ const PaymentSuccess = ({
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold text-slate-900">Payment Successful!</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Your domain <span className="font-semibold text-emerald-600">{paymentData.domain}</span> and subscription have been configured successfully.
+              Your domain <span className="font-semibold text-emerald-600">{subdomain}.primeestates.com</span> and subscription have been configured successfully.
             </p>
           </div>
 
@@ -106,7 +127,6 @@ const PaymentSuccess = ({
 
           <div className="pt-2">
             <button
-              
               onClick={handleWebsite}
               className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition-all text-base"
             >
@@ -169,7 +189,7 @@ const PaymentSuccess = ({
         </div>
       )}
 
-      {/* 📄 OFFICIAL PROFESSIONAL INVOICE TEMPLATE (This renders directly in PDF) */}
+      {/* 📄 OFFICIAL PROFESSIONAL INVOICE TEMPLATE */}
       <div id="printable-invoice" className="hidden">
         <div style={{
           fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -180,11 +200,9 @@ const PaymentSuccess = ({
           color: "#1e293b",
           boxSizing: "border-box"
         }}>
-          
-          {/* Header */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingBottom: "25px", borderBottom: "2px solid #059669" }}>
             <div>
-              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "800", color: "#059669", tracking: "tight" }}>PRIMEESTATES</h1>
+              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "800", color: "#059669" }}>PRIMEESTATES</h1>
               <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}>Software & Agency Solutions</p>
             </div>
             <div style={{ textAlign: "right" }}>
@@ -194,7 +212,6 @@ const PaymentSuccess = ({
             </div>
           </div>
 
-          {/* Customer & Company Details */}
           <div style={{ display: "flex", justifyContent: "space-between", margin: "30px 0" }}>
             <div>
               <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>BILLED TO</p>
@@ -210,7 +227,6 @@ const PaymentSuccess = ({
             </div>
           </div>
 
-          {/* Items Table */}
           <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px", marginBottom: "30px" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #cbd5e1", textTransform: "uppercase", fontSize: "11px", color: "#475569" }}>
@@ -226,7 +242,7 @@ const PaymentSuccess = ({
                   <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#64748b" }}>Subscription License</p>
                 </td>
                 <td style={{ padding: "16px", textAlign: "center", color: "#059669", fontWeight: "600" }}>
-                  {paymentData.domain}
+                  {subdomain}.primeestates.com
                 </td>
                 <td style={{ padding: "16px", textAlign: "right", fontWeight: "700", color: "#0f172a" }}>
                   {paymentData.amount}
@@ -235,8 +251,7 @@ const PaymentSuccess = ({
             </tbody>
           </table>
 
-          {/* Pricing Summary */}
-          <div style={{ display: "flex", justifyBetween: "space-between", alignItems: "center", backgroundColor: "#f8fafc", padding: "16px 20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#f8fafc", padding: "16px 20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
             <div style={{ fontSize: "14px", fontWeight: "700", color: "#334155" }}>
               Total Amount Paid
             </div>
@@ -245,12 +260,10 @@ const PaymentSuccess = ({
             </div>
           </div>
 
-          {/* Footer Notes */}
           <div style={{ marginTop: "50px", paddingTop: "20px", borderTop: "1px solid #e2e8f0", textAlign: "center", fontSize: "11px", color: "#94a3b8" }}>
             <p style={{ margin: 0 }}>Thank you for doing business with PrimeEstates.</p>
             <p style={{ margin: "4px 0 0 0" }}>If you have any questions about this invoice, please contact support@primeestates.com</p>
           </div>
-
         </div>
       </div>
 
