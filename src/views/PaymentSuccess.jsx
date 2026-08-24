@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom'; // URL Parameter পড়ার জন্য
 
 const PaymentSuccess = ({
@@ -19,9 +19,23 @@ const PaymentSuccess = ({
 }) => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [searchParams] = useSearchParams();
-
+  const [sessionData,setSessionData] = useState([]);
+  console.log(sessionData);
+const baseURL = 'http://localhost:4000'
   // 🟢 ১. URL Param থেকে domain/subdomain নেওয়া (যেমন: ?domain=mark)
-  const subdomain = searchParams.get('domain') || paymentData.domain;
+  const subdomain =  paymentData.domain;
+  const sessionId = searchParams.get('session_id') ;
+  console.log(sessionId);
+
+  useEffect(()=>{
+    if(sessionId){
+      fetch(`${baseURL}/session-status?sessionId=${sessionId}`)
+      .then(res =>res.json())
+      .then(data=> {
+        setSessionData(data)
+      })
+    }
+  },[sessionId])
 
   // 🟢 ২. Localhost & Production এর জন্য ডাইনামিক URL তৈরি
   const handleWebsite = () => {
