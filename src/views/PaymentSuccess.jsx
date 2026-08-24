@@ -3,18 +3,18 @@ import { useSearchParams } from 'react-router-dom'; // URL Parameter পড়া�
 
 const PaymentSuccess = ({
   paymentData = {
-    transactionId: "TXN-884920193",
-    planName: "Agency Pro Plan",
-    amount: "$49.00",
-    agencyName: "Prime Estates Ltd",
-    domain: "mark", // Default Subdomain
-    customerEmail: "user@example.com",
-    customerPhone: "+880 1700-000000",
-    date: new Date().toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    // transactionId: "TXN-884920193",
+    // planName: "Agency Pro Plan",
+    // amount: "$49.00",
+    // agencyName: "Prime Estates Ltd",
+    // domain: "mark", // Default Subdomain
+    // customerEmail: "user@example.com",
+    // customerPhone: "+880 1700-000000",
+    // date: new Date().toLocaleDateString('en-US', {
+    //   year: 'numeric',
+    //   month: 'long',
+    //   day: 'numeric'
+    // })
   }
 }) => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -23,7 +23,7 @@ const PaymentSuccess = ({
   console.log(sessionData);
 const baseURL = 'http://localhost:4000'
   // 🟢 ১. URL Param থেকে domain/subdomain নেওয়া (যেমন: ?domain=mark)
-  const subdomain =  paymentData.domain;
+  const subdomain =  sessionData.subdomain;
   const sessionId = searchParams.get('session_id') ;
   console.log(sessionId);
 
@@ -124,7 +124,7 @@ const baseURL = 'http://localhost:4000'
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold text-slate-900">Payment Successful!</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Your domain <span className="font-semibold text-emerald-600">{subdomain}.primeestates.com</span> and subscription have been configured successfully.
+              Your domain <span className="font-semibold text-emerald-600">{sessionData.subdomain}.primeestates.com</span> and subscription have been configured successfully.
             </p>
           </div>
 
@@ -135,7 +135,7 @@ const baseURL = 'http://localhost:4000'
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Amount Paid:</span>
-              <span className="font-bold text-emerald-600 text-sm">{paymentData.amount}</span>
+              <span className="font-bold text-emerald-600 text-sm">{sessionData.planPrice}</span>
             </div>
           </div>
 
@@ -177,7 +177,7 @@ const baseURL = 'http://localhost:4000'
               </div>
               <h4 className="font-semibold text-slate-800 text-base">Receipt Ready for Download</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Click below to save your official invoice for <span className="font-bold text-slate-700">{paymentData.agencyName}</span> as a PDF file.
+                Click below to save your official invoice for <span className="font-bold text-slate-700">{sessionData.agencyName}</span> as a PDF file.
               </p>
             </div>
 
@@ -222,16 +222,16 @@ const baseURL = 'http://localhost:4000'
             <div style={{ textAlign: "right" }}>
               <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#0f172a" }}>INVOICE</h2>
               <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Invoice Ref:</strong> #{paymentData.transactionId}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Date:</strong> {paymentData.date}</p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Date:</strong> {sessionData.createdAt}</p>
             </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", margin: "30px 0" }}>
             <div>
               <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>BILLED TO</p>
-              <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>{paymentData.agencyName}</p>
-              <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#475569" }}>{paymentData.customerEmail}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#475569" }}>{paymentData.customerPhone}</p>
+              <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>{sessionData.agencyName}</p>
+              <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#475569" }}>{sessionData.senderEmail}</p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#475569" }}>{sessionData.whatsAppNumber}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>PAYMENT STATUS</p>
@@ -252,14 +252,14 @@ const baseURL = 'http://localhost:4000'
             <tbody>
               <tr style={{ borderBottom: "1px solid #e2e8f0", fontSize: "13px" }}>
                 <td style={{ padding: "16px" }}>
-                  <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>{paymentData.planName}</p>
+                  <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>{sessionData.planName}</p>
                   <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#64748b" }}>Subscription License</p>
                 </td>
                 <td style={{ padding: "16px", textAlign: "center", color: "#059669", fontWeight: "600" }}>
                   {subdomain}.primeestates.com
                 </td>
                 <td style={{ padding: "16px", textAlign: "right", fontWeight: "700", color: "#0f172a" }}>
-                  {paymentData.amount}
+                  {sessionData.planPrice}
                 </td>
               </tr>
             </tbody>
@@ -270,7 +270,7 @@ const baseURL = 'http://localhost:4000'
               Total Amount Paid
             </div>
             <div style={{ fontSize: "22px", fontWeight: "800", color: "#059669", textAlign: "right" }}>
-              {paymentData.amount}
+              {sessionData.planPrice}
             </div>
           </div>
 
