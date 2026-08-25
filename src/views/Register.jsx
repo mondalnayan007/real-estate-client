@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 
 
 const Register = () => {
-  const { signUpWithEmail, signUpWithGoogle } = useContext(AuthContext);
+  const { signUpWithEmail, signInWithGoogle } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -103,14 +103,14 @@ const handleGoogleRegister = async () => {
   setLoading(true);
 
   try {
-    const result = await signUpWithGoogle();
+    const result = await signInWithGoogle();
     const user = result.user;
+    console.log(user.uid);
 
     // Firebase state sync এর জন্য ১ সেকেন্ড ওয়েট
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Fresh Token
-    const token = await user.getIdToken(true);
+   
 
     // Google Sign-In এর নাম Split করে First & Last Name বের করা
     const nameParts = (user.displayName || '').split(' ');
@@ -127,7 +127,6 @@ const handleGoogleRegister = async () => {
       body: JSON.stringify({
         firstName,
         lastName,
-        name: user.displayName,
         email: user.email,
         uid: user.uid,
         avatar: user.photoURL, // Google এর প্রোফাইল ছবি
