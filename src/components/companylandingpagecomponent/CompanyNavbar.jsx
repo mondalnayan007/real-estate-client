@@ -1,10 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Link } from 'react-router';
-import { FaTerminal, FaBars, FaXmark, FaArrowRight } from 'react-icons/fa6';
+import { 
+  FaTerminal, 
+  FaBars, 
+  FaXmark, 
+  FaArrowRight, 
+  FaUser, 
+  FaRightFromBracket, 
+  FaShieldHalved 
+} from 'react-icons/fa6';
 import { FaSignInAlt } from 'react-icons/fa';
+import { AuthContext } from '../../context/AuthContext';
 
 const CompanyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // 💡 আপনার প্রজেক্টের Auth Context/State অনুযায়ী এটি পরিবর্তন করুন (উদাহরণস্বরূপ static user রাখা হয়েছে)
+  // const user = {
+  //   displayName: 'Rahim Ahmed',
+  //   email: 'rahim@example.com',
+  //   photoURL: '' // খালি থাকলে ডিফল্ট আইকন দেখাবে
+  // };
+
+  const {user} = useContext(AuthContext);
+  console.log(user);
+
+  const handleLogout = () => {
+    setIsProfileOpen(false);
+    console.log("User logged out");
+    // আপনার Logout Function টি এখানে কল করুন (যেমন: logOut())
+  };
+
+  // ড্রপডাউনের বাইরে ক্লিক করলে মেনু বন্ধ করার জন্য Event Listener
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const menuLinks = [
     { label: 'Features', href: '#features' },
@@ -19,7 +57,7 @@ const CompanyNavbar = () => {
         <div className="flex justify-between h-20 items-center">
           
           {/* 🚀 Brand Logo Section */}
-          <div className="flex items-center gap-2.5 select-none group">
+          <Link to="/" className="flex items-center gap-2.5 select-none group">
             <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white shadow-lg shadow-blue-500/20 group-hover:rotate-6 transition-transform duration-300">
               <FaTerminal size={14} />
             </div>
@@ -29,7 +67,7 @@ const CompanyNavbar = () => {
             <span className="bg-blue-500/10 text-blue-400 text-[9px] font-bold uppercase px-2 py-0.5 rounded-md border border-blue-500/20 tracking-wider">
               SaaS Core
             </span>
-          </div>
+          </Link>
           
           {/* 📡 Desktop Link Matrix */}
           <div className="hidden md:flex items-center gap-8 font-medium text-xs uppercase tracking-wider text-slate-400">
@@ -45,20 +83,77 @@ const CompanyNavbar = () => {
             ))}
           </div>
 
-          {/* 🔒 Gateway Action Buttons */}
+          {/* 🔒 Gateway Action / User Profile Section */}
           <div className="hidden md:flex items-center gap-6">
-            <a 
-              href="/login" 
-              className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1.5 group"
-            >
-              <FaSignInAlt size={12} className="text-slate-500 group-hover:text-blue-400 transition-colors" /> Sign In
-            </a>
-            <Link 
-              to={'/register'} 
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all flex items-center gap-1.5 group"
-            >
-              Activate Workspace <FaArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            {user ? (
+              /* User Dropdown */
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-3 focus:outline-none group p-1.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/50 transition-all"
+                >
+                  {user.photoURL ? (
+                    <img 
+                      src={user.photoURL} 
+                      alt="User Avatar" 
+                      className="w-8 h-8 rounded-lg object-cover ring-2 ring-blue-500/30"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold text-xs">
+                      <FaUser size={13} />
+                    </div>
+                  )}
+                  <div className="text-left pr-1">
+                    <p className="text-xs font-bold text-slate-200 leading-none group-hover:text-blue-400 transition-colors">
+                      {user.displayName || 'User Profile'}
+                    </p>
+                  </div>
+                </button>
+
+                {/* Profile Popover / Modal Dropdown */}
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-3 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-4 py-3 border-b border-slate-800/80">
+                      <p className="text-xs font-bold text-white truncate">{user.displayName || 'User'}</p>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</p>
+                    </div>
+
+                    <div className="p-1.5">
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all"
+                      >
+                        <FaShieldHalved size={13} className="text-blue-400" /> Dashboard & Profile
+                      </Link>
+                      
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all"
+                      >
+                        <FaRightFromBracket size={13} /> Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Non-logged in action buttons */
+              <>
+                <Link 
+                  to="/login" 
+                  className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1.5 group"
+                >
+                  <FaSignInAlt size={12} className="text-slate-500 group-hover:text-blue-400 transition-colors" /> Sign In
+                </Link>
+                <Link 
+                  to={'/register'} 
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold uppercase tracking-wider px-5 py-3 rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transition-all flex items-center gap-1.5 group"
+                >
+                  Activate Workspace <FaArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </>
+            )}
           </div>
 
           {/* 📱 Mobile Menu Trigger */}
@@ -89,20 +184,57 @@ const CompanyNavbar = () => {
             ))}
           </div>
           
-          <div className="pt-2 space-y-4">
-            <a 
-              href="/login" 
-              className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider py-3 bg-slate-900 border border-slate-800 rounded-xl"
-            >
-              <FaSignInAlt size={12} /> Account Sign In
-            </a>
-            <Link 
-              to={'/register'} 
-              onClick={() => setIsOpen(false)} 
-              className="block text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/10"
-            >
-              Create Your Website
-            </Link>
+          <div className="pt-2 space-y-3">
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-xl">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="User Avatar" className="w-9 h-9 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+                      <FaUser size={14} />
+                    </div>
+                  )}
+                  <div className="truncate">
+                    <p className="text-xs font-bold text-white truncate">{user.displayName || 'User Profile'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 text-xs font-bold text-slate-200 py-3 bg-slate-900 border border-slate-800 rounded-xl"
+                >
+                  <FaShieldHalved size={13} className="text-blue-400" /> Go to Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 text-xs font-bold text-rose-400 py-3 bg-rose-500/10 border border-rose-500/20 rounded-xl"
+                >
+                  <FaRightFromBracket size={13} /> Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link 
+                  to="/login" 
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider py-3 bg-slate-900 border border-slate-800 rounded-xl"
+                >
+                  <FaSignInAlt size={12} /> Account Sign In
+                </Link>
+                <Link 
+                  to={'/register'} 
+                  onClick={() => setIsOpen(false)} 
+                  className="block text-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/10"
+                >
+                  Create Your Website
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

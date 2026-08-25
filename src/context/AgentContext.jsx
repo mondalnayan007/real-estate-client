@@ -8,6 +8,7 @@ export const AgentProvider = ({children}) => {
     const [user, setUser] = useState(null);
     const hostname = window.location.origin; 
     const [loading, setLoading] = useState(true);
+    console.log(hostname);
     
 
     useEffect(()=>{
