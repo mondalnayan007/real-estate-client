@@ -97,7 +97,7 @@ const handleSubmit = async (e) => {
   }
 };
 
-// 🌐 Google Sign-Up (একই Register API ব্যবহার করে)
+// 🌐 Google Sign-Up (FormData ব্যবহার করে ব্যাকএন্ড Multer-এর সাথে ম্যাচ করা হয়েছে)
 const handleGoogleRegister = async () => {
   setError('');
   setLoading(true);
@@ -105,38 +105,36 @@ const handleGoogleRegister = async () => {
   try {
     const result = await signInWithGoogle();
     const user = result.user;
-    console.log(user.uid);
 
-    // Firebase state sync এর জন্য ১ সেকেন্ড ওয়েট
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const token = await user.getIdToken(true);
 
-   
-
-    // Google Sign-In এর নাম Split করে First & Last Name বের করা
     const nameParts = (user.displayName || '').split(' ');
     const firstName = nameParts[0] || 'Agent';
     const lastName = nameParts.slice(1).join(' ') || '';
 
-    // একই /api/agents/register API-তে রিকোয়েস্ট পাঠানো
+    // 🔴 FormData বাদ দিয়ে সাধারণ JSON Body পাঠাব
+    const payload = {
+      firstName,
+      lastName,
+      email: user.email,
+      uid: user.uid,
+      avatar: user.photoURL,
+      authProvider: 'google'
+    };
+
     const response = await fetch('http://localhost:4000/api/agents/register', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json', // Google-এর জন্য JSON পাঠাচ্ছি
-        
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email: user.email,
-        uid: user.uid,
-        avatar: user.photoURL, // Google এর প্রোফাইল ছবি
-        authProvider: 'google'
-      })
+      body: JSON.stringify(payload)
     });
 
     const resData = await response.json();
 
-    if (response.ok && resData.success) {
+    // সেভ সফল হলে অথবা ইউজার আগে থেকেই রেজিস্টার্ড থাকলে—দুই ক্ষেত্রেই হোমপেজে নিবে
+    if (response.ok || (response.status === 400 && resData.message?.includes('registered'))) {
       navigate('/');
     } else {
       setError(resData.message || 'Google sign-in registration failed.');
@@ -148,6 +146,7 @@ const handleGoogleRegister = async () => {
     setLoading(false);
   }
 };
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
