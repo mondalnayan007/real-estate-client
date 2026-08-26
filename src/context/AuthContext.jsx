@@ -12,7 +12,7 @@ import { auth } from '../firebase/firebase.config';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const googleProvider = new GoogleAuthProvider();
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   // ৫. ইউজারের লগইন অবস্থা ট্র্যাক করা (Observer)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      setAuthUser(currentUser);
       setLoading(false);
     });
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const authInfo = {
-    user,
+    authUser,
     loading,
     createUser,
     loginUser,

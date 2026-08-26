@@ -26,15 +26,17 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')).render(
   <QueryClientProvider client={queryClient}>
-    <AgentProvider>
     <AuthProvider>
+      <AgentProvider>
+    
     <SettingsProvider>
       
       <RouterProvider router={router} />
     
     </SettingsProvider>
-    </AuthProvider>
+    
     </AgentProvider>
+    </AuthProvider>
     </QueryClientProvider>
   ,
 )

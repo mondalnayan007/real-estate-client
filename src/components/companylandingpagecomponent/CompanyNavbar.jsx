@@ -26,8 +26,8 @@ const CompanyNavbar = () => {
   //   photoURL: '' // খালি থাকলে ডিফল্ট আইকন দেখাবে
   // };
 
-  const {user} = useContext(AuthContext);
-  console.log(user);
+  const {authUser} = useContext(AuthContext);
+  console.log(authUser);
 
   const handleLogout = () => {
     setIsProfileOpen(false);
@@ -87,16 +87,16 @@ const CompanyNavbar = () => {
 
           {/* 🔒 Gateway Action / User Profile Section */}
           <div className="hidden md:flex items-center gap-6">
-            {user ? (
+            {authUser ? (
               /* User Dropdown */
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-3 focus:outline-none group p-1.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/50 transition-all"
                 >
-                  {user.photoURL ? (
+                  {authUser.photoURL ? (
                     <img 
-                      src={user.photoURL} 
+                      src={authUser.photoURL} 
                       alt="User Avatar" 
                       className="w-8 h-8 rounded-lg object-cover ring-2 ring-blue-500/30"
                     />
@@ -107,7 +107,7 @@ const CompanyNavbar = () => {
                   )}
                   <div className="text-left pr-1">
                     <p className="text-xs font-bold text-slate-200 leading-none group-hover:text-blue-400 transition-colors">
-                      {user.displayName || 'User Profile'}
+                      {authUser.displayName || 'User Profile'}
                     </p>
                   </div>
                 </button>
@@ -116,8 +116,8 @@ const CompanyNavbar = () => {
                 {isProfileOpen && (
                   <div className="absolute right-0 mt-3 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     <div className="px-4 py-3 border-b border-slate-800/80">
-                      <p className="text-xs font-bold text-white truncate">{user.displayName || 'User'}</p>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{user.email}</p>
+                      <p className="text-xs font-bold text-white truncate">{authUser.displayName || 'User'}</p>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{authUser.email}</p>
                     </div>
 
                     <div className="p-1.5">
@@ -187,19 +187,19 @@ const CompanyNavbar = () => {
           </div>
           
           <div className="pt-2 space-y-3">
-            {user ? (
+            {authUser ? (
               <>
                 <div className="flex items-center gap-3 p-3 bg-slate-900 border border-slate-800 rounded-xl">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt="User Avatar" className="w-9 h-9 rounded-lg object-cover" />
+                  {authUser.photoURL ? (
+                    <img src={authUser.photoURL} alt="User Avatar" className="w-9 h-9 rounded-lg object-cover" />
                   ) : (
                     <div className="w-9 h-9 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-xs">
                       <FaUser size={14} />
                     </div>
                   )}
                   <div className="truncate">
-                    <p className="text-xs font-bold text-white truncate">{user.displayName || 'User Profile'}</p>
-                    <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                    <p className="text-xs font-bold text-white truncate">{authUser.displayName || 'User Profile'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{authUser.email}</p>
                   </div>
                 </div>
                 <Link

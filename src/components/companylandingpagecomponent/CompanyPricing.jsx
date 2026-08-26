@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { 
   Check, X, ShieldCheck, ArrowRight, Sparkles, Building, 
   Globe, Phone, User, Link2, CreditCard, Zap, CheckCircle2 
 } from 'lucide-react';
+import AgentContext from '../../context/AgentContext';
 
 // 🌐 আপনার ব্যাকএন্ড এপিআই ইউআরএল এখানে বসান (e.g., 'https://api.yourdomain.com/v1')
 const BACKEND_API_URL = 'http://localhost:4000';
@@ -11,6 +12,9 @@ const CompanyPricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [domainType, setDomainType] = useState('subdomain');
+
+  // const {user} = useContext(AgentContext)
+  // console.log(user);
   
   // 💳 পেমেন্ট ও ব্যাকএন্ড রিকোয়েস্ট লোডিং স্টেট
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
