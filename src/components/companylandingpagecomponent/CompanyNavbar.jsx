@@ -12,9 +12,11 @@ import {
 import { FaSignInAlt } from 'react-icons/fa';
 import { AuthContext } from '../../context/AuthContext';
 
+
 const CompanyNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { logOut } = useContext(AuthContext)
   const profileRef = useRef(null);
 
   // 💡 আপনার প্রজেক্টের Auth Context/State অনুযায়ী এটি পরিবর্তন করুন (উদাহরণস্বরূপ static user রাখা হয়েছে)
@@ -29,7 +31,7 @@ const CompanyNavbar = () => {
 
   const handleLogout = () => {
     setIsProfileOpen(false);
-    console.log("User logged out");
+    logOut();
     // আপনার Logout Function টি এখানে কল করুন (যেমন: logOut())
   };
 
