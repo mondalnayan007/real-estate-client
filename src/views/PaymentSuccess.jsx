@@ -29,7 +29,12 @@ const baseURL = 'http://localhost:4000'
 
   useEffect(()=>{
     if(sessionId){
-      fetch(`${baseURL}/session-status?sessionId=${sessionId}`)
+      fetch(`${baseURL}/session-status?sessionId=${sessionId}`,{
+        method:"PATCH",
+        headers: {
+                'Content-Type': 'application/json'
+            }
+      })
       .then(res =>res.json())
       .then(data=> {
         setSessionData(data)
@@ -41,12 +46,14 @@ const baseURL = 'http://localhost:4000'
   const handleWebsite = () => {
     const isLocalhost = window.location.hostname.includes('localhost');
     let finalTargetUrl = '';
+    
 
     if (isLocalhost) {
       // Localhost এর ক্ষেত্রে (e.g., http://mark.localhost:3000)
       const port = window.location.port ? `:${window.location.port}` : '';
       const cleanSubdomain = subdomain.replace('.primeestates.com', ''); // শুধুই 'mark' রাখা
       finalTargetUrl = `http://${cleanSubdomain}.localhost${port}`;
+      
     } else {
       // Production এর ক্ষেত্রে (e.g., https://mark.primeestates.com)
       const fullDomain = subdomain.includes('.') ? subdomain : `${subdomain}.primeestates.com`;

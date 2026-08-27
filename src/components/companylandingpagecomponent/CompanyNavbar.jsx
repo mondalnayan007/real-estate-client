@@ -143,7 +143,7 @@ const CompanyNavbar = () => {
               /* Non-logged in action buttons */
               <>
                 <Link 
-                  to="/login" 
+                  to="/signin" 
                   className="text-xs font-bold text-slate-400 hover:text-white uppercase tracking-wider transition-colors flex items-center gap-1.5 group"
                 >
                   <FaSignInAlt size={12} className="text-slate-500 group-hover:text-blue-400 transition-colors" /> Sign In

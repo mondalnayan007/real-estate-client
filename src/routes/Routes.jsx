@@ -20,6 +20,8 @@ import Dashboard from "../views/Dashboard";
 import ContactSection from "../views/ContactSection";
 import BlogDetails from "../views/BlogDetails";
 import PaymentSuccess from "../views/PaymentSuccess";
+import SignIn from "../views/SignIn";
+
 
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
@@ -39,10 +41,10 @@ const mainCompanyRouter = createBrowserRouter([
     path: "/",
     element: <CompanyLandingPage /> // এখানে শুধু আপনার প্রাইসিং ও ফিচারের মেইন ল্যান্ডিং পেজ দেখাবে
   },
-  // {
-  //   path: "/signup", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
-  //   Component: UserSignup
-  // },
+  {
+    path: "/signin", // নতুন এজেন্টের সাবস্ক্রিপশন কেনার সাইন-আপ ফর্ম
+    Component: SignIn
+  },
   {
     path: '/register',
     Component: Register

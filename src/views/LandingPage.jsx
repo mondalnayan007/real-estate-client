@@ -13,7 +13,8 @@ import OurPartner from '../components/OurPartner';
 
 export default function LandingPage() {
   const {user} = use(AgentContext);
-  console.log(user.agentId);
+  console.log(user);
+  
   
 
   return (
