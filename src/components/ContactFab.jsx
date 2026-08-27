@@ -17,6 +17,7 @@ const WhatsAppIcon = ({ size = 24, className = "" }) => (
 
 export default function ContactFab() {
     const {user} = useContext(AgentContext);
+    console.log(user.metadata.whatsappNumber);
     
   return (
     <div className=" z-50">
@@ -47,7 +48,7 @@ export default function ContactFab() {
 
         {/* 2. Phone Call Action */}
         <a 
-          href={`tel:${user?.whatsappNumber}`}
+          href={`tel:${user?.metadata.whatsappNumber}`}
           className="btn btn-lg btn-circle bg-slate-800 hover:bg-blue-600 text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
           title="Call Us"
         >
@@ -56,7 +57,7 @@ export default function ContactFab() {
 
         {/* 3. WhatsApp Direct Action */}
         <a 
-          href={`https://wa.me/${user?.whatsappNumber}` }
+          href={`https://wa.me/${user?.metadata.whatsappNumber}` }
           target="_blank" 
           rel="noopener noreferrer"
           className="btn btn-lg btn-circle bg-[#25D366] hover:bg-[#20ba5a] text-white border-none shadow-lg hover:scale-110 transition-all flex items-center justify-center group"
