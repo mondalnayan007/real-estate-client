@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 
 
 const Register = () => {
-  const { signUpWithEmail, signInWithGoogle,createUser } = useContext(AuthContext);
+  const {  signInWithGoogle,createUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
