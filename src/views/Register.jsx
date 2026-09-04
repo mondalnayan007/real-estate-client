@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 
 
 const Register = () => {
-  const { signUpWithEmail, signInWithGoogle } = useContext(AuthContext);
+  const { signUpWithEmail, signInWithGoogle,createUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -50,7 +50,7 @@ const handleSubmit = async (e) => {
 
   try {
     // Step ১: Firebase-এ ইউজার অ্যাকাউন্ট তৈরি
-    const userCredential = await signUpWithEmail(formData.email, formData.password);
+    const userCredential = await createUser(formData.email, formData.password);
     const firebaseUser = userCredential.user;
     console.log(firebaseUser);
 

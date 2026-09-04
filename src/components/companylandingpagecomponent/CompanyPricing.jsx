@@ -32,30 +32,7 @@ const {authUser} = useContext(AuthContext);
 
   // 📦 ৪টি বিস্তারিত প্ল্যান ডিফাইন করা হয়েছে
   const pricingPlans = [
-    { 
-      id: 'plan_starter',
-      name: 'Starter Plan', 
-      price: '$19',
-      numericPrice: 19,
-      duration: 'monthly',
-      desc: 'Ideal for independent real estate agents building an initial web presence.',
-      limits: {
-        listings: 10,
-        agents: 1,
-        storageGB: 2,
-        customDomainAllowed: false
-      },
-      features: [
-        'Instant Subdomain Lookup',
-        'Up to 10 Property Listings',
-        'Standard Luxury Template Theme',
-        'Basic CRM Dashboard Tracking',
-        'Community Support'
-      ],
-      color: 'from-slate-900 via-slate-900 to-slate-950',
-      badgeColor: 'text-slate-400 bg-slate-800/80 border-slate-700/50',
-      isPopular: false
-    },
+    
     { 
       id: 'plan_growth',
       name: 'Growth Plan', 
@@ -64,15 +41,13 @@ const {authUser} = useContext(AuthContext);
       duration: 'monthly',
       desc: 'Designed for small teams and growing agencies scaling local operations.',
       limits: {
-        listings: 40,
-        agents: 3,
+        listings: 15,
         storageGB: 10,
         customDomainAllowed: true
       },
       features: [
-        'Custom Domain Integration',
-        'Up to 40 Property Listings',
-        '3 Agent Team Accounts',
+        'Sub Domain Integration',
+        'Up to 15 Property Listings',
         'Custom Branding & Color Schemes',
         'Standard Analytics & Lead Form'
       ],
@@ -88,15 +63,13 @@ const {authUser} = useContext(AuthContext);
       duration: 'monthly',
       desc: 'Best for established brokerages needing full branding freedom and advanced features.',
       limits: {
-        listings: 150,
-        agents: 10,
+        listings: 35,
         storageGB: 50,
         customDomainAllowed: true
       },
       features: [
         'Custom Domain Integration',
-        'Up to 150 Property Listings',
-        '10 Agent Team Accounts',
+        'Up to 35 Property Listings',
         'Advanced Analytics & Tracking',
         'Automated WhatsApp Lead Routing',
         '24/7 Priority Support'
@@ -113,15 +86,13 @@ const {authUser} = useContext(AuthContext);
       duration: 'monthly',
       desc: 'Engineered for real estate empires requiring white-label solutions and API power.',
       limits: {
-        listings: 'Unlimited',
-        agents: 'Unlimited',
+        listings: 80,
         storageGB: 200,
         customDomainAllowed: true
       },
       features: [
         'White-Labeled Custom Domain',
-        'Unlimited Property Listings',
-        'Unlimited Agent Accounts',
+        '80 Property Listings',
         'Dedicated Account Executive',
         'REST API & Webhook Access',
         'Custom Database Backups'
@@ -269,11 +240,11 @@ const {authUser} = useContext(AuthContext);
         </div>
 
         {/* 🎚️ ৪ টি কার্ডের রেসপনসিভ গ্রিড (4 Pricing Cards Layout) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch ">
           {pricingPlans.map((plan) => (
             <div 
               key={plan.id} 
-              className={`relative flex flex-col p-6 rounded-3xl bg-gradient-to-b ${plan.color} border transition-all duration-300 group ${
+              className={`relative flex flex-col p-6 rounded-3xl bg-gradient-to-b ${plan.color} border transition-all duration-300 hover:-translate-y-5 group ${
                 plan.isPopular 
                   ? 'border-blue-500/80 shadow-2xl shadow-blue-500/10 lg:-translate-y-3 z-10' 
                   : 'border-slate-800/80 hover:border-slate-700 hover:shadow-xl'
