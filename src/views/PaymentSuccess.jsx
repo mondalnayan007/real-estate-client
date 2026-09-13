@@ -1,72 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom'; // URL Parameter পড়ার জন্য
+import React, { use, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
-const PaymentSuccess = ({
-  paymentData = {
-    // transactionId: "TXN-884920193",
-    // planName: "Agency Pro Plan",
-    // amount: "$49.00",
-    // agencyName: "Prime Estates Ltd",
-    // domain: "mark", // Default Subdomain
-    // customerEmail: "user@example.com",
-    // customerPhone: "+880 1700-000000",
-    // date: new Date().toLocaleDateString('en-US', {
-    //   year: 'numeric',
-    //   month: 'long',
-    //   day: 'numeric'
-    // })
-  }
-}) => {
+const PaymentSuccess = () => {
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [searchParams] = useSearchParams();
-  const [sessionData,setSessionData] = useState([]);
-  console.log(sessionData);
-const baseURL = 'http://localhost:4000'
-  // 🟢 ১. URL Param থেকে domain/subdomain নেওয়া (যেমন: ?domain=mark)
-  const subdomain =  sessionData.subdomain;
-  const sessionId = searchParams.get('session_id') ;
-  console.log(sessionId);
+  const [agentData, setAgentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const {authUser} = use(AuthContext);
+    
 
-  useEffect(()=>{
-    if(sessionId){
-      fetch(`${baseURL}/session-status?sessionId=${sessionId}`,{
-        method:"PATCH",
-        headers: {
-                'Content-Type': 'application/json'
-            }
-      })
-      .then(res =>res.json())
-      .then(data=> {
-        setSessionData(data)
-      })
+  const baseURL = 'http://localhost:4000';
+
+  
+  const tranId = searchParams.get('tran_id');
+
+ 
+  useEffect(() => {
+    
+    const loggedInUserEmail = authUser.email; 
+
+    if (loggedInUserEmail) {
+      fetch(`${baseURL}/agents/${loggedInUserEmail}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAgentData(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error fetching agent data:", err);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-  },[sessionId])
+  }, []);
 
-  // 🟢 ২. Localhost & Production এর জন্য ডাইনামিক URL তৈরি
+  // ডাটা সেফটি শর্টকাট (Metadata destructured)
+  const metadata = agentData?.metadata || {};
+  const subdomain = metadata?.subdomain || 'agency';
+  const planPrice = metadata?.planPrice ? `৳${metadata.planPrice}` : 'N/A';
+  const agencyName = metadata?.agencyName || agentData?.name || 'Valued Agency';
+  const senderEmail = metadata?.senderEmail || agentData?.email || 'N/A';
+  const whatsappNumber = metadata?.whatsappNumber || 'N/A';
+  const planName = metadata?.planName || 'Subscription Plan';
+  const paymentDate = agentData?.updatedAt 
+    ? new Date(agentData.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString();
+
+    console.log(metadata);
+  // 🟢 ৩. Localhost & Production-এর জন্য সাবডোমেইন ডাইনামিক URL
   const handleWebsite = () => {
     const isLocalhost = window.location.hostname.includes('localhost');
     let finalTargetUrl = '';
-    
 
     if (isLocalhost) {
-      // Localhost এর ক্ষেত্রে (e.g., http://mark.localhost:3000)
       const port = window.location.port ? `:${window.location.port}` : '';
-      const cleanSubdomain = subdomain.replace('.primeestates.com', ''); // শুধুই 'mark' রাখা
+      const cleanSubdomain = subdomain.replace('.primeestates.com', '');
       finalTargetUrl = `http://${cleanSubdomain}.localhost${port}`;
-      
     } else {
-      // Production এর ক্ষেত্রে (e.g., https://mark.primeestates.com)
       const fullDomain = subdomain.includes('.') ? subdomain : `${subdomain}.primeestates.com`;
       finalTargetUrl = `https://${fullDomain}`;
     }
 
-    // রিডায়রেক্ট
     window.location.href = finalTargetUrl;
   };
 
   const handleNativePrint = () => {
     window.print();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -131,18 +141,18 @@ const baseURL = 'http://localhost:4000'
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold text-slate-900">Payment Successful!</h1>
             <p className="text-slate-500 text-sm leading-relaxed">
-              Your domain <span className="font-semibold text-emerald-600">{sessionData.subdomain}.primeestates.com</span> and subscription have been configured successfully.
+              Your domain <span className="font-semibold text-emerald-600">{subdomain}.primeestates.com</span> and subscription have been configured successfully.
             </p>
           </div>
 
           <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left text-xs space-y-2">
             <div className="flex justify-between">
               <span className="text-slate-500">Transaction Ref:</span>
-              <span className="font-mono font-bold text-slate-700">{paymentData.transactionId}</span>
+              <span className="font-mono font-bold text-slate-700">{tranId || 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Amount Paid:</span>
-              <span className="font-bold text-emerald-600 text-sm">{sessionData.planPrice}</span>
+              <span className="font-bold text-emerald-600 text-sm">{planPrice}</span>
             </div>
           </div>
 
@@ -184,7 +194,7 @@ const baseURL = 'http://localhost:4000'
               </div>
               <h4 className="font-semibold text-slate-800 text-base">Receipt Ready for Download</h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Click below to save your official invoice for <span className="font-bold text-slate-700">{sessionData.agencyName}</span> as a PDF file.
+                Click below to save your official invoice for <span className="font-bold text-slate-700">{agencyName}</span> as a PDF file.
               </p>
             </div>
 
@@ -228,17 +238,17 @@ const baseURL = 'http://localhost:4000'
             </div>
             <div style={{ textAlign: "right" }}>
               <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#0f172a" }}>INVOICE</h2>
-              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Invoice Ref:</strong> #{paymentData.transactionId}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Date:</strong> {sessionData.createdAt}</p>
+              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Invoice Ref:</strong> #{tranId || 'N/A'}</p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Date:</strong> {paymentDate}</p>
             </div>
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", margin: "30px 0" }}>
             <div>
               <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>BILLED TO</p>
-              <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>{sessionData.agencyName}</p>
-              <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#475569" }}>{sessionData.senderEmail}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#475569" }}>{sessionData.whatsAppNumber}</p>
+              <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>{agencyName}</p>
+              <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#475569" }}>{senderEmail}</p>
+              <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#475569" }}>{whatsappNumber}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>PAYMENT STATUS</p>
@@ -259,14 +269,14 @@ const baseURL = 'http://localhost:4000'
             <tbody>
               <tr style={{ borderBottom: "1px solid #e2e8f0", fontSize: "13px" }}>
                 <td style={{ padding: "16px" }}>
-                  <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>{sessionData.planName}</p>
+                  <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>{planName}</p>
                   <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#64748b" }}>Subscription License</p>
                 </td>
                 <td style={{ padding: "16px", textAlign: "center", color: "#059669", fontWeight: "600" }}>
                   {subdomain}.primeestates.com
                 </td>
                 <td style={{ padding: "16px", textAlign: "right", fontWeight: "700", color: "#0f172a" }}>
-                  {sessionData.planPrice}
+                  {planPrice}
                 </td>
               </tr>
             </tbody>
@@ -277,7 +287,7 @@ const baseURL = 'http://localhost:4000'
               Total Amount Paid
             </div>
             <div style={{ fontSize: "22px", fontWeight: "800", color: "#059669", textAlign: "right" }}>
-              {sessionData.planPrice}
+              {planPrice}
             </div>
           </div>
 

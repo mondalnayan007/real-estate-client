@@ -24,7 +24,7 @@ export const AgentProvider = ({children}) => {
             
             
         })
-    },[])
+    },[hostname])
 
     const agentValue = {
           user
