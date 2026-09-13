@@ -7,6 +7,7 @@ const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const [agentData, setAgentData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [metadata,setMetadata] = useState(null);
   const {authUser} = use(AuthContext);
     
 
@@ -15,31 +16,46 @@ const PaymentSuccess = () => {
   
   const tranId = searchParams.get('tran_id');
 
- 
-  useEffect(() => {
-    
-    const loggedInUserEmail = authUser.email; 
 
-    if (loggedInUserEmail) {
-      fetch(`${baseURL}/agents/${loggedInUserEmail}`)
+  useEffect(()=>{
+     fetch(`${baseURL}/subscription?t_id=${tranId}`)
         .then((res) => res.json())
         .then((data) => {
-          setAgentData(data);
+          setMetadata(data.metadata)
           setLoading(false);
         })
         .catch((err) => {
-          console.error("Error fetching agent data:", err);
+          console.error("Error fetching subscription data:", err);
           setLoading(false);
         });
-    } else {
-      setLoading(false);
-    }
+
+  },[tranId])
+
+ 
+  useEffect(() => {
+    
+    // const loggedInUserEmail = authUser.email; 
+
+    // if (loggedInUserEmail) {
+    //   fetch(`${baseURL}/agents/${loggedInUserEmail}`)
+    //     .then((res) => res.json())
+    //     .then((data) => {
+    //       setAgentData(data);
+    //       setLoading(false);
+    //     })
+    //     .catch((err) => {
+    //       console.error("Error fetching agent data:", err);
+    //       setLoading(false);
+    //     });
+    // } else {
+    //   setLoading(false);
+    // }
   }, []);
 
   // ডাটা সেফটি শর্টকাট (Metadata destructured)
-  const metadata = agentData?.metadata || {};
+
   const subdomain = metadata?.subdomain || 'agency';
-  const planPrice = metadata?.planPrice ? `৳${metadata.planPrice}` : 'N/A';
+  const planPrice = metadata?.planPrice ? `$${metadata.planPrice}` : 'N/A';
   const agencyName = metadata?.agencyName || agentData?.name || 'Valued Agency';
   const senderEmail = metadata?.senderEmail || agentData?.email || 'N/A';
   const whatsappNumber = metadata?.whatsappNumber || 'N/A';
