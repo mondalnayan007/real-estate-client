@@ -389,154 +389,173 @@ console.log(selectedPlan);
               </div>
             ) : (
               /* 📋 ইউজার ডাটা এবং ডোমেইন ফর্ম */
-              <form  className="space-y-4">
-                
-                {/* ১. ফুল নেম */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                    <User size={11} /> Full Name
-                  </label>
-                  <input 
-                    type="text" 
-                    name="fullName"
-                    required
-                    placeholder="e.g. Marcus Aurelius"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                  />
-                </div>
+             <form onSubmit={userData?.paymentStatus === 'paid' ? handleRenewPlan : handleSubmit} className="space-y-4">
+  {userData?.paymentStatus === 'paid' ? (
+    /* =================১. পেইড ইউজারের জন্য ভিউ================= */
+    <div className="py-8 text-center space-y-3 bg-slate-950/50 border border-slate-800/80 rounded-2xl">
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 mb-1">
+        <Sparkles size={24} />
+      </div>
+      <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+        Active Subscription Found
+      </h3>
+      <p className="text-xs text-slate-400 max-w-xs mx-auto">
+        You already have an active plan. Click below to renew your current subscription period.
+      </p>
+    </div>
+  ) : (
+    /* =================২. আনপেইড ইউজারের জন্য ইনপুট ফর্ম================= */
+    <div className="space-y-4">
+      {/* ১. ফুল নেম */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+          <User size={11} /> Full Name
+        </label>
+        <input 
+          type="text" 
+          name="fullName"
+          required
+          placeholder="e.g. Marcus Aurelius"
+          value={formData.fullName}
+          onChange={handleInputChange}
+          className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
+        />
+      </div>
 
-                {/* ২. এজেন্সির নাম */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                    <Building size={11} /> Agency / Business Name
-                  </label>
-                  <input 
-                    type="text" 
-                    name="agencyName"
-                    required
-                    placeholder="e.g. Marcus Luxury Real Estate"
-                    value={formData.agencyName}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                  />
-                </div>
+      {/* ২. এজেন্সির নাম */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+          <Building size={11} /> Agency / Business Name
+        </label>
+        <input 
+          type="text" 
+          name="agencyName"
+          required
+          placeholder="e.g. Marcus Luxury Real Estate"
+          value={formData.agencyName}
+          onChange={handleInputChange}
+          className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
+        />
+      </div>
 
-                {/* ৩. হোয়াটসঅ্যাপ নম্বর */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                    <Phone size={11} /> WhatsApp Number (For Lead Alerts)
-                  </label>
-                  <input 
-                    type="tel" 
-                    name="whatsappNumber"
-                    required
-                    placeholder="e.g. +1234567890"
-                    value={formData.whatsappNumber}
-                    onChange={handleInputChange}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
-                  />
-                </div>
+      {/* ৩. হোয়াটসঅ্যাপ নম্বর */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+          <Phone size={11} /> WhatsApp Number (For Lead Alerts)
+        </label>
+        <input 
+          type="tel" 
+          name="whatsappNumber"
+          required
+          placeholder="e.g. +1234567890"
+          value={formData.whatsappNumber}
+          onChange={handleInputChange}
+          className="w-full bg-slate-950 border border-slate-800 focus:border-blue-500/80 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-600 outline-none transition-all font-medium"
+        />
+      </div>
 
-                {/* 🛠️ ডোমেইন ক্যাটাগরি সিলেক্টর */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                    <Globe size={11} /> Web Address Configuration
-                  </label>
-                  <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => setDomainType('subdomain')}
-                      className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                        domainType === 'subdomain' 
-                          ? 'bg-blue-600 text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Use Subdomain
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDomainType('custom')}
-                      className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
-                        domainType === 'custom' 
-                          ? 'bg-blue-600 text-white shadow-md' 
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Custom Domain
-                    </button>
-                  </div>
-                </div>
+      {/* 🛠️ ডোমেইন ক্যাটাগরি সিলেক্টর */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+          <Globe size={11} /> Web Address Configuration
+        </label>
+        <div className="grid grid-cols-2 p-1 bg-slate-950 border border-slate-800 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setDomainType('subdomain')}
+            className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+              domainType === 'subdomain' 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Use Subdomain
+          </button>
+          <button
+            type="button"
+            onClick={() => setDomainType('custom')}
+            className={`py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all ${
+              domainType === 'custom' 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Custom Domain
+          </button>
+        </div>
+      </div>
 
-                {/* ৪. ডাইনামিক ডোমেইন ইনপুট */}
-                {domainType === 'subdomain' ? (
-                  <div className="space-y-1.5 animate-in fade-in duration-150">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                      <Globe size={11} /> Subdomain Username
-                    </label>
-                    <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
-                      <input 
-                        type="text" 
-                        name="customUsername"
-                        required={domainType === 'subdomain'}
-                        placeholder="marcus"
-                        value={formData.customUsername}
-                        onChange={handleInputChange}
-                        className="w-full bg-transparent px-4 py-3 text-xs text-blue-400 placeholder-slate-700 outline-none font-bold"
-                      />
-                      <span className="absolute right-3 text-[10px] font-mono font-bold bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1 rounded-md pointer-events-none select-none">
-                        .primeestates.com
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5 animate-in fade-in duration-150">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
-                      <Link2 size={11} /> Existing Domain Name
-                    </label>
-                    <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
-                      <input 
-                        type="text" 
-                        name="customDomain"
-                        required={domainType === 'custom'}
-                        placeholder="e.g. www.youragency.com"
-                        value={formData.customDomain}
-                        onChange={handleInputChange}
-                        className="w-full bg-transparent px-4 py-3 text-xs text-indigo-400 placeholder-slate-700 outline-none font-bold"
-                      />
-                    </div>
-                  </div>
-                )}
+      {/* ৪. ডাইনামিক ডোমেইন ইনপুট */}
+      {domainType === 'subdomain' ? (
+        <div className="space-y-1.5 animate-in fade-in duration-150">
+          <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+            <Globe size={11} /> Subdomain Username
+          </label>
+          <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
+            <input 
+              type="text" 
+              name="customUsername"
+              required={domainType === 'subdomain'}
+              placeholder="marcus"
+              value={formData.customUsername}
+              onChange={handleInputChange}
+              className="w-full bg-transparent px-4 py-3 text-xs text-blue-400 placeholder-slate-700 outline-none font-bold"
+            />
+            <span className="absolute right-3 text-[10px] font-mono font-bold bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1 rounded-md pointer-events-none select-none">
+              .primeestates.com
+            </span>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-1.5 animate-in fade-in duration-150">
+          <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1">
+            <Link2 size={11} /> Existing Domain Name
+          </label>
+          <div className="relative flex items-center bg-slate-950 border border-slate-800 rounded-xl focus-within:border-blue-500/80 transition-all overflow-hidden">
+            <input 
+              type="text" 
+              name="customDomain"
+              required={domainType === 'custom'}
+              placeholder="e.g. www.youragency.com"
+              value={formData.customDomain}
+              onChange={handleInputChange}
+              className="w-full bg-transparent px-4 py-3 text-xs text-indigo-400 placeholder-slate-700 outline-none font-bold"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )}
 
-                {/* অ্যাকশন বাটন */}
-                <div className="flex gap-3 pt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)} 
-                    className="w-1/3 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  {
-                    userData?.paymentStatus === 'paid' && userData?.metadata.planName === selectedPlan.name ?  <button 
-                    onClick={handleRenewPlan}
-                    className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    Renew Your Plan <ArrowRight size={13} />
-                  </button>
-                    : 
-                    <button 
-                    onClick={handleSubmit}
-                    className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    Proceed to Payment <ArrowRight size={13} />
-                  </button>
-                  }
-                </div>
+  {/* =================অ্যাকশন বাটন সেকশন================= */}
+  <div className="flex gap-3 pt-4">
+    <button 
+      type="button" 
+      onClick={() => setIsModalOpen(false)} 
+      className="w-1/3 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider transition-colors"
+    >
+      Cancel
+    </button>
 
-              </form>
+    {userData?.paymentStatus === 'paid' ? (
+      <button 
+        type="button"
+        onClick={handleRenewPlan}
+        className="w-2/3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5"
+      >
+        Renew Your Plan <ArrowRight size={13} />
+      </button>
+    ) : (
+      <button 
+        type="submit"
+        onClick={handleSubmit}
+        className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
+      >
+        Proceed to Payment <ArrowRight size={13} />
+      </button>
+    )}
+  </div>
+</form>
             )}
           </div>
         </div>
