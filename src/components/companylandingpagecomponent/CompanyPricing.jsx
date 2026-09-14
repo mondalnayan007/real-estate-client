@@ -20,7 +20,7 @@ const CompanyPricing = () => {
 
 const {authUser} = useContext(AuthContext);
 
-console.log(selectedPlan);
+
   
   // 💳 পেমেন্ট ও ব্যাকএন্ড রিকোয়েস্ট লোডিং স্টেট
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -240,7 +240,18 @@ console.log(selectedPlan);
 
 
   const handleRenewPlan = ()=>{
-    alert('User wants to renew the plan !!!');
+     const renewalInfo = {
+      planDetails: {
+        planId: selectedPlan.id,
+        planName: selectedPlan.name,
+        price: selectedPlan.numericPrice,
+        currency: 'USD',
+        duration: selectedPlan.duration,
+        limits: selectedPlan.limits,
+        features: selectedPlan.features
+      },
+     }
+     console.log(renewalInfo);
   }
 
 
