@@ -239,7 +239,7 @@ const {authUser} = useContext(AuthContext);
   };
 
 
-  const handleRenewPlan = ()=>{
+  const handleRenewPlan = async()=>{
      const renewalInfo = {
       planDetails: {
         planId: selectedPlan.id,
@@ -248,10 +248,43 @@ const {authUser} = useContext(AuthContext);
         currency: 'USD',
         duration: selectedPlan.duration,
         limits: selectedPlan.limits,
-        features: selectedPlan.features
+        features: selectedPlan.features,
+        senderEmail:authUser?.email
       },
      }
-     console.log(renewalInfo);
+
+      if (BACKEND_API_URL) {
+      try {
+        const response = await  fetch(`${BACKEND_API_URL}/create-renew-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+           
+            // 'Authorization': `Bearer ${userToken}`
+          },
+          body: JSON.stringify(renewalInfo)
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // if (response.ok && data.url) {
+        //   // ব্যাকএন্ড থেকে পেমেন্ট লিংক আসলে রিডাইরেক্ট হবে (e.g., Stripe / SSLCommerz Link)
+        //   window.location.href = data.url;
+        // } else {
+        //   throw new Error(data.message || 'Payment session initialization failed.');
+        // }
+      } catch (error) {
+        console.error("Payment API Error:", error);
+        setErrorMessage(error.message || 'Failed to connect with payment gateway.');
+        setIsProcessingPayment(false);
+      }
+    }
+
+
+
+
+     
   }
 
 
