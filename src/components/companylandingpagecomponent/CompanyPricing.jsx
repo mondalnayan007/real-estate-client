@@ -1,10 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { 
   Check, X, ShieldCheck, ArrowRight, Sparkles, Building, 
   Globe, Phone, User, Link2, CreditCard, Zap, CheckCircle2 
 } from 'lucide-react';
 
 import { AuthContext } from '../../context/AuthContext';
+
 
 // 🌐 আপনার ব্যাকএন্ড এপিআই ইউআরএল এখানে বসান (e.g., 'https://api.yourdomain.com/v1')
 const BACKEND_API_URL = 'http://localhost:4000';
@@ -13,8 +14,13 @@ const CompanyPricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [domainType, setDomainType] = useState('subdomain');
+  const [userInfo,setUserInfo] = useState({});
+   const userData = userInfo[0];
+   console.log(userData?.paymentStatus);
 
 const {authUser} = useContext(AuthContext);
+
+console.log(selectedPlan);
   
   // 💳 পেমেন্ট ও ব্যাকএন্ড রিকোয়েস্ট লোডিং স্টেট
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -29,6 +35,21 @@ const {authUser} = useContext(AuthContext);
     customDomain: '',
         
   });
+
+
+   
+  
+    const baseUrl = 'http://localhost:4000'
+  
+  
+    if(authUser){
+       useEffect(()=>{
+        fetch(`${baseUrl}/agents?email=${authUser.email}`)
+        .then(res=> res.json())
+        .then(data=>setUserInfo(data))
+       },[authUser])
+    }
+  
 
   // 📦 ৪টি বিস্তারিত প্ল্যান ডিফাইন করা হয়েছে
   const pricingPlans = [
@@ -217,6 +238,15 @@ const {authUser} = useContext(AuthContext);
     }
   };
 
+
+  const handleRenewPlan = ()=>{
+    alert('User wants to renew the plan !!!');
+  }
+
+
+
+
+
   return (
     <section id="pricing" className="py-24 bg-slate-950 text-slate-100 relative overflow-hidden font-sans">
       
@@ -359,7 +389,7 @@ const {authUser} = useContext(AuthContext);
               </div>
             ) : (
               /* 📋 ইউজার ডাটা এবং ডোমেইন ফর্ম */
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form  className="space-y-4">
                 
                 {/* ১. ফুল নেম */}
                 <div className="space-y-1.5">
@@ -489,12 +519,21 @@ const {authUser} = useContext(AuthContext);
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="submit"
+                  {
+                    userData?.paymentStatus === 'paid' && userData?.metadata.planName === selectedPlan.name ?  <button 
+                    onClick={handleRenewPlan}
+                    className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    Renew Your Plan <ArrowRight size={13} />
+                  </button>
+                    : 
+                    <button 
+                    onClick={handleSubmit}
                     className="w-2/3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
                   >
                     Proceed to Payment <ArrowRight size={13} />
                   </button>
+                  }
                 </div>
 
               </form>
