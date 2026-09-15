@@ -253,6 +253,8 @@ const {authUser} = useContext(AuthContext);
       },
      }
 
+
+
       if (BACKEND_API_URL) {
       try {
         const response = await  fetch(`${BACKEND_API_URL}/create-renew-session`, {
@@ -268,12 +270,12 @@ const {authUser} = useContext(AuthContext);
         const data = await response.json();
         console.log(data);
 
-        // if (response.ok && data.url) {
-        //   // ব্যাকএন্ড থেকে পেমেন্ট লিংক আসলে রিডাইরেক্ট হবে (e.g., Stripe / SSLCommerz Link)
-        //   window.location.href = data.url;
-        // } else {
-        //   throw new Error(data.message || 'Payment session initialization failed.');
-        // }
+        if (response.ok && data.url) {
+          // ব্যাকএন্ড থেকে পেমেন্ট লিংক আসলে রিডাইরেক্ট হবে (e.g., Stripe / SSLCommerz Link)
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.message || 'Payment session initialization failed.');
+        }
       } catch (error) {
         console.error("Payment API Error:", error);
         setErrorMessage(error.message || 'Failed to connect with payment gateway.');

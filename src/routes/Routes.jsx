@@ -21,6 +21,7 @@ import ContactSection from "../views/ContactSection";
 import BlogDetails from "../views/BlogDetails";
 import PaymentSuccess from "../views/PaymentSuccess";
 import SignIn from "../views/SignIn";
+import RenewalSuccess from "../views/RenewalSuccess";
 
 
 // ==========================================
@@ -64,6 +65,10 @@ const mainCompanyRouter = createBrowserRouter([
   {
     path: '/payment-success',
     Component: PaymentSuccess
+  },
+  {
+    path: '/renewal-success',
+    Component: RenewalSuccess
   },
   {
     path: '*',
