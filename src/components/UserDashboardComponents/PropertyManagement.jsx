@@ -4,8 +4,10 @@ import AgentContext from '../../context/AgentContext';
 
 export default function PropertyManagement() {
   const [properties, setProperties] = useState([]);
+  console.log(properties);
 
   const { user } = use(AgentContext);
+  console.log(user.metadata.propertyLimit);
   const agentId = user?.agentId;
 
   const hostname = window.location.hostname;
@@ -80,6 +82,14 @@ export default function PropertyManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // 🔒 Property Limit Validation
+    const propertyLimit = Number(user?.metadata?.propertyLimit) || 0;
+    if (properties.length >= propertyLimit) {
+      alert(`Property limit reached! You cannot upload more than ${propertyLimit} properties.`);
+      return;
+    }
+
     if (!newProp.title || !newProp.price || !newProp.totalShares) {
       alert("Please fill all required fields!");
       return;
