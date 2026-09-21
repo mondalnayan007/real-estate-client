@@ -5,7 +5,7 @@ import { BarChart3, Building2, Palette, Inbox, FileText, Save, Monitor, ChevronD
 import DashboardAnalytics from '../components/UserDashboardComponents/DashboardAnalytics';
 import PropertyManagement from '../components/UserDashboardComponents/PropertyManagement';
 import LeadManagement from '../components/UserDashboardComponents/LeadManagement';
-import CmsSeoControl from '../components/UserDashboardComponents/CmsSeoControl';
+
 
 // 🌐 নতুন ১২টি ফ্রন্টএন্ড সাব-কম্পোনেন্টস ইম্পোর্ট
 import Settings from '../components/UserDashboardComponents/frontendDesign/SubMenus/Settings';
@@ -51,11 +51,7 @@ export default function AgentDashboard() {
 
   const [clickTracking] = useState({ whatsappClicks: 142, phoneCalls: 89 });
 
-  const [cms, setCms] = useState({
-    heroTitle: 'Find Your Dream Luxury Home Instantly', heroSlogan: 'The premier real estate platform.',
-    aboutUs: 'We are Dhaka’s leading real estate agency...', contactUs: 'Contact our 24/7 help desk...', terms: 'All properties are verified...',
-    metaTitle: 'PrimeEstates | Premium Flats for Sale in Dhaka', metaDesc: 'Browse verified luxury apartments.', keywords: 'property, flats, buy plot'
-  });
+  
 
   const handleGlobalPublish = () => {
     console.log("Publishing live data to Server:", { properties, branding, leads, cms });
@@ -121,15 +117,7 @@ export default function AgentDashboard() {
               <Inbox size={16} /> 📥 Lead Inbox
             </button>
 
-            <button
-              onClick={() => setActiveTab('cms')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 ${activeTab === 'cms'
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-            >
-              <FileText size={16} /> 📝 CMS & SEO Control
-            </button>
+            
 
             {/* 🌐 FRONTEND DROPDOWN ACCORDION MODULE */}
             <div className="pt-3">
@@ -184,7 +172,7 @@ export default function AgentDashboard() {
         {activeTab === 'properties' && <PropertyManagement properties={properties} setProperties={setProperties} />}
         {activeTab === 'blogs' && <BlogManager  />}
         {activeTab === 'leads' && <LeadManagement leads={leads} tracking={clickTracking} />}
-        {activeTab === 'cms' && <CmsSeoControl cms={cms} setCms={setCms} />}
+       
 
         {/* Frontend Dynamic Views Mapping */}
         {activeTab === 'fe-setting' && <Settings />}
