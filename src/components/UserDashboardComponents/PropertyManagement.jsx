@@ -85,11 +85,13 @@ export default function PropertyManagement() {
     e.preventDefault();
 
     // 🔒 Property Limit Validation
-    const propertyLimit = user?.metadata?.propertyLimit || 0;
-    if (properties.length >= propertyLimit) {
-      alert(`Property limit reached! You cannot upload more than ${propertyLimit} properties.`);
-      return;
-    }
+   const propertyLimit = Number(user?.metadata?.propertyLimit || 0);
+   const listedProperty = user?.metadata?.listedProperty;
+
+if (listedProperty >= propertyLimit) {
+  alert(`Property limit reached! You cannot upload more than ${propertyLimit} properties.`);
+  return;
+}
   
 
     if (!newProp.title || !newProp.price || !newProp.totalShares) {
