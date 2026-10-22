@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, LogIn, AlertCircle, Home, Eye, EyeOff, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext'; // 👈 আপনার Context-এর সঠিক পাথ নিশ্চিত করুন
+
 import AgentContext from '../context/AgentContext';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -10,43 +11,76 @@ export default function Login() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const {user} = useContext(AgentContext);
-  console.log(user);
-  
-  const { loginWithEmailAndPassword } = useContext(AuthContext);
+  const { user } = useContext(AgentContext);
+  const { loginUser } = useContext(AuthContext); // ফায়ারবেস অথেনটিকেশন ফাংশন
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  console.log(user?.agentId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const result = await loginWithEmailAndPassword(formData.email, formData.password);
+    const { email, password } = formData;
+    const currentAgentId = user?.agentId || user?.uid; // আপনার AgentContext থেকে প্রাপ্ত agentId
 
-    if (result.success) {
-      if (result.role === 'admin') {
+    
+
+    try {
+      // চেষ্টা ১: প্রথমে ফায়ারবেস দিয়ে লগইন করার চেষ্টা করা (Admin হিসেবে)
+      const firebaseResult = await loginUser(email, password);
+      
+      if (firebaseResult.success) {
         navigate('/admin/dashboard');
-      } else {
-        navigate('/dashboard');
+        return;
       }
-    } else {
-      setError(result.message || 'Login failed!');
+    } catch (fbErr) {
+      // ফায়ারবেসে না মিললে মঙ্গোডিবি ব্যাকএন্ডে রিকোয়েস্ট পাঠানো হবে
+      console.log("Firebase login failed, checking MongoDB...", fbErr.message);
     }
-    setLoading(false);
+
+    try {
+      // চেষ্টা ২: MongoDB ডাটাবেজ চেক করা (Client হিসেবে, agentId সহ)
+      const response = await fetch('http://localhost:4000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email, 
+          password, 
+          agentId: currentAgentId // অন্য এজেন্টের ডাটা ফিল্টার বা ভ্যালিডেশনের জন্য
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Invalid email or password!');
+      }
+
+      // সফলভাবে মঙ্গোডিবি ইউজার ভ্যালিড হলে
+      localStorage.setItem('clientUser', JSON.stringify(data.user));
+      navigate('/dashboard');
+
+    } catch (err) {
+      setError(err.message || 'Login failed! Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    // Google Font 'Inter' প্রয়োগ করা হয়েছে পুরো কন্টেইনারে
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-slate-50 font-['Inter',sans-serif] selection:bg-emerald-500 selection:text-white relative overflow-hidden">
       
       {/* Home Navigation Button */}
       <Link 
         to="/" 
-        className="absolute top-6 right-6 z-30 flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#007b57] transition-all duration-300 bg-white/80 hover:bg-white backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+        className="absolute top-6 right-6 z-30 flex items-center gap-2 text-xs font-bold text-slate-700 hover:text-[#007b57] transition-all duration-300 bg-white/85 hover:bg-white backdrop-blur-md px-5 py-2.5 rounded-full border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
       >
         <Home size={15} />
         <span>Back to Home</span>
@@ -55,13 +89,11 @@ export default function Login() {
       {/* LEFT SIDE: Premium Green Branding Section */}
       <div className="w-full md:w-1/2 bg-gradient-to-br from-[#005f43] via-[#007b57] to-[#004d37] text-white p-8 lg:p-16 flex flex-col justify-center items-center text-center relative overflow-hidden min-h-[360px] md:min-h-screen">
         
-        {/* Glow Effects & Background Decoration */}
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-300/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-md space-y-8 z-10 animate-fade-in">
           
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-emerald-200 text-xs font-semibold tracking-wide uppercase shadow-inner">
             <Sparkles size={14} className="text-emerald-300" />
             <span>Exclusive Access</span>
@@ -71,7 +103,7 @@ export default function Login() {
             <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight leading-tight text-white drop-shadow-sm">
               Welcome to <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-white">
-                {user.agencyName}
+                {user?.metadata?.agencyName || 'Our Portal'}
               </span>
             </h1>
             <p className="text-sm lg:text-base text-emerald-100/90 font-normal leading-relaxed max-w-sm mx-auto">
@@ -79,7 +111,6 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Feature List Cards (Glassmorphism) */}
           <div className="pt-2 space-y-3.5 text-left max-w-sm mx-auto">
             <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 transition-all duration-300 hover:bg-white/15 hover:translate-x-1">
               <div className="p-2 rounded-xl bg-white/10 text-emerald-300 shrink-0">
@@ -110,20 +141,18 @@ export default function Login() {
         
         <div className="w-full max-w-md space-y-8 animate-fade-in">
           
-          {/* Header */}
           <div className="text-center space-y-2">
             <div className="w-12 h-12 bg-emerald-50 text-[#007b57] rounded-2xl border border-emerald-100/80 flex items-center justify-center mx-auto shadow-sm mb-3">
               <LogIn size={22} />
             </div>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
-              {user.agencyName} Ltd.
+               {user?.metadata?.agencyName || 'Agency'} Ltd.
             </h2>
             <p className="text-xs font-semibold text-slate-400 tracking-wide uppercase">
               Login to your account
             </p>
           </div>
 
-          {/* Error Alert */}
           {error && (
             <div className="p-4 bg-rose-50/80 border border-rose-100 rounded-2xl flex items-start gap-3 text-rose-600 text-xs font-semibold shadow-sm animate-shake">
               <AlertCircle size={18} className="shrink-0 mt-0.5" />
@@ -131,7 +160,6 @@ export default function Login() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -176,7 +204,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-xs pt-1">
               <label className="flex items-center gap-2.5 cursor-pointer text-slate-600 font-medium select-none">
                 <input 
@@ -190,7 +217,6 @@ export default function Login() {
               </a>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}

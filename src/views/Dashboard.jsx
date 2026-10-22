@@ -108,6 +108,7 @@ const labelClass =
 
 // API Fetchers for TanStack Query
 const fetchUserBookings = async (userId) => {
+  
   if (!userId) return [];
   const res = await fetch(
     `${API_BASE_URL}/api/my-bookings?userId=${encodeURIComponent(userId)}`
@@ -144,7 +145,7 @@ const submitPaymentApi = async (paymentPayload) => {
 };
 
 export default function Dashboard() {
-  const { clientUser } = useContext(AuthContext);
+  const { authUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -165,9 +166,9 @@ export default function Dashboard() {
     data: bookings = [],
     isLoading: loadingBookings,
   } = useQuery({
-    queryKey: ['myBookings', clientUser?._id],
-    queryFn: () => fetchUserBookings(clientUser?._id),
-    enabled: !!clientUser?._id,
+    queryKey: ['myBookings', authUser?.uid],
+    queryFn: () => fetchUserBookings(authUser?.uid),
+    enabled: !!authUser?.uid,
     refetchInterval: 10000, // 10s auto refetch
   });
 
@@ -207,7 +208,7 @@ export default function Dashboard() {
 
       // Refresh cache automatically without full page refresh
       queryClient.invalidateQueries({ queryKey: ['transactions', activeBookingId] });
-      queryClient.invalidateQueries({ queryKey: ['myBookings', clientUser?._id] });
+      queryClient.invalidateQueries({ queryKey: ['myBookings', authUser?.uid] });
     },
     onError: (error) => {
       console.error('Payment submission error:', error);
@@ -272,7 +273,7 @@ export default function Dashboard() {
   const handlePaymentSubmit = (event) => {
     event.preventDefault();
 
-    if (!selectedBooking || !clientUser?._id) return;
+    if (!selectedBooking || !authUser?.uid) return;
 
     const numericAmount = Number(amount);
     const bookingId = getBookingId(selectedBooking);
@@ -336,7 +337,7 @@ export default function Dashboard() {
 
     const paymentPayload = {
       bookingId,
-      userId: clientUser._id,
+      userId: authUser.uid,
       paymentType,
       paymentMethod,
       amount: numericAmount,
@@ -414,8 +415,8 @@ export default function Dashboard() {
                   Welcome
                 </p>
                 <p className="text-sm font-extrabold text-slate-900">
-                  {clientUser?.name ||
-                    clientUser?.displayName ||
+                  {authUser?.name ||
+                    authUser?.displayName ||
                     'Valued Client'}
                 </p>
               </div>
