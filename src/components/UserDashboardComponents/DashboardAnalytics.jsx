@@ -14,9 +14,11 @@ export default function DashboardAnalytics() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('This Month');
   const [selectedRegion, setSelectedRegion] = useState('All');
+  console.log(data);
   
   const { user } = use(AgentContext);
   const baseURL = "http://localhost:4000";
+  console.log(user?.agentId);
 
   const fetchDashboardAnalytics = async () => {
     if (!user?.agentId) return;

@@ -13,7 +13,7 @@ export default function Login() {
 
   const { user } = useContext(AgentContext);
   const { loginUser } = useContext(AuthContext); // ফায়ারবেস অথেনটিকেশন ফাংশন
-  const navigate = useNavigate();
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,21 +26,24 @@ export default function Login() {
     setError('');
 
     const { email, password } = formData;
-    const currentAgentId = user?.agentId || user?.uid; // আপনার AgentContext থেকে প্রাপ্ত agentId
+    const agentId = user?.agentId || user?.uid; // আপনার AgentContext থেকে প্রাপ্ত agentId
 
     
 
     try {
       // চেষ্টা ১: প্রথমে ফায়ারবেস দিয়ে লগইন করার চেষ্টা করা (Admin হিসেবে)
+      
       const firebaseResult = await loginUser(email, password);
       
-      if (firebaseResult.success) {
-        navigate('/admin/dashboard');
+      
+      if (firebaseResult && firebaseResult.user) {
+        setLoading(false);
+        window.location.href = '/admin/dashboard';
         return;
       }
     } catch (fbErr) {
       // ফায়ারবেসে না মিললে মঙ্গোডিবি ব্যাকএন্ডে রিকোয়েস্ট পাঠানো হবে
-      console.log("Firebase login failed, checking MongoDB...", fbErr.message);
+      console.error("Firebase login structural error:", fbErr);
     }
 
     try {
@@ -53,7 +56,7 @@ export default function Login() {
         body: JSON.stringify({ 
           email, 
           password, 
-          agentId: currentAgentId // অন্য এজেন্টের ডাটা ফিল্টার বা ভ্যালিডেশনের জন্য
+          agentId 
         }),
       });
 
@@ -65,7 +68,7 @@ export default function Login() {
 
       // সফলভাবে মঙ্গোডিবি ইউজার ভ্যালিড হলে
       localStorage.setItem('clientUser', JSON.stringify(data.user));
-      navigate('/dashboard');
+      window.location.href = '/dashboard';
 
     } catch (err) {
       setError(err.message || 'Login failed! Please check your credentials.');

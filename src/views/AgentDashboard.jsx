@@ -27,14 +27,14 @@ export default function AgentDashboard() {
   // ১২টি ফ্রন্টএন্ড সাব-মেনু আইটেম লিস্ট
   const frontendSubMenus = [
     { id: 'fe-setting', label: 'Setting' },
-    { id: 'fe-menu', label: 'Menu' },
+    // { id: 'fe-menu', label: 'Menu' },
     { id: 'fe-pageSection', label: 'Team Page Section' },
-    { id: 'fe-managePage', label: 'Manage Page' },
+    // { id: 'fe-managePage', label: 'Manage Page' },
     { id: 'fe-slider', label: 'Slider' },
-    { id: 'fe-features', label: 'Features' },
+    // { id: 'fe-features', label: 'Features' },
     { id: 'fe-testimonial', label: 'Testimonial' },
-    { id: 'fe-service', label: 'Service' },
-    { id: 'fe-gallery', label: 'Gallery ' },
+    // { id: 'fe-service', label: 'Service' },
+    // { id: 'fe-gallery', label: 'Gallery ' },
   ];
 
   // গ্লোবাল স্টেটসমূহ (ডাটাবেস ও এপিআই সিঙ্ক)
@@ -57,6 +57,8 @@ export default function AgentDashboard() {
     console.log("Publishing live data to Server:", { properties, branding, leads, cms });
     alert("🚀 All frontend sections and settings synchronized successfully!");
   };
+
+  
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col xl:flex-row">
@@ -176,14 +178,14 @@ export default function AgentDashboard() {
 
         {/* Frontend Dynamic Views Mapping */}
         {activeTab === 'fe-setting' && <Settings />}
-        {activeTab === 'fe-menu' && <Menu />}
+        {/* {activeTab === 'fe-menu' && <Menu />} */}
         {activeTab === 'fe-pageSection' && <TeamPageSection />}
-        {activeTab === 'fe-managePage' && <ManagePage />}
+        {/* {activeTab === 'fe-managePage' && <ManagePage />} */}
         {activeTab === 'fe-slider' && <Slider />}
-        {activeTab === 'fe-features' && <Features />}
+        {/* {activeTab === 'fe-features' && <Features />} */}
         {activeTab === 'fe-testimonial' && <Testimonial />}
-        {activeTab === 'fe-service' && <Service />}
-        {activeTab === 'fe-gallery' && <Gallery />}
+        {/* {activeTab === 'fe-service' && <Service />}
+        {activeTab === 'fe-gallery' && <Gallery />} */}
       </div>
 
     </div>

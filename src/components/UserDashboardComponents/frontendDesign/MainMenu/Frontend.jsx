@@ -63,15 +63,15 @@ export default function UserDashboard() {
       {/* 🖥️ ডাইনামিক ওয়ার্কস্পেস এরিয়া */}
       <div className="flex-1 p-6 md:p-10 overflow-y-auto max-h-screen bg-slate-950">
         {activeSubMenu === 'Setting' && <Settings />}
-        {activeSubMenu === 'Menu' && <Menu />}
+        {/* {activeSubMenu === 'Menu' && <Menu />} */}
         {activeSubMenu === 'Team Page Section ' && <TeamPageSection />}
-        {activeSubMenu === 'Manage Page' && <ManagePage />}
+        {/* {activeSubMenu === 'Manage Page' && <ManagePage />} */}
         {activeSubMenu === 'Slider' && <Slider />}
-        {activeSubMenu === 'Features' && <Features />}
+        {/* {activeSubMenu === 'Features' && <Features />} */}
         {activeSubMenu === 'Testimonial' && <Testimonial />}
-        {activeSubMenu === 'Service' && <Service />}
+        {/* {activeSubMenu === 'Service' && <Service />}
        
-        {activeSubMenu === 'Gallery Category' && <Gallery />}
+        {activeSubMenu === 'Gallery Category' && <Gallery />} */}
         
         
       </div>

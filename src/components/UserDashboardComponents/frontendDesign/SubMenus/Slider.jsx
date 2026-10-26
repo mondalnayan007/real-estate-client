@@ -8,28 +8,26 @@ export default function Slider() {
   const [menuItems, setMenuItems] = useState([]); // স্লাইডার লিস্ট কন্টেইনার
   const [searchQuery, setSearchQuery] = useState('');
   const hostname = window.location.hostname;
-const subdomain = hostname.split('.')[0];
-  const {user} = use(AgentContext);
-    console.log(user.agentId);
+  const subdomain = hostname.split('.')[0];
+  const { user } = use(AgentContext);
+  console.log(user.agentId);
 
-console.log(subdomain);
+  console.log(subdomain);
   // 🔗 আপনার ব্যাকএন্ড এন্ডপয়েন্ট URL এখানে বসান
   const API_BASE_URL = 'http://localhost:4000/slider';
 
-  // 📝 ফর্ম স্টেট (Screenshot 2026-06-19 021032.png এর সব ফিল্ড)
+  // 📝 ফর্ম স্টেট
   const initialFormState = {
-    
     headerTitle: '',
     title: '',
     description: '',
     position: 'Left',
-    domain:subdomain,
+    domain: subdomain,
     photo: null,
-    agentId:user.agentId,
+    agentId: user.agentId,
     photoPreview: '' // ফ্রন্টএন্ডে ইমেজ প্রিভিউ দেখানোর জন্য
   };
   const [formData, setFormData] = useState(initialFormState);
-
 
   // 🌐 ১. BACKEND API: স্লাইডার লিস্ট গেট করার জন্য (GET Request)
   useEffect(() => {
@@ -43,9 +41,6 @@ console.log(subdomain);
         setMenuItems(data);
       } catch (error) {
         console.error("Error fetching sliders (Using Mock Data fallback):", error);
-        
-       
-       
       }
     };
     fetchSliders();
@@ -76,97 +71,74 @@ console.log(subdomain);
     setActiveTab('form');
   };
 
-  // ❌ ২. BACKEND API: স্লাইডার ডিলিট (DELETE Request)
-  // const handleDeleteClick = async (id) => {
-  //   if (window.confirm("Are you sure you want to delete this slider?")) {
-  //     try {
-  //       const response = await fetch(`${API_BASE_URL}/${id}`, {
-  //         method: 'DELETE',
-  //       });
+  // 🚀 ৩. BACKEND API: ফর্ম সাবমিট (POST / PUT Request)
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
 
-  //       if (response.ok) {
-  //         setMenuItems(prev => prev.filter(item => item.id !== id));
-  //         alert('Slider asset deleted successfully.');
-  //       } else {
-  //         throw new Error('Failed to delete');
-  //       }
-  //     } catch (error) {
-  //       console.error("Error deleting slider:", error);
-  //       // লোকাল স্টেট থেকে রিমুভ (যদি ব্যাকএন্ড টেস্ট করার সময় কানেক্টেড না থাকে)
-  //       setMenuItems(prev => prev.filter(item => item.id !== id));
-  //       alert('Slider deleted locally.');
-  //     }
-  //   }
-  // };
+    // ১. ইউনিক আইডি নির্ধারণ (_id বা id)
+    const currentId = formData._id || formData.id;
+    console.log(currentId);
 
-// 🚀 ৩. BACKEND API: ফর্ম সাবমিট (POST / PUT Request)
-const handleFormSubmit = async (e) => {
-  e.preventDefault();
+    // ২. FormData অবজেক্ট তৈরি
+    const payload = new FormData();
+    payload.append('headerTitle', formData.headerTitle || '');
+    payload.append('title', formData.title || '');
+    payload.append('description', formData.description || '');
+    payload.append('position', formData.position || '');
+    payload.append('domain', formData.domain || '');
+    payload.append('agentId', formData.agentId || '');
 
-  // ১. ইউনিক আইডি নির্ধারণ (_id বা id)
-  const currentId = formData._id || formData.id;
-  console.log(currentId);
-
-  // ২. FormData অবজেক্ট তৈরি
-  const payload = new FormData();
-  payload.append('headerTitle', formData.headerTitle || '');
-  payload.append('title', formData.title || '');
-  payload.append('description', formData.description || '');
-  payload.append('position', formData.position || '');
-  payload.append('domain', formData.domain || '');
-  payload.append('agentId', formData.agentId || '');
-
-  // ফটো ফাইল হলে তবেই FormData-তে যুক্ত হবে
-  if (formData.photo && typeof formData.photo !== 'string') {
-    payload.append('photo', formData.photo);
-  }
-
-  try {
-    if (isEditing) {
-      // PUT Request (Update)
-      const response = await fetch(`${API_BASE_URL}/${currentId}`, {
-        method: 'PUT',
-        body: payload,
-      });
-
-      if (response.ok) {
-        const updatedData = await response.json();
-        // ID ম্যাচ করে স্টেট আপডেট (MongoDB _id বা সাধারণ id এর জন্য নিরাপদ)
-        setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? updatedData : item));
-        alert('Slider node updated!');
-      } else {
-        // ফলব্যাক লোকাল আপডেট
-        setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? { ...formData } : item));
-        alert('Slider updated locally!');
-      }
-    } else {
-      // POST Request (Create)
-      const response = await fetch(API_BASE_URL, {
-        method: 'POST',
-        body: payload,
-      });
-
-      if (response.ok) {
-        const createdData = await response.json();
-        setMenuItems(prev => [...prev, createdData]);
-        alert('New luxury slider asset added!');
-      } else {
-        // ফলব্যাক লোকাল ক্রিয়েট
-        const newSlider = { ...formData, id: Date.now() };
-        setMenuItems(prev => [...prev, newSlider]);
-        alert('New luxury slider asset added locally!');
-      }
+    // ফটো ফাইল হলে তবেই FormData-তে যুক্ত হবে
+    if (formData.photo && typeof formData.photo !== 'string') {
+      payload.append('photo', formData.photo);
     }
 
-    // ফর্ম রিসেট ও ব্যাক টু লিস্ট
-    setFormData(initialFormState);
-    setIsEditing(false);
-    setActiveTab('list');
-  } catch (error) {
-    console.error("Error saving slider:", error);
-    alert('Something went wrong!');
-  }
-};
+    try {
+      if (isEditing) {
+        // PUT Request (Update)
+        const response = await fetch(`${API_BASE_URL}/${currentId}`, {
+          method: 'PUT',
+          body: payload,
+        });
+
+        if (response.ok) {
+          const updatedData = await response.json();
+          // ID ম্যাচ করে স্টেট আপডেট (MongoDB _id বা সাধারণ id এর জন্য নিরাপদ)
+          setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? updatedData : item));
+          alert('Slider node updated!');
+        } else {
+          // ফলব্যাক লোকাল আপডেট
+          setMenuItems(prev => prev.map(item => (item._id === currentId || item.id === currentId) ? { ...formData } : item));
+          alert('Slider updated locally!');
+        }
+      } else {
+        // POST Request (Create)
+        const response = await fetch(API_BASE_URL, {
+          method: 'POST',
+          body: payload,
+        });
+
+        if (response.ok) {
+          const createdData = await response.json();
+          setMenuItems(prev => [...prev, createdData]);
+          alert('New luxury slider asset added!');
+        } else {
+          // ফলব্যাক লোকাল ক্রিয়েট
+          const newSlider = { ...formData, id: Date.now() };
+          setMenuItems(prev => [...prev, newSlider]);
+          alert('New luxury slider asset added locally!');
+        }
+      }
+
+      // ফর্ম রিসেট ও ব্যাক টু লিস্ট
+      setFormData(initialFormState);
+      setIsEditing(false);
+      setActiveTab('list');
+    } catch (error) {
+      console.error("Error saving slider:", error);
+      alert('Something went wrong!');
+    }
+  };
 
   // ফিল্টারিং লজিক (সার্চ বার)
   const filteredItems = menuItems.filter(item => 
@@ -179,22 +151,31 @@ const handleFormSubmit = async (e) => {
       {/* হেডার */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-white uppercase tracking-tight">Hero Banner Sliders</h2>
-          <p className="text-xs text-slate-400">Configure corporate widescreen real estate promotional slides and redirect endpoints.</p>
+          <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Hero Banner Sliders</h2>
+          <p className="text-xs text-slate-500">Configure corporate widescreen real estate promotional slides and redirect endpoints.</p>
         </div>
         {activeTab === 'list' && (
-          <button onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('form'); }} className="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+          <button 
+            onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('form'); }} 
+            className="bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+          >
             <Plus size={14} /> Add Slide
           </button>
         )}
       </div>
 
       {/* ট্যাব নেভিগেশন */}
-      <div className="flex border-b border-slate-800 gap-1">
-        <button onClick={() => setActiveTab('list')} className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${activeTab === 'list' ? 'border-rose-600 bg-rose-600/5 text-rose-500' : 'border-transparent text-slate-400 hover:text-slate-200'}`}>
+      <div className="flex border-b border-slate-200 gap-1">
+        <button 
+          onClick={() => setActiveTab('list')} 
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${activeTab === 'list' ? 'border-rose-600 bg-rose-50 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+        >
           <List size={14} /> Slider List
         </button>
-        <button onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('form'); }} className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${activeTab === 'form' ? 'border-rose-600 bg-rose-600/5 text-rose-500' : 'border-transparent text-slate-400 hover:text-slate-200'}`}>
+        <button 
+          onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('form'); }} 
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 rounded-t-xl ${activeTab === 'form' ? 'border-rose-600 bg-rose-50 text-rose-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+        >
           <Plus size={14} /> {isEditing ? '✏️ Edit Slider' : '➕ Add Slider'}
         </button>
       </div>
@@ -204,29 +185,35 @@ const handleFormSubmit = async (e) => {
         
         /* ================= 📊 ট্যাব ১: স্লাইডার লিস্ট টেবিল ================= */
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-slate-800/60">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <select className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-white">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <select className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-700 focus:outline-none focus:border-rose-500 shadow-sm">
                 <option value="25">25</option>
               </select>
               <span>rows per page</span>
             </div>
             <div className="relative w-full sm:w-64">
-              <input type="text" placeholder="Search sliders..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-4 py-1.5 text-xs text-white focus:outline-none focus:border-rose-600" />
-              <Search className="absolute left-2.5 top-2 text-slate-500" size={14} />
+              <input 
+                type="text" 
+                placeholder="Search sliders..." 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+                className="w-full bg-white border border-slate-300 rounded-xl pl-8 pr-4 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500 shadow-sm transition-all" 
+              />
+              <Search className="absolute left-2.5 top-2 text-slate-400" size={14} />
             </div>
           </div>
 
           {filteredItems.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-500 text-xs flex flex-col items-center justify-center gap-2 shadow-xl">
-              <ImageIcon size={28} className="text-slate-700 animate-pulse" /> No showcase banner elements found.
+            <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 text-xs flex flex-col items-center justify-center gap-2 shadow-sm">
+              <ImageIcon size={28} className="text-slate-300 animate-pulse" /> No showcase banner elements found.
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-800 bg-slate-950/40 text-[11px] uppercase font-bold text-slate-400 tracking-wider">
+                    <tr className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase font-bold text-slate-500 tracking-wider">
                       <th className="px-6 py-3.5 w-16">Sl</th>
                       <th className="px-6 py-3.5 w-32">Photo</th>
                       <th className="px-6 py-3.5">Title</th>
@@ -235,25 +222,41 @@ const handleFormSubmit = async (e) => {
                       <th className="px-6 py-3.5 w-24 text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="text-xs text-slate-300 divide-y divide-slate-800/60">
+                  <tbody className="text-xs text-slate-600 divide-y divide-slate-100">
                     {filteredItems.map((item, index) => (
-                      <tr key={item.id} className="hover:bg-slate-950/20 transition-colors">
-                        <td className="px-6 py-4 text-slate-500 font-mono">{index + 1}</td>
+                      <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="px-6 py-4 text-slate-400 font-mono">{index + 1}</td>
                         <td className="px-6 py-4">
                           {item.photo ? (
-                            <img src={item.photo} alt="slider" className="w-20 h-11 object-cover rounded-lg border border-slate-800 shadow" />
+                            <img src={item.photo} alt="slider" className="w-20 h-11 object-cover rounded-lg border border-slate-200 shadow-sm" />
                           ) : (
-                            <div className="w-20 h-11 bg-slate-950 rounded-lg border border-slate-800 flex items-center justify-center text-slate-600"><ImageIcon size={14} /></div>
+                            <div className="w-20 h-11 bg-slate-100 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400">
+                              <ImageIcon size={14} />
+                            </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 font-bold text-white max-w-xs truncate">{item.title}</td>
-                        <td className="px-6 py-4 text-slate-400">{item.headerTitle || '-'}</td>
+                        <td className="px-6 py-4 font-bold text-slate-800 max-w-xs truncate">{item.title}</td>
+                        <td className="px-6 py-4 text-slate-500">{item.headerTitle || '-'}</td>
                         
-                        <td className="px-6 py-4 text-center text-slate-400"><span className="bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[10px] font-mono">{item.position}</span></td>
+                        <td className="px-6 py-4 text-center text-slate-600">
+                          <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-[10px] font-mono text-slate-700">{item.position}</span>
+                        </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex gap-2 justify-center">
-                            <button type="button" onClick={() => handleEditClick(item)} className="p-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-rose-500/50 transition-colors"><Edit2 size={12} /></button>
-                            <button type="button" onClick={() => handleDeleteClick(item.id)} className="p-1.5 rounded-lg bg-rose-950/40 border border-rose-900/40 text-rose-400 hover:bg-rose-600 hover:text-white transition-all"><Trash2 size={12} /></button>
+                            <button 
+                              type="button" 
+                              onClick={() => handleEditClick(item)} 
+                              className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-colors shadow-sm"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={() => handleDeleteClick && handleDeleteClick(item.id)} 
+                              className="p-1.5 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                            >
+                              <Trash2 size={12} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -268,42 +271,71 @@ const handleFormSubmit = async (e) => {
       ) : (
 
         /* ================= 📝 ট্যাব ২: অ্যাড / এডিট স্লাইডার ফর্ম ================= */
-        <form onSubmit={handleFormSubmit} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-5 max-w-3xl shadow-xl">
-          <div className="border-b border-slate-800 pb-3 mb-2">
-            <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider">
+        <form onSubmit={handleFormSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 space-y-5 max-w-3xl shadow-sm">
+          <div className="border-b border-slate-100 pb-3 mb-2">
+            <h3 className="text-xs font-bold uppercase text-rose-600 tracking-wider">
               {isEditing ? '✏️ Modify Hero Slider Node' : '📂 Establish Showcase Slider Record'}
             </h3>
           </div>
 
           {/* headerTitle */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">HeaderTitle</label>
+            <label className="text-xs font-bold text-slate-600 md:text-right">HeaderTitle</label>
             <div className="md:col-span-3">
-              <input type="text" name="headerTitle" required value={formData.headerTitle} onChange={handleInputChange} placeholder="e.g., Ultra Modern Smart Apartments" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
+              <input 
+                type="text" 
+                name="headerTitle" 
+                required 
+                value={formData.headerTitle} 
+                onChange={handleInputChange} 
+                placeholder="e.g., Ultra Modern Smart Apartments" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-rose-500 transition-all" 
+              />
             </div>
           </div>
+          
           {/* Title */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Title</label>
+            <label className="text-xs font-bold text-slate-600 md:text-right">Title</label>
             <div className="md:col-span-3">
-              <input type="text" name="title" required value={formData.title} onChange={handleInputChange} placeholder="e.g., Ultra Modern Smart Apartments" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" />
+              <input 
+                type="text" 
+                name="title" 
+                required 
+                value={formData.title} 
+                onChange={handleInputChange} 
+                placeholder="e.g., Ultra Modern Smart Apartments" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-rose-500 transition-all" 
+              />
             </div>
           </div>
-
 
           {/* Description */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Description *</label>
+            <label className="text-xs font-bold text-slate-600 md:text-right">Description *</label>
             <div className="md:col-span-3">
-              <textarea name="description" value={formData.description} onChange={handleInputChange} placeholder="Enter sub-headline context details..." rows={3} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500" required />
+              <textarea 
+                name="description" 
+                value={formData.description} 
+                onChange={handleInputChange} 
+                placeholder="Enter sub-headline context details..." 
+                rows={3} 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-rose-500 transition-all" 
+                required 
+              />
             </div>
           </div>
 
           {/* Position Selector */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-            <label className="text-xs font-bold text-slate-400 md:text-right">Position *</label>
+            <label className="text-xs font-bold text-slate-600 md:text-right">Position *</label>
             <div className="md:col-span-3">
-              <select name="position" value={formData.position} onChange={handleInputChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 appearance-none">
+              <select 
+                name="position" 
+                value={formData.position} 
+                onChange={handleInputChange} 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:border-rose-500 appearance-none transition-all"
+              >
                 <option value="Left">Left</option>
                 <option value="Center">Center</option>
                 <option value="Right">Right</option>
@@ -313,21 +345,21 @@ const handleFormSubmit = async (e) => {
 
           {/* Drag & Drop Photo Area */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
-            <label className="text-xs font-bold text-slate-400 md:text-right pt-2">Photo *</label>
+            <label className="text-xs font-bold text-slate-600 md:text-right pt-2">Photo *</label>
             <div className="md:col-span-3">
-              <label className="border border-dashed border-slate-800 bg-slate-950/40 rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-rose-500/40 transition-all group overflow-hidden max-w-full relative min-h-[140px]">
+              <label className="border border-dashed border-slate-300 bg-slate-50 rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-rose-400 hover:bg-rose-50/20 transition-all group overflow-hidden max-w-full relative min-h-[140px]">
                 <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" required={!isEditing} />
                 
                 {formData.photoPreview ? (
-                  <div className="absolute inset-0 w-full h-full bg-slate-950 flex items-center justify-center">
+                  <div className="absolute inset-0 w-full h-full bg-white flex items-center justify-center">
                     <img src={formData.photoPreview} alt="Preview" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[11px] text-white font-bold transition-opacity">Change Image</div>
+                    <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[11px] text-white font-bold transition-opacity">Change Image</div>
                   </div>
                 ) : (
                   <>
-                    <Upload className="text-slate-600 group-hover:text-rose-500 transition-colors" size={24} />
-                    <span className="text-xs text-slate-400 font-medium">Drag and drop a file here or click</span>
-                    <span className="text-[10px] text-slate-600">Supports JPEG, PNG wide formats</span>
+                    <Upload className="text-slate-400 group-hover:text-rose-500 transition-colors" size={24} />
+                    <span className="text-xs text-slate-600 font-medium">Drag and drop a file here or click</span>
+                    <span className="text-[10px] text-slate-400">Supports JPEG, PNG wide formats</span>
                   </>
                 )}
               </label>
@@ -335,14 +367,21 @@ const handleFormSubmit = async (e) => {
           </div>
 
           {/* সাবমিট একশন রুট */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
             <div className="hidden md:block"></div>
             <div className="md:col-span-3 flex gap-3">
-              <button type="submit" className="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg shadow-rose-600/10">
+              <button 
+                type="submit" 
+                className="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+              >
                 <Save size={14} /> {isEditing ? 'Update Slide Data' : 'Save Config'}
               </button>
               {isEditing && (
-                <button type="button" onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('list'); }} className="bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 px-5 py-2.5 rounded-xl text-xs font-bold transition-all">
+                <button 
+                  type="button" 
+                  onClick={() => { setFormData(initialFormState); setIsEditing(false); setActiveTab('list'); }} 
+                  className="bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-xs font-bold transition-all"
+                >
                   Cancel Edit
                 </button>
               )}

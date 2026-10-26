@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   CheckCircle2, 
@@ -15,13 +15,24 @@ import {
   Tag,
   Send
 } from 'lucide-react';
+import AgentContext from '../../context/AgentContext';
 
+
+export default function LeadManagement() {
+
+
+const { user } = useContext(AgentContext);
 const API_BASE_URL = 'http://localhost:4000';
 
+const agentId = user?.agentId || user?.uid;
+
+console.log(agentId);
+
 const fetchPendingPayments = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/pending-payments`);
+  const response = await fetch(`${API_BASE_URL}/api/admin/pending-payments?agentId=${agentId}`);
   if (!response.ok) throw new Error('Could not connect to the backend server.');
   const data = await response.json();
+  console.log(data);
 
   if (!data.success) throw new Error(data.message || 'Failed to load pending payments.');
   return data.data || [];
@@ -39,7 +50,9 @@ const updatePaymentStatus = async ({ txnId, status }) => {
   return { txnId, status, data };
 };
 
-export default function LeadManagement() {
+
+
+
   const queryClient = useQueryClient();
 
   const { data: pendingPayments = [], isLoading, isRefetching, error, refetch } = useQuery({

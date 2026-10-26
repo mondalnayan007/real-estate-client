@@ -2,51 +2,42 @@ import React, { useState, useEffect, use } from 'react';
 import { Save, Upload } from 'lucide-react';
 import AgentContext from '../../../../context/AgentContext';
 
-
-// ফর্মে রি-ইউজেবল ইনিশিয়াল স্টেট ডেফিনিশন
-
-
 export default function Settings() {
-    const {user} = use(AgentContext);
-    console.log(user.agentId);
+  const { user } = use(AgentContext);
+  console.log(user?.agentId);
 
   const hostname = window.location.hostname;
-const subdomain = hostname.split('.')[0];
-
+  const subdomain = hostname.split('.')[0];
 
   const initialFormState = {
-  brandName: '',
-  title: '',
-  email: '',
-  phone:'',
-  workingHours: '',
-  logo: null,
-  favIcon: null,
-  address: '',
-  footerAboutText: '',
-  copyrightText: '',
-  facebookUrl: '',
-  twitterUrl: '',
-  youtubeUrl: '',
-  linkedinUrl: '',
-  pinterestUrl: '',
-  instagramUrl: '',
-  domain:subdomain,
-  agentId:user.agentId
-  
-};
-  // 📦 ব্যাকএন্ড ফ্রেন্ডলি স্টেট অবজেক্ট (ডিফল্ট ব্ল্যাঙ্ক রাখা হয়েছে)
+    brandName: '',
+    title: '',
+    email: '',
+    phone: '',
+    workingHours: '',
+    logo: null,
+    favIcon: null,
+    address: '',
+    footerAboutText: '',
+    copyrightText: '',
+    facebookUrl: '',
+    twitterUrl: '',
+    youtubeUrl: '',
+    linkedinUrl: '',
+    pinterestUrl: '',
+    instagramUrl: '',
+    domain: subdomain,
+    agentId: user?.agentId || ''
+  };
+
   const [formData, setFormData] = useState(initialFormState);
 
-  // 🖼️ ইমেজ প্রিভিউ ইউআরএল ট্র্যাকিং স্টেট
   const [logoPreview, setLogoPreview] = useState(null);
   const [favIconPreview, setFavIconPreview] = useState(null);
 
-  // 🌐 ১. BACKEND API: ডাটাবেজ থেকে সেটিংস ডাটা তুলে আনার জন্য (GET Request)
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        // 🛠️ আপনার আসল API কল করার জন্য নিচের কমেন্টগুলো খুলে দিন:
         /*
         const response = await axios.get('YOUR_BACKEND_GET_API_URL');
         if (response.data) {
@@ -66,13 +57,11 @@ const subdomain = hostname.split('.')[0];
     fetchSettings();
   }, []);
 
-  // 🔄 জেনেরিক হ্যান্ডলার (ইনপুট চেঞ্চ ট্র্যাকিং)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 📁 ফাইল আপলোড হ্যান্ডলার (লোগো এবং ফেভআইকন এর জন্য উইথ লাইভ প্রিভিউ)
   const handleFileChange = (e, fieldName) => {
     const file = e.target.files[0];
     if (file) {
@@ -87,7 +76,6 @@ const subdomain = hostname.split('.')[0];
     }
   };
 
-  // 🚀 ২. BACKEND API: ফর্ম ডাটাবেজে সেভ করার জন্য (POST / PUT Request)
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -111,10 +99,8 @@ const subdomain = hostname.split('.')[0];
       })
       .then((data) => {
         console.log("Successfully saved to backend payload:", data);
-
         alert("Global configuration successfully saved to the backend database!");
 
-        // সফল সাবমিট হওয়ার পর ফর্ম রিসেট
         setFormData(initialFormState);
         setLogoPreview(null);
         setFavIconPreview(null);
@@ -125,30 +111,30 @@ const subdomain = hostname.split('.')[0];
       });
   };
 
-  const labelStyle = "text-[10px] uppercase font-bold text-slate-400 block mb-1";
-  const inputStyle = "w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-rose-500 transition-colors";
+  const labelStyle = "text-[10px] uppercase font-black tracking-wider text-slate-500 block mb-1.5";
+  const inputStyle = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-semibold text-slate-800 outline-none transition-all duration-200 focus:bg-white focus:border-[#007b57] focus:ring-4 focus:ring-[#007b57]/10 shadow-sm";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-200 pb-16">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-200 pb-16 text-slate-800">
 
       {/* হেডার গ্রুপ */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-900 pb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h2 className="text-xl font-black text-white uppercase tracking-tight">Website Engine Configuration</h2>
-          <p className="text-xs text-slate-400">Complete frontend branding, metadata alignment, layout styling, and social directory mapping.</p>
+          <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Website Engine Configuration</h2>
+          <p className="text-xs font-medium text-slate-500 mt-0.5">Complete frontend branding, metadata alignment, layout styling, and social directory mapping.</p>
         </div>
-        <button type="submit" className="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg shadow-rose-600/10 shrink-0">
-          <Save size={14} /> Save Config
+        <button type="submit" className="bg-[#007b57] hover:bg-[#006346] text-white px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all shadow-lg shadow-[#007b57]/20 shrink-0">
+          <Save size={15} /> Save Config
         </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* কলাম ১: কোর ওয়েবসাইট সেটিংস */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">🌐 Core Architecture Settings</h3>
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
+          <h3 className="text-xs font-black uppercase text-[#007b57] tracking-wider mb-2 border-b border-slate-100 pb-3">🌐 Core Architecture Settings</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className={labelStyle}>Brand Name</label>
               <input type="text" name="brandName" value={formData.brandName} onChange={handleChange} placeholder="e.g. Premium Real Estate Engine" className={inputStyle} required />
@@ -159,13 +145,13 @@ const subdomain = hostname.split('.')[0];
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className={labelStyle}> Email *</label>
+              <label className={labelStyle}>Email *</label>
               <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="e.g. info@yourdomain.com" className={inputStyle} required />
             </div>
             <div>
-              <label className={labelStyle}> Phone*</label>
+              <label className={labelStyle}>Phone *</label>
               <input type="number" name="phone" value={formData.phone} onChange={handleChange} placeholder="e.g. +8801********" className={inputStyle} required />
             </div>
           </div>
@@ -176,35 +162,35 @@ const subdomain = hostname.split('.')[0];
           </div>
 
           {/* মিডিয়া আপলোডার নোড উইথ লাইভ প্রিভিউ */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="border border-dashed border-slate-300 p-4 rounded-2xl flex items-center justify-between bg-slate-50/60">
               <div className="flex items-center gap-3">
                 {logoPreview ? (
-                  <img src={logoPreview} alt="Logo Preview" className="w-9 h-9 object-contain rounded bg-slate-950 p-1 border border-slate-800" />
+                  <img src={logoPreview} alt="Logo Preview" className="w-10 h-10 object-contain rounded-xl bg-white p-1 border border-slate-200 shadow-sm" />
                 ) : null}
                 <div>
                   <label className={labelStyle}>Logo Asset *</label>
-                  <p className="text-[10px] text-slate-500">Corporate image nodule</p>
+                  <p className="text-[10px] font-medium text-slate-400">Corporate image nodule</p>
                 </div>
               </div>
-              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
-                <Upload size={14} />
+              <label className="bg-slate-900 hover:bg-slate-800 p-2.5 rounded-xl cursor-pointer transition-colors text-white shadow-sm">
+                <Upload size={15} />
                 <input type="file" onChange={(e) => handleFileChange(e, 'logo')} className="hidden" accept="image/*" />
               </label>
             </div>
 
-            <div className="border border-dashed border-slate-800 p-4 rounded-xl flex items-center justify-between bg-slate-950/40">
+            <div className="border border-dashed border-slate-300 p-4 rounded-2xl flex items-center justify-between bg-slate-50/60">
               <div className="flex items-center gap-3">
                 {favIconPreview ? (
-                  <img src={favIconPreview} alt="FavIcon Preview" className="w-9 h-9 object-contain rounded bg-slate-950 p-1 border border-slate-800" />
+                  <img src={favIconPreview} alt="FavIcon Preview" className="w-10 h-10 object-contain rounded-xl bg-white p-1 border border-slate-200 shadow-sm" />
                 ) : null}
                 <div>
                   <label className={labelStyle}>Fav Icon *</label>
-                  <p className="text-[10px] text-slate-500">Shortcut icon vector</p>
+                  <p className="text-[10px] font-medium text-slate-400">Shortcut icon vector</p>
                 </div>
               </div>
-              <label className="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg cursor-pointer transition-colors text-white">
-                <Upload size={14} />
+              <label className="bg-slate-900 hover:bg-slate-800 p-2.5 rounded-xl cursor-pointer transition-colors text-white shadow-sm">
+                <Upload size={15} />
                 <input type="file" onChange={(e) => handleFileChange(e, 'favIcon')} className="hidden" accept="image/*" />
               </label>
             </div>
@@ -214,13 +200,11 @@ const subdomain = hostname.split('.')[0];
             <label className={labelStyle}>Address *</label>
             <textarea name="address" value={formData.address} onChange={handleChange} placeholder="Enter company physical address..." rows={2} className={inputStyle} required />
           </div>
-
-          
         </div>
 
         {/* কলাম ২: থিম অপশন ও কন্টাক্ট নোড */}
-        <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">📝 Typography Typography</h3>
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
+          <h3 className="text-xs font-black uppercase text-[#007b57] tracking-wider mb-2 border-b border-slate-100 pb-3">📝 Typography & Content</h3>
           <div>
             <label className={labelStyle}>Footer About Text *</label>
             <textarea name="footerAboutText" value={formData.footerAboutText} onChange={handleChange} placeholder="Enter summary paragraph for website footer..." rows={3} className={inputStyle} required />
@@ -233,13 +217,11 @@ const subdomain = hostname.split('.')[0];
 
       </div>
 
-      {/* রো ৩: ফুটার ডেসক্রিপশন এবং সোশ্যাল ডিরেক্টরি */}
+      {/* রো ৩: সোশ্যাল ডিরেক্টরি */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* সোশ্যাল ডিরেক্টরি ইনপুটস */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800/80 rounded-2xl p-6 space-y-4">
-          <h3 className="text-xs font-bold uppercase text-rose-500 tracking-wider mb-2 border-b border-slate-800 pb-2">🔗 Social Graph Endpoints</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm">
+          <h3 className="text-xs font-black uppercase text-[#007b57] tracking-wider mb-2 border-b border-slate-100 pb-3">🔗 Social Graph Endpoints</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className={labelStyle}>Facebook Url</label>
               <input type="url" name="facebookUrl" value={formData.facebookUrl} onChange={handleChange} placeholder="https://facebook.com/yourpage" className={inputStyle} />
@@ -252,7 +234,6 @@ const subdomain = hostname.split('.')[0];
               <label className={labelStyle}>Youtube Url</label>
               <input type="url" name="youtubeUrl" value={formData.youtubeUrl} onChange={handleChange} placeholder="https://youtube.com/c/yourchannel" className={inputStyle} />
             </div>
-
             <div>
               <label className={labelStyle}>Linkedin Url</label>
               <input type="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} placeholder="https://linkedin.com/company/yourcompany" className={inputStyle} />
