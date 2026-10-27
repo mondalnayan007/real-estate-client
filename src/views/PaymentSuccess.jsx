@@ -1,320 +1,539 @@
-import React, { use, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+
+const API_BASE = "/backend";
+const ROOT_DOMAIN = "bdproperties.site";
+
+const formatDate = (value) => {
+  if (!value) return "N/A";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "N/A";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const formatMoney = (value) => {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) return "N/A";
+
+  return new Intl.NumberFormat("en-BD", {
+    style: "currency",
+    currency: "BDT",
+    minimumFractionDigits: 2,
+  }).format(amount);
+};
 
 const PaymentSuccess = () => {
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [searchParams] = useSearchParams();
-  const [agentData, setAgentData] = useState(null);
+
+  const tranId = searchParams.get("tran_id");
+
+  const [metadata, setMetadata] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [metadata,setMetadata] = useState(null);
-  const {authUser} = use(AuthContext);
-    
+  const [error, setError] = useState("");
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
-  const baseURL = '/backend';
-
-  
-  const tranId = searchParams.get('tran_id');
-
-
-  useEffect(()=>{
-     fetch(`${baseURL}/subscription?t_id=${tranId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setMetadata(data.metadata)
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("Error fetching subscription data:", err);
-          setLoading(false);
-        });
-
-  },[tranId])
-
- 
   useEffect(() => {
-    
-    // const loggedInUserEmail = authUser.email; 
-
-    // if (loggedInUserEmail) {
-    //   fetch(`${baseURL}/agents/${loggedInUserEmail}`)
-    //     .then((res) => res.json())
-    //     .then((data) => {
-    //       setAgentData(data);
-    //       setLoading(false);
-    //     })
-    //     .catch((err) => {
-    //       console.error("Error fetching agent data:", err);
-    //       setLoading(false);
-    //     });
-    // } else {
-    //   setLoading(false);
-    // }
-  }, []);
-
-  // ডাটা সেফটি শর্টকাট (Metadata destructured)
-
-  const subdomain = metadata?.subdomain || 'agency';
-  const planPrice = metadata?.planPrice ? `$${metadata.planPrice}` : 'N/A';
-  const agencyName = metadata?.agencyName || agentData?.name || 'Valued Agency';
-  const senderEmail = metadata?.senderEmail || agentData?.email || 'N/A';
-  const whatsappNumber = metadata?.whatsappNumber || 'N/A';
-  const planName = metadata?.planName || 'Subscription Plan';
-  const paymentDate = agentData?.updatedAt 
-    ? new Date(agentData.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : new Date().toLocaleDateString();
-
-    console.log(metadata);
-  // 🟢 ৩. Localhost & Production-এর জন্য সাবডোমেইন ডাইনামিক URL
-  const handleWebsite = () => {
-    const isLocalhost = window.location.hostname.includes('localhost');
-    let finalTargetUrl = '';
-
-    if (isLocalhost) {
-      const port = window.location.port ? `:${window.location.port}` : '';
-      const cleanSubdomain = subdomain.replace('.primeestates.com', '');
-      finalTargetUrl = `http://${cleanSubdomain}.localhost${port}`;
-    } else {
-      const fullDomain = subdomain.includes('.') ? subdomain : `${subdomain}.primeestates.com`;
-      finalTargetUrl = `https://${fullDomain}`;
+    if (!tranId) {
+      setError("Transaction reference is missing.");
+      setLoading(false);
+      return;
     }
 
-    window.location.href = finalTargetUrl;
+    const controller = new AbortController();
+
+    const fetchSubscription = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `${API_BASE}/subscription?t_id=${encodeURIComponent(tranId)}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to retrieve subscription information.");
+        }
+
+        const data = await response.json();
+
+        // Adapt these fields to the exact response returned by your API.
+        const subscriptionData = data.subscription ?? data.data ?? data;
+
+        const paymentStatus = String(
+          subscriptionData.paymentStatus ?? ""
+        ).toLowerCase();
+
+        setSubscription(subscriptionData);
+        setMetadata(subscriptionData.metadata ?? data.metadata ?? null);
+
+        if (paymentStatus !== "paid") {
+          setError(
+            "Your payment has not yet been confirmed. Please wait for verification or contact support."
+          );
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Subscription fetch error:", err);
+          setError("Unable to verify payment information. Please try again.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchSubscription();
+
+    return () => controller.abort();
+  }, [tranId]);
+
+  const subdomain = metadata?.subdomain || "";
+  const agencyName = metadata?.agencyName || "Valued Agency";
+  const senderEmail = metadata?.senderEmail || "N/A";
+  const whatsappNumber = metadata?.whatsappNumber || "N/A";
+  const planName = metadata?.planName || "Subscription Plan";
+  const planPrice = metadata?.planPrice ?? subscription?.amount;
+  const paymentStatus = String(
+    subscription?.paymentStatus ?? ""
+  ).toLowerCase();
+
+  const isPaid = paymentStatus === "paid";
+
+  const paymentDate = formatDate(
+    subscription?.updatedAt ||
+      subscription?.createdAt ||
+      metadata?.startDate
+  );
+
+  // Build the tenant website URL using the production domain.
+  const handleWebsite = () => {
+    if (!subdomain) {
+      setError("Your agency subdomain is not available yet.");
+      return;
+    }
+
+    // Accept a plain username, but don't accept arbitrary external hosts.
+    const cleanSubdomain = subdomain
+      .trim()
+      .toLowerCase()
+      .replace(new RegExp(`\\.${ROOT_DOMAIN.replace(".", "\\.")}$`), "");
+
+    if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(cleanSubdomain)) {
+      setError("The agency subdomain is invalid. Please contact support.");
+      return;
+    }
+
+    window.location.assign(`https://${cleanSubdomain}.${ROOT_DOMAIN}`);
   };
 
-  const handleNativePrint = () => {
+  const handlePrint = () => {
     window.print();
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent" />
+          <p className="mt-4 text-sm text-slate-600">
+            Loading your payment information...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      
-      {/* 🔴 PRINT ENGINE CSS */}
+    <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
       <style>{`
         @media print {
+          body {
+            background: white !important;
+          }
+
           body * {
             visibility: hidden !important;
           }
-          #printable-invoice, #printable-invoice * {
+
+          #printable-invoice,
+          #printable-invoice * {
             visibility: visible !important;
           }
+
           #printable-invoice {
             display: block !important;
             position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
+            inset: 0 auto auto 0 !important;
             width: 100% !important;
-            padding: 0 !important;
             margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
           }
+
           @page {
             size: A4;
-            margin: 15mm;
+            margin: 14mm;
           }
         }
       `}</style>
 
-      {/* 🟢 TOP HEADER SECTION */}
-      <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-            P
-          </div>
-          <span className="font-bold text-slate-800 text-lg">PrimeEstates</span>
-        </div>
+      <header className="no-print border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-600 text-2xl font-extrabold text-white">
+              B
+            </div>
 
-        <button
-          onClick={() => setShowInvoiceModal(true)}
-          className="inline-flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-medium text-sm transition-all border border-slate-300 shadow-sm"
-        >
-          <svg className="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <span>Download Payment Receipt</span>
-        </button>
+            <div>
+              <p className="text-lg font-extrabold tracking-tight">
+                BD Properties
+              </p>
+              <p className="text-xs text-slate-500">
+                Agency Subscription Portal
+              </p>
+            </div>
+          </div>
+
+          {isPaid && (
+            <button
+              onClick={() => setShowInvoiceModal(true)}
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold transition hover:bg-slate-50"
+            >
+              View Invoice
+            </button>
+          )}
+        </div>
       </header>
 
-      {/* 🟢 MAIN BODY SECTION */}
-      <main className="flex-1 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8 text-center space-y-6">
-          
-          <div className="mx-auto w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center relative">
-            <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
+      <main className="no-print mx-auto flex max-w-6xl justify-center px-5 py-12">
+        <section className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm sm:p-10">
+          {isPaid ? (
+            <>
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <svg
+                  className="h-11 w-11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m5 12 4 4L19 6"
+                  />
+                </svg>
+              </div>
 
-          <div className="space-y-2">
-            <h1 className="text-3xl font-extrabold text-slate-900">Payment Successful!</h1>
-            <p className="text-slate-500 text-sm leading-relaxed">
-              Your domain <span className="font-semibold text-emerald-600">{subdomain}.primeestates.com</span> and subscription have been configured successfully.
-            </p>
-          </div>
+              <p className="mt-6 text-sm font-bold uppercase tracking-widest text-emerald-700">
+                Payment Confirmed
+              </p>
 
-          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-left text-xs space-y-2">
-            <div className="flex justify-between">
-              <span className="text-slate-500">Transaction Ref:</span>
-              <span className="font-mono font-bold text-slate-700">{tranId || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Amount Paid:</span>
-              <span className="font-bold text-emerald-600 text-sm">{planPrice}</span>
-            </div>
-          </div>
+              <h1 className="mt-2 text-3xl font-extrabold text-slate-900">
+                Thank You!
+              </h1>
 
-          <div className="pt-2">
-            <button
-              onClick={handleWebsite}
-              className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/25 transition-all text-base"
-            >
-              <span>Go to Your Website</span>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          </div>
+              <p className="mt-3 leading-7 text-slate-600">
+                Your subscription payment has been marked as paid in the
+                subscription record.
+              </p>
 
-        </div>
+              <div className="mt-7 space-y-4 rounded-2xl bg-slate-50 p-5 text-left">
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-sm text-slate-500">Transaction ID</span>
+                  <span className="break-all text-right font-mono text-sm font-semibold">
+                    {tranId}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-sm text-slate-500">Subscription</span>
+                  <span className="text-right text-sm font-semibold">
+                    {planName}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-sm text-slate-500">Amount</span>
+                  <span className="text-right text-base font-bold text-emerald-700">
+                    {formatMoney(planPrice)}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-sm text-slate-500">Payment Date</span>
+                  <span className="text-right text-sm font-semibold">
+                    {paymentDate}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={handleWebsite}
+                  disabled={!subdomain}
+                  className="flex-1 rounded-xl bg-emerald-600 px-5 py-3.5 font-bold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Visit Your Website
+                </button>
+
+                <button
+                  onClick={() => setShowInvoiceModal(true)}
+                  className="flex-1 rounded-xl border border-slate-300 px-5 py-3.5 font-bold transition hover:bg-slate-50"
+                >
+                  View Invoice
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                <span className="text-3xl">!</span>
+              </div>
+
+              <h1 className="mt-5 text-2xl font-extrabold">
+                Payment Not Yet Confirmed
+              </h1>
+
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {error ||
+                  "We could not confirm this payment yet. Please contact support if you have completed payment."}
+              </p>
+
+              <p className="mt-4 break-all text-xs text-slate-500">
+                Transaction reference: {tranId || "Unavailable"}
+              </p>
+
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-6 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700"
+              >
+                Check Again
+              </button>
+            </>
+          )}
+
+          {error && isPaid && (
+            <p className="mt-4 text-sm text-amber-700">{error}</p>
+          )}
+        </section>
       </main>
 
-      {/* 🟢 MODAL PREVIEW */}
-      {showInvoiceModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
-            
-            <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-              <h3 className="font-bold text-slate-800">Payment Receipt Preview</h3>
+      {/* Invoice preview modal */}
+      {showInvoiceModal && isPaid && (
+        <div className="no-print fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
+          <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+              <div>
+                <h2 className="font-bold text-slate-900">
+                  Invoice Preview
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Review your subscription invoice before printing.
+                </p>
+              </div>
+
               <button
                 onClick={() => setShowInvoiceModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
+                aria-label="Close invoice preview"
+                className="rounded-lg px-3 py-2 text-xl text-slate-500 hover:bg-slate-100"
               >
-                ✕
+                ×
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 text-center space-y-4">
-              <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-slate-800 text-base">Receipt Ready for Download</h4>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Click below to save your official invoice for <span className="font-bold text-slate-700">{agencyName}</span> as a PDF file.
-              </p>
+            <div className="max-h-[70vh] overflow-y-auto p-4 sm:p-8">
+              <Invoice
+                tranId={tranId}
+                agencyName={agencyName}
+                senderEmail={senderEmail}
+                whatsappNumber={whatsappNumber}
+                planName={planName}
+                planPrice={planPrice}
+                paymentDate={paymentDate}
+                subdomain={subdomain}
+              />
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
+            <div className="flex justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4">
               <button
                 onClick={() => setShowInvoiceModal(false)}
-                className="px-4 py-2 border border-slate-300 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
               >
                 Close
               </button>
+
               <button
-                onClick={handleNativePrint}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md flex items-center space-x-1"
+                onClick={handlePrint}
+                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Save / Download PDF</span>
+                Print / Save PDF
               </button>
             </div>
-
           </div>
         </div>
       )}
 
-      {/* 📄 OFFICIAL PROFESSIONAL INVOICE TEMPLATE */}
+      {/* Only this section is printed */}
       <div id="printable-invoice" className="hidden">
-        <div style={{
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          maxWidth: "750px",
-          margin: "0 auto",
-          padding: "40px",
-          backgroundColor: "#ffffff",
-          color: "#1e293b",
-          boxSizing: "border-box"
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", paddingBottom: "25px", borderBottom: "2px solid #059669" }}>
-            <div>
-              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "800", color: "#059669" }}>PRIMEESTATES</h1>
-              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}>Software & Agency Solutions</p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "700", color: "#0f172a" }}>INVOICE</h2>
-              <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Invoice Ref:</strong> #{tranId || 'N/A'}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "12px", color: "#64748b" }}><strong>Date:</strong> {paymentDate}</p>
-            </div>
-          </div>
+        {isPaid && (
+          <Invoice
+            tranId={tranId}
+            agencyName={agencyName}
+            senderEmail={senderEmail}
+            whatsappNumber={whatsappNumber}
+            planName={planName}
+            planPrice={planPrice}
+            paymentDate={paymentDate}
+            subdomain={subdomain}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
 
-          <div style={{ display: "flex", justifyContent: "space-between", margin: "30px 0" }}>
-            <div>
-              <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>BILLED TO</p>
-              <p style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#0f172a" }}>{agencyName}</p>
-              <p style={{ margin: "3px 0 0 0", fontSize: "13px", color: "#475569" }}>{senderEmail}</p>
-              <p style={{ margin: "2px 0 0 0", fontSize: "13px", color: "#475569" }}>{whatsappNumber}</p>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <p style={{ margin: "0 0 6px 0", fontSize: "11px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }}>PAYMENT STATUS</p>
-              <span style={{ display: "inline-block", backgroundColor: "#d1fae5", color: "#065f46", fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "20px" }}>
-                PAID IN FULL
-              </span>
-            </div>
-          </div>
+const Invoice = ({
+  tranId,
+  agencyName,
+  senderEmail,
+  whatsappNumber,
+  planName,
+  planPrice,
+  paymentDate,
+  subdomain,
+}) => {
+  const agencyDomain = subdomain
+    ? `${subdomain}.${ROOT_DOMAIN}`
+    : "Not assigned";
 
-          <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px", marginBottom: "30px" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #cbd5e1", textTransform: "uppercase", fontSize: "11px", color: "#475569" }}>
-                <th style={{ padding: "12px 16px", textAlign: "left" }}>Description</th>
-                <th style={{ padding: "12px 16px", textAlign: "center" }}>Domain Reference</th>
-                <th style={{ padding: "12px 16px", textAlign: "right" }}>Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: "1px solid #e2e8f0", fontSize: "13px" }}>
-                <td style={{ padding: "16px" }}>
-                  <p style={{ margin: 0, fontWeight: "700", color: "#0f172a" }}>{planName}</p>
-                  <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#64748b" }}>Subscription License</p>
-                </td>
-                <td style={{ padding: "16px", textAlign: "center", color: "#059669", fontWeight: "600" }}>
-                  {subdomain}.primeestates.com
-                </td>
-                <td style={{ padding: "16px", textAlign: "right", fontWeight: "700", color: "#0f172a" }}>
-                  {planPrice}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  return (
+    <article className="mx-auto w-full max-w-3xl bg-white p-6 text-slate-800 sm:p-10">
+      <div className="flex flex-col justify-between gap-6 border-b-2 border-emerald-600 pb-7 sm:flex-row">
+        <div>
+          <p className="text-3xl font-black tracking-tight text-emerald-700">
+            BD PROPERTIES
+          </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Agency Subscription Services
+          </p>
+          <p className="mt-1 text-xs text-slate-400">
+            bdproperties.site
+          </p>
+        </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#f8fafc", padding: "16px 20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-            <div style={{ fontSize: "14px", fontWeight: "700", color: "#334155" }}>
-              Total Amount Paid
-            </div>
-            <div style={{ fontSize: "22px", fontWeight: "800", color: "#059669", textAlign: "right" }}>
-              {planPrice}
-            </div>
-          </div>
-
-          <div style={{ marginTop: "50px", paddingTop: "20px", borderTop: "1px solid #e2e8f0", textAlign: "center", fontSize: "11px", color: "#94a3b8" }}>
-            <p style={{ margin: 0 }}>Thank you for doing business with PrimeEstates.</p>
-            <p style={{ margin: "4px 0 0 0" }}>If you have any questions about this invoice, please contact support@primeestates.com</p>
-          </div>
+        <div className="sm:text-right">
+          <h2 className="text-3xl font-extrabold tracking-widest text-slate-900">
+            INVOICE
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Invoice reference
+          </p>
+          <p className="break-all font-mono text-sm font-bold">
+            {tranId || "N/A"}
+          </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Issued: {paymentDate}
+          </p>
         </div>
       </div>
 
-    </div>
+      <div className="grid gap-8 py-8 sm:grid-cols-2">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+            Billed To
+          </p>
+          <h3 className="mt-3 text-lg font-bold">{agencyName}</h3>
+          <p className="mt-1 break-all text-sm text-slate-600">
+            {senderEmail}
+          </p>
+          <p className="mt-1 text-sm text-slate-600">{whatsappNumber}</p>
+        </div>
+
+        <div className="sm:text-right">
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+            Payment Status
+          </p>
+          <div className="mt-3 inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
+            PAID
+          </div>
+          <p className="mt-3 text-sm text-slate-500">Currency: BDT</p>
+          <p className="mt-1 break-all text-sm text-slate-600">
+            Website: {agencyDomain}
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-y border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <th className="px-3 py-4 font-bold">Description</th>
+              <th className="px-3 py-4 text-center font-bold">Period</th>
+              <th className="px-3 py-4 text-right font-bold">Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr className="border-b border-slate-200">
+              <td className="px-3 py-5">
+                <p className="font-bold text-slate-900">{planName}</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Agency subscription
+                </p>
+              </td>
+
+              <td className="px-3 py-5 text-center text-slate-600">
+                Subscription
+              </td>
+
+              <td className="whitespace-nowrap px-3 py-5 text-right font-bold">
+                {formatMoney(planPrice)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="ml-auto mt-8 max-w-sm space-y-3">
+        <div className="flex justify-between gap-4 text-sm text-slate-500">
+          <span>Subtotal</span>
+          <span>{formatMoney(planPrice)}</span>
+        </div>
+
+        <div className="flex justify-between gap-4 border-t border-slate-200 pt-4">
+          <span className="font-bold text-slate-900">Total Paid</span>
+          <span className="text-xl font-extrabold text-emerald-700">
+            {formatMoney(planPrice)}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-12 border-t border-slate-200 pt-6 text-center">
+        <p className="font-semibold text-slate-700">
+          Thank you for choosing BD Properties.
+        </p>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Please retain this invoice for your records. For billing enquiries,
+          contact your website administrator.
+        </p>
+        <p className="mt-4 text-xs text-slate-400">
+          Generated electronically · {tranId || "No transaction reference"}
+        </p>
+      </div>
+    </article>
   );
 };
 
