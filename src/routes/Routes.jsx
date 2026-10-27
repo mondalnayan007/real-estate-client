@@ -27,12 +27,15 @@ import SignIn from "../views/SignIn";
 // ==========================================
 // 🧠 ১. ডোমেইন ও সাব-ডোমেইন চেক করার লজিক
 // ==========================================
-const hostname = window.location.hostname;
-const subdomain = hostname.split('.')[0];
 
+const hostname = window.location.hostname.toLowerCase();
 
-// লোকালহোস্ট এবং আপনার লাইভ মেইন ডোমেইনকে মেইন ডোমেইন ধরা হবে
-const isMainDomain = hostname === "localhost" || hostname === "primeestates.com";
+const isMainDomain =
+  hostname === "localhost" ||
+  hostname === "127.0.0.1" ||
+  hostname === "bdproperties.site" ||
+  hostname === "www.bdproperties.site";
+
 
 // ==========================================
 // 👑 ২. মেইন কোম্পানির জন্য রাউটার (যদি ইউজার মেইন ডোমেইনে আসে)

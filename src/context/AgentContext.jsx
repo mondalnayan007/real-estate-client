@@ -3,17 +3,33 @@ import { createContext, useEffect, useState } from "react";
 
 export const AgentContext = createContext();
 
+const MAIN_DOMAINS = [
+    "bdproperties.site",
+    "www.bdproperties.site",
+    "localhost",
+    "127.0.0.1",
+];
+
 export const AgentProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const hostname = window.location.origin;
-
     useEffect(() => {
+        const hostname = window.location.hostname.toLowerCase();
+
+        // Main domain-e agent API call korbe na
+        if (MAIN_DOMAINS.includes(hostname)) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
         const fetchAgent = async () => {
             try {
                 const response = await fetch(
-                    `/backend/agents?hostname=${encodeURIComponent(hostname)}`
+                    `/backend/agents?hostname=${encodeURIComponent(
+                        window.location.origin
+                    )}`
                 );
 
                 const data = await response.json();
@@ -26,7 +42,11 @@ export const AgentProvider = ({ children }) => {
 
                 if (Array.isArray(data)) {
                     setUser(data[0] ?? null);
-                } else if (data && data.success === true && Array.isArray(data.data)) {
+                } else if (
+                    data &&
+                    data.success === true &&
+                    Array.isArray(data.data)
+                ) {
                     setUser(data.data[0] ?? null);
                 } else {
                     console.error("Unexpected agent response:", data);
@@ -41,12 +61,10 @@ export const AgentProvider = ({ children }) => {
         };
 
         fetchAgent();
-    }, [hostname]);
-
-    const agentValue = { user };
+    }, []);
 
     return (
-        <AgentContext.Provider value={agentValue}>
+        <AgentContext.Provider value={{ user }}>
             {!loading && children}
         </AgentContext.Provider>
     );
