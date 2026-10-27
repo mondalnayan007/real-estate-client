@@ -22,7 +22,7 @@ export default function LeadManagement() {
 
 
 const { user } = useContext(AgentContext);
-const API_BASE_URL = 'http://localhost:4000';
+const API_BASE_URL = '/backend';
 
 const agentId = user?.agentId || user?.uid;
 

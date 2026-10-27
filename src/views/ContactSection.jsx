@@ -28,7 +28,7 @@ export default function ContactSection() {
     setLoading(true); // 👈 লোডিং শুরু করা হলো
 
     try {
-      const response = await fetch('http://localhost:4000/api/contact-agent', {
+      const response = await fetch('/backend/api/contact-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

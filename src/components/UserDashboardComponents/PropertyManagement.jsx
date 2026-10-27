@@ -54,7 +54,7 @@ export default function PropertyManagement() {
 
   useEffect(() => {
     if (agentId) {
-      fetch(`http://localhost:4000/projects?agentId=${agentId}`)
+      fetch(`/backend/projects?agentId=${agentId}`)
         .then(res => res.json())
         .then(data => setProperties(data))
         .catch(err => console.error("Fetch error:", err));
@@ -114,7 +114,7 @@ if (listedProperty >= propertyLimit) {
         formData.append('images', image);
       });
 
-      const response = await fetch('http://localhost:4000/projects', {
+      const response = await fetch('/backend/projects', {
         method: 'POST',
         body: formData,
       });
@@ -140,7 +140,7 @@ if (listedProperty >= propertyLimit) {
     if (!window.confirm("Are you sure you want to delete this property listing?")) return;
 
     try {
-      const response = await fetch(`http://localhost:4000/projects/${id}`, {
+      const response = await fetch(`/backend/projects/${id}`, {
         method: 'DELETE'
       });
 

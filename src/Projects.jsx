@@ -57,7 +57,7 @@ export default function Projects() {
 
   useEffect(() => {
     if (user?.agentId) {
-      fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
+      fetch(`/backend/projects?agentId=${user.agentId}`)
         .then(res => res.json())
         .then(data => setPremiumProjects(data))
         .catch(err => console.error("Error fetching data:", err));

@@ -17,7 +17,7 @@ export default function DashboardAnalytics() {
   console.log(data);
   
   const { user } = use(AgentContext);
-  const baseURL = "http://localhost:4000";
+  const baseURL = "/backend";
   console.log(user?.agentId);
 
   const fetchDashboardAnalytics = async () => {

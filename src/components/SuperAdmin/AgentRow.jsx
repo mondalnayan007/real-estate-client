@@ -22,12 +22,12 @@ const AgentRow = ({ agent, onToggleStatus, onDeleteAgent }) => {
         <div className="font-medium text-slate-700">{agent.agencyName || 'N/A'}</div>
         {agent.subdomain ? (
           <a 
-            href={`https://${agent.subdomain}.primeestates.com`} 
+            href={`https://${agent.subdomain}.bdproperties.site`} 
             target="_blank" 
             rel="noreferrer"
             className="text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 mt-0.5 font-medium"
           >
-            {agent.subdomain}.primeestates.com <ExternalLink size={10} />
+            {agent.subdomain}.bdproperties.site <ExternalLink size={10} />
           </a>
         ) : (
           <span className="text-slate-400">No Subdomain</span>

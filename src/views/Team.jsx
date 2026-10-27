@@ -56,7 +56,7 @@ export default function Team() {
   useEffect(() => {
     // ইউজার এবং Agent ID থাকলে API কল করবে
     if (user?.agentId) {
-      fetch(`http://localhost:4000/api/admin/team-members?agentId=${user.agentId}`)
+      fetch(`/backend/api/admin/team-members?agentId=${user.agentId}`)
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data)) {

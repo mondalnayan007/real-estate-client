@@ -8,7 +8,7 @@ import { AuthContext } from '../../context/AuthContext';
 
 
 // 🌐 আপনার ব্যাকএন্ড এপিআই ইউআরএল এখানে বসান (e.g., 'https://api.yourdomain.com/v1')
-const BACKEND_API_URL = 'http://localhost:4000';
+const BACKEND_API_URL = '/backend';
 
 const CompanyPricing = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,7 +39,7 @@ const {authUser} = useContext(AuthContext);
 
    
   
-    const baseUrl = 'http://localhost:4000'
+    const baseUrl = '/backend'
   
   
     if(authUser){
@@ -151,7 +151,7 @@ const {authUser} = useContext(AuthContext);
         setIsProcessingPayment(false);
         return;
       }
-      finalTargetAddress = `http://${cleanUsername}.localhost:5173`;
+      finalTargetAddress = `http://${cleanUsername}.bdproperties.site`;
     } else {
       const cleanCustomDomain = formData.customDomain.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, '');
       if (!cleanCustomDomain) {
@@ -548,7 +548,7 @@ const {authUser} = useContext(AuthContext);
               className="w-full bg-transparent px-4 py-3 text-xs text-blue-400 placeholder-slate-700 outline-none font-bold"
             />
             <span className="absolute right-3 text-[10px] font-mono font-bold bg-slate-900 border border-slate-800 text-slate-400 px-3 py-1 rounded-md pointer-events-none select-none">
-              .primeestates.com
+              .bdproperties.site
             </span>
           </div>
         </div>

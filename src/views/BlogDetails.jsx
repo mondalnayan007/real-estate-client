@@ -40,12 +40,12 @@ export default function BlogDetails() {
         
         // 1️⃣ Agent ID থাকলে Dynamic URL, না থাকলে Default Handling
         const singleBlogUrl = agentId 
-          ? `http://localhost:4000/api/blogs?agentId=${agentId}&id=${id}` 
-          : `http://localhost:4000/api/blogs?id=${id}`;
+          ? `/backend/api/blogs?agentId=${agentId}&id=${id}` 
+          : `/backend/api/blogs?id=${id}`;
 
         const allBlogsUrl = agentId 
-          ? `http://localhost:4000/api/blogs?agentId=${agentId}` 
-          : `http://localhost:4000/api/blogs`;
+          ? `/backend/api/blogs?agentId=${agentId}` 
+          : `/backend/api/blogs`;
 
         // 2️⃣ Single Blog Details & All Blogs (For Recent Posts) API Request
         const [singleRes, allRes] = await Promise.all([

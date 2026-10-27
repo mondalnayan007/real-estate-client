@@ -62,7 +62,7 @@ export default function HomePageProjects() {
 
     // ২. যদি ইউজার থাকে এবং তার agentId থাকে
     if (user?.agentId) {
-      fetch(`http://localhost:4000/projects?agentId=${user.agentId}`)
+      fetch(`/backend/projects?agentId=${user.agentId}`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {

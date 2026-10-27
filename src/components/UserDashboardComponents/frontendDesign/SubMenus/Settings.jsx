@@ -87,7 +87,7 @@ export default function Settings() {
       }
     });
 
-    fetch("http://localhost:4000/settings", {
+    fetch("/backend/settings", {
       method: "POST",
       body: dataPayload,
     })

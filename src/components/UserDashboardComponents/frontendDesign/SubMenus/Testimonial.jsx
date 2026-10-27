@@ -5,7 +5,7 @@ import { Star, Trash2, EyeOff, Eye, MessageSquare, Plus, Video, X, Upload, Check
 // 🌐 TESTIMONIAL BACKEND CONFIGURATION
 // ==========================================
 // ব্যাকএন্ড এপিআই ইউআরএল এখানে বসাবেন। e.g., 'http://localhost:4000/api'
-const API_BASE_URL = ''; 
+const API_BASE_URL = '/backend'; 
 
 export default function TestimonialManager() {
   const [testimonials, setTestimonials] = useState([]);

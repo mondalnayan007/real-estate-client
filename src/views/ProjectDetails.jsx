@@ -22,7 +22,7 @@ const ProjectDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:4000/projects?agentId=${user?.agentId}&id=${id}`)
+    fetch(`/backend/projects?agentId=${user?.agentId}&id=${id}`)
       .then((res) => res.json())
       .then((data) => {
         // Handle array or single object response
@@ -67,7 +67,7 @@ const ProjectDetails = () => {
     };
 
     try {
-      const response = await fetch('http://localhost:4000/api/contact-agent', {
+      const response = await fetch('/backend/api/contact-agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

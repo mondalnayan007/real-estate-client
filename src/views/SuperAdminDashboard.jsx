@@ -10,7 +10,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 
-const API_BASE_URL = 'http://localhost:4000/api/subscriptions';
+const API_BASE_URL = '/backend/api/subscriptions';
 
 export default function SuperAdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');

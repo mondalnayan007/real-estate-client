@@ -31,7 +31,7 @@ const CompanyNavbar = () => {
 
   if(authUser){
      useEffect(()=>{
-      fetch(`${baseUrl}/agents?email=${authUser.email}`)
+      fetch(`/backend/agents?email=${authUser.email}`)
       .then(res=> res.json())
       .then(data=>setUserInfo(data))
      },[authUser])

@@ -50,7 +50,7 @@ export default function HeroCarousel() {
   const [carouselData, setCarouselData] = useState(defaultSlides);
 
   useEffect(() => {
-    fetch(`http://localhost:4000/slider?agentId=${user.agentId}`)
+    fetch(`/backend/slider?agentId=${user.agentId}`)
       .then((res) => res.json())
       .then((data) => {
         // ডাটাবেস থেকে যদি ডাটা আসে এবং অ্যারিতে অন্তত ১টি ডাটা থাকে

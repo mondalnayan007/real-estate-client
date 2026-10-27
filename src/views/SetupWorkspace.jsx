@@ -30,25 +30,59 @@ const SetupWorkspace = () => {
         setLoading(true);
 
         // ডোমেন নাম ক্যালকুলেট করা
-        let calculatedDomain = "";
-        let cleanSubdomain = "";
-        let cleanCustomDomain = "";
+       let calculatedDomain = "";
+let cleanSubdomain = "";
+let cleanCustomDomain = "";
 
-        if (domainType === 'subdomain') {
-            cleanSubdomain = customUsername.trim().toLowerCase().replace(/\s+/g, '');
-            if (!cleanSubdomain) {
-                setLoading(false);
-                return setError("Please enter a valid subdomain prefix.");
-            }
-            calculatedDomain = `http://${cleanSubdomain}.localhost:5173`;
-        } else {
-            cleanCustomDomain = customDomain.trim().toLowerCase().replace(/^(http?:\/\/)?(www\.)?/, '');
-            if (!cleanCustomDomain) {
-                setLoading(false);
-                return setError("Please enter your custom domain.");
-            }
-            calculatedDomain = `http://${cleanCustomDomain}`;
-        }
+if (domainType === 'subdomain') {
+    cleanSubdomain = customUsername.trim().toLowerCase();
+
+    const usernamePattern =
+        /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+    if (!usernamePattern.test(cleanSubdomain)) {
+        setLoading(false);
+        setError(
+            'Use lowercase letters, numbers, or hyphens. Username cannot start or end with a hyphen.'
+        );
+        return;
+    }
+
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        calculatedDomain =
+            `http://${cleanSubdomain}.localhost${port ? `:${port}` : ''}`;
+    } else if (
+        hostname === 'bdproperties.site' ||
+        hostname === 'www.bdproperties.site'
+    ) {
+        calculatedDomain = `https://${cleanSubdomain}.bdproperties.site`;
+    } else {
+        setLoading(false);
+        setError('Please open the main website to set up your workspace.');
+        return;
+    }
+} else {
+    cleanCustomDomain = customDomain
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .replace(/\/+$/, '');
+
+    const domainPattern =
+        /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+
+    if (!domainPattern.test(cleanCustomDomain)) {
+        setLoading(false);
+        setError('Please enter a valid custom domain.');
+        return;
+    }
+
+    calculatedDomain = `https://${cleanCustomDomain}`;
+}
 
         try {
             // ১. আপনার আগের প্রোজেক্ট স্টাইলে FormData তৈরি করা
@@ -83,7 +117,7 @@ const SetupWorkspace = () => {
             }
 
             // ৪. আপনার এক্সপ্রেস এপিআই-তে পোস্ট করা
-            const response = await fetch('http://localhost:4000/api/agents/register', {
+            const response = await fetch('/backend/api/agents/register', {
                 method: 'POST',
                 body: formData // ⚠️ কোনো 'Content-Type' হেডার দেবেন না। ব্রাউজার নিজে থেকেই Multipart boundary সেট করে নেবে।
             });
@@ -119,7 +153,7 @@ const SetupWorkspace = () => {
             <div className="sm:mx-auto w-full max-w-md mb-8">
                 <div className="flex justify-between items-center border-b border-slate-900 pb-5">
                     <span className="text-2xl font-black tracking-wider text-blue-500">
-                        PRIME<span className="text-white">ESTATES</span>
+                        BD <span className="text-white">PROPERTIES</span>
                     </span>
                     <div className="flex items-center gap-2">
                         {step1Data.avatar && (
@@ -228,7 +262,7 @@ const SetupWorkspace = () => {
                                         className="w-full pl-9 pr-28 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
                                     />
                                     <span className="absolute right-2 text-[8px] font-bold text-slate-400 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700 pointer-events-none font-mono">
-                                        .primestate.com
+                                        .bdproperties.site
                                     </span>
                                 </div>
                             </div>

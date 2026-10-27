@@ -47,12 +47,17 @@ const handleSubmit = (e) => {
     e.preventDefault();
     
     // ১. ইউজারনেম থেকে স্পেস বা ক্যাপিটাল লেটার থাকলে তা ক্লিন করা (URL Friendly)
-    const cleanUsername = formData.customUsername.trim().toLowerCase().replace(/\s+/g, '');
+    const cleanUsername = formData.customUsername
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, '');
 
-    if (!cleanUsername) {
-      alert("Please enter a valid username.");
-      return;
-    }
+const usernamePattern = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+if (!usernamePattern.test(cleanUsername)) {
+  alert('Use lowercase letters, numbers, and hyphens only. Do not start or end with a hyphen.');
+  return;
+}
 
     // ২. কারেন্ট হোস্টনেম এবং পোর্ট বের করা (যেমন: localhost:5173 বা primeestates.com)
     const currentHostname = window.location.hostname; // e.g., "localhost" or "primeestates.com"
@@ -64,11 +69,19 @@ const handleSubmit = (e) => {
     if (currentHostname === "localhost" || currentHostname === "127.0.0.1") {
       // লোকালহোস্টের জন্য ইউআরএল হবে: http://marcus.localhost:5173
       redirectUrl = `http://${cleanUsername}.localhost${currentPort ? `:${currentPort}` : ''}`;
-    } else {
-      // লাইভ সাইটের জন্য ইউআরএল হবে: https://marcus.primeestates.com
-      // আপনার মেইন ডোমেইনটি যদি অন্য কিছু হয়, তবে 'primeestates.com' এর জায়গায় আপনার ডোমেইন বসবে
-      redirectUrl = `https://${cleanUsername}.${currentHostname}`;
-    }
+    }  else {
+  const mainDomain = 'bdproperties.site';
+
+  if (
+    currentHostname === mainDomain ||
+    currentHostname === `www.${mainDomain}`
+  ) {
+    redirectUrl = `https://${cleanUsername}.${mainDomain}`;
+  } else {
+    alert('Please open the main website to set up your workspace.');
+    return;
+  }
+}
 
     console.log("Saving Agent Setup Data & Redirecting to:", redirectUrl);
 
@@ -192,7 +205,7 @@ const handleSubmit = (e) => {
                     className="w-full bg-transparent px-4 py-3 font-semibold focus:outline-none text-sm text-right pr-1 placeholder:font-normal text-blue-600" 
                   />
                   <span className="bg-slate-200/60 text-slate-500 text-sm px-4 py-3 font-semibold border-l border-slate-200 select-none">
-                    .primeestates.com
+                   .bdproperties.site
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1.5">This will be your unique live web address for your customers.</p>

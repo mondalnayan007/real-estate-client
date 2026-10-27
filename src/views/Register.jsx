@@ -71,7 +71,7 @@ const handleSubmit = async (e) => {
     }
 
     // Step ৩: ব্যাকএন্ড API-তে সেভ করার রিকোয়েস্ট
-    const response = await fetch('http://localhost:4000/api/agents/register', {
+    const response = await fetch('/backend/api/agents/register', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
@@ -122,7 +122,7 @@ const handleGoogleRegister = async () => {
       authProvider: 'google'
     };
 
-    const response = await fetch('http://localhost:4000/api/agents/register', {
+    const response = await fetch('/backend/api/agents/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

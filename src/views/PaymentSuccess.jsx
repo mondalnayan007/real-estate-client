@@ -11,7 +11,7 @@ const PaymentSuccess = () => {
   const {authUser} = use(AuthContext);
     
 
-  const baseURL = 'http://localhost:4000';
+  const baseURL = '/backend';
 
   
   const tranId = searchParams.get('tran_id');

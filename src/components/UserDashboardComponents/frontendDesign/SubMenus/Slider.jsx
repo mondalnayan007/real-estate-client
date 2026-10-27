@@ -14,7 +14,7 @@ export default function Slider() {
 
   console.log(subdomain);
   // 🔗 আপনার ব্যাকএন্ড এন্ডপয়েন্ট URL এখানে বসান
-  const API_BASE_URL = 'http://localhost:4000/slider';
+  const API_BASE_URL = '/backend/slider';
 
   // 📝 ফর্ম স্টেট
   const initialFormState = {
@@ -33,7 +33,7 @@ export default function Slider() {
   useEffect(() => {
     const fetchSliders = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/slider?agentId=${user?.agentId}`);
+        const response = await fetch(`/backend/slider?agentId=${user?.agentId}`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

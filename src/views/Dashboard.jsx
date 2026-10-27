@@ -27,7 +27,7 @@ import { HiOutlineBuildingOffice2, HiOutlineShieldCheck } from 'react-icons/hi2'
 import { FaBuilding } from 'react-icons/fa6';
 import { TbMoneybag } from 'react-icons/tb';
 
-const API_BASE_URL = 'http://localhost:4000';
+const API_BASE_URL = '/backend';
 
 const money = (value = 0) =>
   `৳${Number(value || 0).toLocaleString('en-BD', {

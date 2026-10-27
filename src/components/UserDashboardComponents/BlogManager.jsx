@@ -34,7 +34,7 @@ export default function BlogManager() {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:4000/api/blogs?agentId=${user.agentId}`);
+      const res = await fetch(`/backend/api/blogs?agentId=${user.agentId}`);
       if (res.ok) {
         const data = await res.json();
         setBlogs(data);
@@ -116,7 +116,7 @@ export default function BlogManager() {
       bodyData.append('tags', JSON.stringify(formData.tags));
       bodyData.append('socials', JSON.stringify(formData.socials));
 
-      const res = await fetch('http://localhost:4000/api/blogs', {
+      const res = await fetch('/backend/api/blogs', {
         method: 'POST',
         body: bodyData,
       });

@@ -15,7 +15,7 @@ export const AgentProvider = ({children}) => {
     
 
     useEffect(()=>{
-        fetch(`http://localhost:4000/agents?hostname=${hostname}`)
+        fetch(`/backend/agents?hostname=${hostname}`)
         .then(res=>res.json())
         .then(data =>{
             const [agent] = data

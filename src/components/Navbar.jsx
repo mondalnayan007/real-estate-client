@@ -96,7 +96,11 @@ export default function Navbar() {
               onClick={() => { navigate('/'); closeMenu(); }}
             >
               <Home className={`h-6 w-6 transition-colors duration-300 ${isSolidNavbar ? 'text-[#185F35]' : 'text-white'}`} />
-              <span className="font-serif font-normal italic tracking-wide">Prime<span className="font-sans font-black not-italic tracking-tight">Estates</span></span>
+             <span className="font-serif font-normal italic tracking-wide">
+  BD <span className="font-sans font-black not-italic tracking-tight">
+    Properties
+  </span>
+</span>
             </div>
           )}
 

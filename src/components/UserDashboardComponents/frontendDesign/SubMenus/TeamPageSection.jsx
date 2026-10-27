@@ -45,7 +45,7 @@ export default function TeamManagementSection() {
     setFetching(true);
     try {
       // 👈 আপনার ব্যাকএন্ডের GET API URL এখানে বসান
-      const response = await fetch(`http://localhost:4000/api/admin/team-members?agentId=${user?.agentId}`); 
+      const response = await fetch(`/backend/api/admin/team-members?agentId=${user?.agentId}`); 
       const result = await response.json();
 
       if (response.ok) {
@@ -103,7 +103,7 @@ export default function TeamManagementSection() {
 
       // 📤 Backend API Call
       // 👈 আপনার ব্যাকএন্ডের POST API URL এখানে বসান
-      const response = await fetch('http://localhost:4000/api/admin/team-members', {
+      const response = await fetch('/backend/api/admin/team-members', {
         method: 'POST',
         body: submitData, // FormData পাঠালে 'Content-Type' হেডার দিতে হয় না
       });
@@ -135,25 +135,25 @@ export default function TeamManagementSection() {
   // ==========================================
   // 🗑️ 3. DELETE MEMBER DATA
   // ==========================================
-  const handleDeleteMember = async (id) => {
-    if (!window.confirm('Are you sure you want to remove this member?')) return;
+  // const handleDeleteMember = async (id) => {
+  //   if (!window.confirm('Are you sure you want to remove this member?')) return;
 
-    try {
-      // 👈 আপনার ব্যাকএন্ডের DELETE API URL এখানে বসান
-      const response = await fetch(`http://localhost:5000/api/v1/team-members/${id}`, {
-        method: 'DELETE',
-      });
+  //   try {
+  //     // 👈 আপনার ব্যাকএন্ডের DELETE API URL এখানে বসান
+  //     const response = await fetch(`/backend/api/v1/team-members/${id}`, {
+  //       method: 'DELETE',
+  //     });
 
-      if (response.ok) {
-        setMembers(prev => prev.filter(m => m._id !== id));
-      } else {
-        alert('Failed to delete member.');
-      }
-    } catch (error) {
-      console.error('Delete Error:', error);
-      alert('Could not delete member.');
-    }
-  };
+  //     if (response.ok) {
+  //       setMembers(prev => prev.filter(m => m._id !== id));
+  //     } else {
+  //       alert('Failed to delete member.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Delete Error:', error);
+  //     alert('Could not delete member.');
+  //   }
+  // };
 
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 font-sans p-4 md:p-8">

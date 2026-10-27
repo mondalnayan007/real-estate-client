@@ -23,8 +23,8 @@ export default function Blog() {
         // agentId থাকলে সেটি প্যারামে পাঠাবে, না থাকলে শুধু `/api/blogs` হিট করবে
         const agentId = user?.agentId;
         const endpoint = agentId 
-          ? `http://localhost:4000/api/blogs?agentId=${agentId}`
-          : `http://localhost:4000/api/blogs`;
+          ? `/backend/api/blogs?agentId=${agentId}`
+          : `/backend/api/blogs`;
 
         const response = await fetch(endpoint);
 
